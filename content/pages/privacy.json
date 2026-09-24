@@ -1,0 +1,57 @@
+{
+  "title": {
+    "ar": "سياسة الخصوصية",
+    "en": "Privacy policy"
+  },
+  "eyebrow": "PRIVACY",
+  "intro": {
+    "ar": "نحترم خصوصيتك. توضح هذه الصفحة البيانات التي نجمعها عبر الموقع وكيف نستخدمها.",
+    "en": "We respect your privacy. This page explains what data we collect through this website and how we use it."
+  },
+  "sections": [
+    {
+      "heading": {
+        "ar": "البيانات التي نجمعها",
+        "en": "Data we collect"
+      },
+      "body": {
+        "ar": "عند إرسال نموذج طلب رحلة أو استفسار نجمع ما تكتبه فقط: الاسم، رقم الهاتف، البريد الإلكتروني إن وُجد، وتفاصيل الرحلة.",
+        "en": "When you send a trip request or enquiry form we collect only what you enter: your name, phone number, email if provided, and trip details."
+      }
+    },
+    {
+      "heading": {
+        "ar": "كيف نستخدمها",
+        "en": "How we use it"
+      },
+      "body": {
+        "ar": "نستخدم بياناتك للتواصل معك بخصوص طلبك وإعداد عرض السفر فقط. لا نبيع بياناتك ولا نشاركها إلا مع مزودي الخدمة اللازمين لحجزك (شركات الطيران والفنادق).",
+        "en": "We use your data only to contact you about your request and prepare your travel offer. We never sell your data, and share it only with the suppliers needed for your booking (airlines and hotels)."
+      }
+    },
+    {
+      "heading": {
+        "ar": "ملفات تعريف الارتباط والتحليلات",
+        "en": "Cookies and analytics"
+      },
+      "body": {
+        "ar": "قد نستخدم أدوات تحليل لقياس عدد الزيارات وتحسين الموقع، دون جمع معلومات تعرّف بك شخصياً.",
+        "en": "We may use analytics tools to measure visits and improve the site, without collecting information that personally identifies you."
+      }
+    },
+    {
+      "heading": {
+        "ar": "حقوقك",
+        "en": "Your rights"
+      },
+      "body": {
+        "ar": "يمكنك طلب الاطلاع على بياناتك أو حذفها في أي وقت بالتواصل معنا عبر الهاتف أو البريد الإلكتروني.",
+        "en": "You can ask to see or delete your data at any time by contacting us by phone or email."
+      }
+    }
+  ],
+  "seoDescription": {
+    "ar": "سياسة الخصوصية لموقع أريحا للسياحة والسفر.",
+    "en": "Privacy policy for the Ariha Travel & Tourism website."
+  }
+}

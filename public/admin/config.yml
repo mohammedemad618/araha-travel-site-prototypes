@@ -1,0 +1,1284 @@
+# Decap CMS configuration — https://decapcms.org/docs/configuration-options/
+# Every change made in /admin is committed to the GitHub repository, which
+# triggers a new Netlify build. Invalid content fails the build, so the live
+# site keeps the previous version until the mistake is fixed.
+
+backend:
+  name: github
+  repo: mohammedemad618/araha-travel-site-prototypes
+  branch: main
+  base_url: https://api.netlify.com
+  auth_endpoint: auth
+  commit_messages:
+    create: 'CMS: add {{collection}} "{{slug}}"'
+    update: 'CMS: update {{collection}} "{{slug}}"'
+    delete: 'CMS: delete {{collection}} "{{slug}}"'
+    uploadMedia: 'CMS: upload "{{path}}"'
+    deleteMedia: 'CMS: delete "{{path}}"'
+local_backend: true
+locale: ar
+media_folder: public/uploads
+public_folder: /uploads
+site_url: https://araha-travel.netlify.app
+display_url: https://araha-travel.netlify.app
+collections:
+- name: packages
+  label: الباقات
+  label_singular: باقة
+  folder: content/packages
+  extension: json
+  format: json
+  create: true
+  delete: true
+  slug: '{{fields.slug}}'
+  identifier_field: slug
+  summary: '{{title.ar}} — {{price}} د.ع'
+  sortable_fields:
+  - order
+  - price
+  - days
+  fields:
+  - label: المعرّف في الرابط (إنجليزي، أحرف صغيرة وشرطات)
+    name: slug
+    widget: string
+    pattern:
+    - ^[a-z0-9-]+$
+    - أحرف إنجليزية صغيرة وأرقام وشرطات فقط
+  - label: اسم الباقة
+    name: title
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: الوجهة
+    name: destination
+    widget: relation
+    collection: destinations
+    value_field: slug
+    search_fields:
+    - slug
+    - name.ar
+    - name.en
+    display_fields:
+    - name.ar
+  - label: أسلوب الرحلة
+    name: styles
+    widget: select
+    multiple: true
+    min: 1
+    options:
+    - label: مغامرة
+      value: adventure
+    - label: استكشاف
+      value: discovery
+    - label: عائلية
+      value: family
+    - label: رومانسية
+      value: romance
+    - label: استرخاء
+      value: unwind
+    - label: فاخرة
+      value: luxury
+  - label: عدد الأيام
+    name: days
+    widget: number
+    value_type: int
+    min: 1
+  - label: عدد الليالي
+    name: nights
+    widget: number
+    value_type: int
+    min: 0
+  - label: السعر ابتداءً من (دينار عراقي)
+    name: price
+    widget: number
+    value_type: int
+    min: 1
+  - label: ملاحظة السعر
+    name: priceNote
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: أبرز المميزات (تظهر على البطاقة)
+    name: highlights
+    widget: list
+    min: 1
+    summary: '{{fields.ar}}'
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: المقدمة
+    name: lead
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: text
+    - label: English
+      name: en
+      widget: text
+  - label: نبذة عن الرحلة
+    name: overview
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: text
+    - label: English
+      name: en
+      widget: text
+  - label: معلومات الرحلة
+    name: facts
+    widget: object
+    fields:
+    - label: المسار
+      name: route
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: الإقامة
+      name: stay
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: الطيران
+      name: flights
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: أفضل موسم
+      name: season
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: المجموعة
+      name: group
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+  - label: الصورة الرئيسية
+    name: image
+    widget: object
+    fields:
+    - label: الصورة
+      name: src
+      widget: image
+      choose_url: true
+    - label: وصف الصورة (للمكفوفين ومحركات البحث)
+      name: alt
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: اسم المصوّر (اختياري)
+      name: credit
+      widget: string
+      required: false
+    - label: رابط المصوّر (اختياري)
+      name: creditUrl
+      widget: string
+      required: false
+  - label: معرض الصور
+    name: gallery
+    widget: list
+    required: false
+    summary: '{{fields.alt.ar}}'
+    fields:
+    - label: الصورة
+      name: src
+      widget: image
+      choose_url: true
+    - label: وصف الصورة (للمكفوفين ومحركات البحث)
+      name: alt
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: اسم المصوّر (اختياري)
+      name: credit
+      widget: string
+      required: false
+    - label: رابط المصوّر (اختياري)
+      name: creditUrl
+      widget: string
+      required: false
+  - label: مواعيد المغادرة
+    name: departures
+    widget: list
+    required: false
+    hint: المواعيد السابقة تختفي تلقائياً من الموقع عند النشر التالي.
+    field:
+      label: التاريخ
+      name: date
+      widget: datetime
+      format: YYYY-MM-DD
+      date_format: YYYY-MM-DD
+      time_format: false
+  - label: برنامج الرحلة
+    name: itinerary
+    widget: list
+    min: 1
+    summary: '{{fields.title.ar}}'
+    fields:
+    - label: عنوان اليوم
+      name: title
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: تفاصيل اليوم
+      name: description
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+      - label: English
+        name: en
+        widget: text
+    - label: وسوم
+      name: tags
+      widget: list
+      required: false
+      summary: '{{fields.ar}}'
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+  - label: يشمل العرض
+    name: includes
+    widget: list
+    min: 1
+    summary: '{{fields.ar}}'
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: لا يشمل العرض
+    name: excludes
+    widget: list
+    required: false
+    summary: '{{fields.ar}}'
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: باقة مميزة؟
+    name: featured
+    widget: boolean
+    default: false
+  - label: 'شارة (اختياري، مثل: الأكثر طلباً)'
+    name: badge
+    widget: object
+    required: false
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+      required: false
+    - label: English
+      name: en
+      widget: string
+      required: false
+  - label: الترتيب (الأصغر يظهر أولاً)
+    name: order
+    widget: number
+    value_type: int
+    default: 100
+  - label: تحسين محركات البحث (اختياري)
+    name: seo
+    widget: object
+    required: false
+    collapsed: true
+    fields:
+    - label: عنوان الصفحة
+      name: title
+      widget: object
+      required: false
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+    - label: الوصف
+      name: description
+      widget: object
+      required: false
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+        required: false
+      - label: English
+        name: en
+        widget: text
+        required: false
+- name: destinations
+  label: الوجهات
+  label_singular: وجهة
+  folder: content/destinations
+  extension: json
+  format: json
+  create: true
+  delete: true
+  slug: '{{fields.slug}}'
+  identifier_field: slug
+  summary: '{{name.ar}}'
+  fields:
+  - label: المعرّف في الرابط
+    name: slug
+    widget: string
+    pattern:
+    - ^[a-z0-9-]+$
+    - أحرف إنجليزية صغيرة وأرقام وشرطات فقط
+  - label: اسم الوجهة
+    name: name
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: الاسم بالأحرف الكبيرة (مثل TÜRKIYE)
+    name: label
+    widget: string
+  - label: الإحداثيات (مثل 41.01° N)
+    name: coord
+    widget: string
+  - label: جملة قصيرة
+    name: tagline
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: الوصف
+    name: description
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: text
+    - label: English
+      name: en
+      widget: text
+  - label: أفضل وقت للزيارة
+    name: bestSeason
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: الصورة
+    name: image
+    widget: object
+    fields:
+    - label: الصورة
+      name: src
+      widget: image
+      choose_url: true
+    - label: وصف الصورة (للمكفوفين ومحركات البحث)
+      name: alt
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: اسم المصوّر (اختياري)
+      name: credit
+      widget: string
+      required: false
+    - label: رابط المصوّر (اختياري)
+      name: creditUrl
+      widget: string
+      required: false
+  - label: حجم البطاقة في الصفحة الرئيسية
+    name: homeLayout
+    widget: select
+    default: mid
+    options:
+    - label: كبيرة
+      value: big
+    - label: متوسطة
+      value: mid
+    - label: عريضة
+      value: wide
+  - label: الترتيب
+    name: order
+    widget: number
+    value_type: int
+    default: 100
+- name: settings
+  label: الإعدادات
+  editor:
+    preview: false
+  files:
+  - name: site
+    label: معلومات الشركة والتواصل
+    file: content/settings/site.json
+    fields:
+    - label: اسم الشركة
+      name: name
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: الاسم المختصر (الشعار)
+      name: shortName
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: الشعار النصي
+      name: tagline
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: وصف الموقع (لمحركات البحث)
+      name: description
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+      - label: English
+        name: en
+        widget: text
+    - label: رابط الموقع
+      name: url
+      widget: string
+    - label: رقم الهاتف (بصيغة دولية مثل +9647701234567)
+      name: phone
+      widget: string
+    - label: رقم الهاتف كما يظهر
+      name: phoneDisplay
+      widget: string
+    - label: رقم واتساب (أرقام فقط مع رمز الدولة، مثل 9647801234567)
+      name: whatsapp
+      widget: string
+      pattern:
+      - ^\d{8,15}$
+      - أرقام فقط مع رمز الدولة
+    - label: رقم واتساب كما يظهر
+      name: whatsappDisplay
+      widget: string
+    - label: البريد الإلكتروني
+      name: email
+      widget: string
+    - label: العنوان
+      name: address
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: ساعات العمل
+      name: hours
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: رقم الإجازة السياحية (اختياري)
+      name: license
+      widget: object
+      required: false
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+    - label: عنوان الخريطة (بحث Google Maps)
+      name: mapQuery
+      widget: string
+    - label: حسابات التواصل الاجتماعي (اتركها فارغة لإخفائها)
+      name: social
+      widget: object
+      fields:
+      - label: Instagram
+        name: instagram
+        widget: string
+        required: false
+      - label: Facebook
+        name: facebook
+        widget: string
+        required: false
+      - label: TikTok
+        name: tiktok
+        widget: string
+        required: false
+  - name: home
+    label: الصفحة الرئيسية
+    file: content/settings/home.json
+    fields:
+    - label: الواجهة (Hero)
+      name: hero
+      widget: object
+      fields:
+      - label: السطر الصغير (إنجليزي)
+        name: eyebrow
+        widget: string
+      - label: العنوان (سطران)
+        name: headline
+        widget: list
+        min: 2
+        max: 2
+        summary: '{{fields.ar}}'
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: النص التعريفي
+        name: intro
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
+      - label: الشرائح
+        name: slides
+        widget: list
+        min: 1
+        summary: '{{fields.place.ar}}'
+        fields:
+        - label: المكان
+          name: place
+          widget: object
+          fields:
+          - label: العربية
+            name: ar
+            widget: string
+          - label: English
+            name: en
+            widget: string
+        - label: الإحداثيات
+          name: coord
+          widget: string
+        - label: الصورة
+          name: image
+          widget: object
+          fields:
+          - label: الصورة
+            name: src
+            widget: image
+            choose_url: true
+          - label: وصف الصورة (للمكفوفين ومحركات البحث)
+            name: alt
+            widget: object
+            fields:
+            - label: العربية
+              name: ar
+              widget: string
+            - label: English
+              name: en
+              widget: string
+          - label: اسم المصوّر (اختياري)
+            name: credit
+            widget: string
+            required: false
+          - label: رابط المصوّر (اختياري)
+            name: creditUrl
+            widget: string
+            required: false
+    - label: أساليب السفر
+      name: styles
+      widget: list
+      summary: '{{fields.title.ar}}'
+      fields:
+      - label: النوع
+        name: style
+        widget: select
+        options:
+        - adventure
+        - discovery
+        - family
+        - romance
+        - unwind
+        - luxury
+      - label: العنوان
+        name: title
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: الوصف
+        name: description
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: الصورة
+        name: image
+        widget: object
+        fields:
+        - label: الصورة
+          name: src
+          widget: image
+          choose_url: true
+        - label: وصف الصورة (للمكفوفين ومحركات البحث)
+          name: alt
+          widget: object
+          fields:
+          - label: العربية
+            name: ar
+            widget: string
+          - label: English
+            name: en
+            widget: string
+        - label: اسم المصوّر (اختياري)
+          name: credit
+          widget: string
+          required: false
+        - label: رابط المصوّر (اختياري)
+          name: creditUrl
+          widget: string
+          required: false
+    - label: الباقة المميزة الكبيرة
+      name: featuredPackage
+      widget: relation
+      collection: packages
+      value_field: slug
+      search_fields:
+      - slug
+      - title.ar
+      display_fields:
+      - title.ar
+    - label: الخدمات
+      name: services
+      widget: list
+      summary: '{{fields.title.ar}}'
+      fields:
+      - label: الخدمة
+        name: title
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: الوصف
+        name: description
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
+    - label: لماذا نحن
+      name: benefits
+      widget: list
+      summary: '{{fields.title.ar}}'
+      fields:
+      - label: الميزة
+        name: title
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: الوصف
+        name: description
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
+    - label: العرض الموسمي
+      name: offer
+      widget: object
+      fields:
+      - label: الباقة
+        name: package
+        widget: relation
+        collection: packages
+        value_field: slug
+        search_fields:
+        - slug
+        - title.ar
+        display_fields:
+        - title.ar
+      - label: السطر الصغير (إنجليزي)
+        name: eyebrow
+        widget: string
+      - label: العنوان
+        name: title
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: المسار
+        name: route
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: ملاحظة
+        name: note
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: الصورة
+        name: image
+        widget: object
+        fields:
+        - label: الصورة
+          name: src
+          widget: image
+          choose_url: true
+        - label: وصف الصورة (للمكفوفين ومحركات البحث)
+          name: alt
+          widget: object
+          fields:
+          - label: العربية
+            name: ar
+            widget: string
+          - label: English
+            name: en
+            widget: string
+        - label: اسم المصوّر (اختياري)
+          name: credit
+          widget: string
+          required: false
+        - label: رابط المصوّر (اختياري)
+          name: creditUrl
+          widget: string
+          required: false
+    - label: صورة الدعوة الأخيرة
+      name: finalImage
+      widget: object
+      fields:
+      - label: الصورة
+        name: src
+        widget: image
+        choose_url: true
+      - label: وصف الصورة (للمكفوفين ومحركات البحث)
+        name: alt
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: اسم المصوّر (اختياري)
+        name: credit
+        widget: string
+        required: false
+      - label: رابط المصوّر (اختياري)
+        name: creditUrl
+        widget: string
+        required: false
+  - name: testimonials
+    label: آراء العملاء
+    file: content/settings/testimonials.json
+    fields:
+    - label: الآراء
+      name: items
+      widget: list
+      summary: '{{fields.name.ar}}'
+      hint: استخدم آراء حقيقية من عملائك وبموافقتهم فقط.
+      fields:
+      - label: الرأي
+        name: quote
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
+      - label: الاسم والمدينة
+        name: name
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: الوجهة
+        name: destination
+        widget: relation
+        collection: destinations
+        value_field: slug
+        search_fields:
+        - slug
+        - name.ar
+        display_fields:
+        - name.ar
+      - label: الصورة
+        name: image
+        widget: object
+        fields:
+        - label: الصورة
+          name: src
+          widget: image
+          choose_url: true
+        - label: وصف الصورة (للمكفوفين ومحركات البحث)
+          name: alt
+          widget: object
+          fields:
+          - label: العربية
+            name: ar
+            widget: string
+          - label: English
+            name: en
+            widget: string
+        - label: اسم المصوّر (اختياري)
+          name: credit
+          widget: string
+          required: false
+        - label: رابط المصوّر (اختياري)
+          name: creditUrl
+          widget: string
+          required: false
+  - name: faq
+    label: الأسئلة الشائعة
+    file: content/settings/faq.json
+    fields:
+    - label: الأسئلة
+      name: items
+      widget: list
+      summary: '{{fields.question.ar}}'
+      fields:
+      - label: السؤال
+        name: question
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: الجواب
+        name: answer
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
+- name: pages
+  label: الصفحات
+  editor:
+    preview: false
+  files:
+  - name: about
+    label: من نحن
+    file: content/pages/about.json
+    fields:
+    - label: العنوان
+      name: title
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: السطر الصغير (إنجليزي)
+      name: eyebrow
+      widget: string
+    - label: المقدمة
+      name: intro
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+      - label: English
+        name: en
+        widget: text
+    - label: صورة الواجهة (اختياري)
+      name: image
+      widget: object
+      required: false
+      fields:
+      - label: الصورة
+        name: src
+        widget: image
+        choose_url: true
+        required: false
+      - label: وصف الصورة (للمكفوفين ومحركات البحث)
+        name: alt
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+          required: false
+        - label: English
+          name: en
+          widget: string
+          required: false
+        required: false
+      - label: اسم المصوّر (اختياري)
+        name: credit
+        widget: string
+        required: false
+      - label: رابط المصوّر (اختياري)
+        name: creditUrl
+        widget: string
+        required: false
+    - label: الأقسام
+      name: sections
+      widget: list
+      summary: '{{fields.heading.ar}}'
+      fields:
+      - label: العنوان
+        name: heading
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: النص (افصل الفقرات بسطر فارغ)
+        name: body
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
+    - label: وصف الصفحة لمحركات البحث
+      name: seoDescription
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+  - name: privacy
+    label: سياسة الخصوصية
+    file: content/pages/privacy.json
+    fields:
+    - label: العنوان
+      name: title
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: السطر الصغير (إنجليزي)
+      name: eyebrow
+      widget: string
+    - label: المقدمة
+      name: intro
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+      - label: English
+        name: en
+        widget: text
+    - label: صورة الواجهة (اختياري)
+      name: image
+      widget: object
+      required: false
+      fields:
+      - label: الصورة
+        name: src
+        widget: image
+        choose_url: true
+        required: false
+      - label: وصف الصورة (للمكفوفين ومحركات البحث)
+        name: alt
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+          required: false
+        - label: English
+          name: en
+          widget: string
+          required: false
+        required: false
+      - label: اسم المصوّر (اختياري)
+        name: credit
+        widget: string
+        required: false
+      - label: رابط المصوّر (اختياري)
+        name: creditUrl
+        widget: string
+        required: false
+    - label: الأقسام
+      name: sections
+      widget: list
+      summary: '{{fields.heading.ar}}'
+      fields:
+      - label: العنوان
+        name: heading
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: النص (افصل الفقرات بسطر فارغ)
+        name: body
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
+    - label: وصف الصفحة لمحركات البحث
+      name: seoDescription
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+  - name: terms
+    label: الشروط والأحكام
+    file: content/pages/terms.json
+    fields:
+    - label: العنوان
+      name: title
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: السطر الصغير (إنجليزي)
+      name: eyebrow
+      widget: string
+    - label: المقدمة
+      name: intro
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+      - label: English
+        name: en
+        widget: text
+    - label: صورة الواجهة (اختياري)
+      name: image
+      widget: object
+      required: false
+      fields:
+      - label: الصورة
+        name: src
+        widget: image
+        choose_url: true
+        required: false
+      - label: وصف الصورة (للمكفوفين ومحركات البحث)
+        name: alt
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+          required: false
+        - label: English
+          name: en
+          widget: string
+          required: false
+        required: false
+      - label: اسم المصوّر (اختياري)
+        name: credit
+        widget: string
+        required: false
+      - label: رابط المصوّر (اختياري)
+        name: creditUrl
+        widget: string
+        required: false
+    - label: الأقسام
+      name: sections
+      widget: list
+      summary: '{{fields.heading.ar}}'
+      fields:
+      - label: العنوان
+        name: heading
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: النص (افصل الفقرات بسطر فارغ)
+        name: body
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
+    - label: وصف الصفحة لمحركات البحث
+      name: seoDescription
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string

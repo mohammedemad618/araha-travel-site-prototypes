@@ -1,0 +1,233 @@
+{
+  "slug": "modern-dubai",
+  "title": {
+    "ar": "دبي الحديثة",
+    "en": "Modern Dubai"
+  },
+  "destination": "uae",
+  "styles": [
+    "luxury",
+    "family",
+    "discovery"
+  ],
+  "days": 5,
+  "nights": 4,
+  "price": 720000,
+  "priceNote": {
+    "ar": "للشخص الواحد في غرفة مزدوجة",
+    "en": "per person, sharing a double room"
+  },
+  "highlights": [
+    {
+      "ar": "فندق 5 نجوم",
+      "en": "5-star hotel"
+    },
+    {
+      "ar": "رحلة سفاري",
+      "en": "Desert safari"
+    },
+    {
+      "ar": "عشاء على المارينا",
+      "en": "Marina dinner cruise"
+    }
+  ],
+  "lead": {
+    "ar": "خمسة أيام بين أبراج دبي وصحرائها ومراسيها، بإيقاع مريح يناسب العائلة.",
+    "en": "Five days among Dubai’s towers, desert and marinas, at an easy family pace."
+  },
+  "overview": {
+    "ar": "إقامة في فندق 5 نجوم، رحلة سفاري بعد الظهر مع عشاء في المخيم، عشاء على قارب في المارينا، وجولة في دبي القديمة والحديثة مع وقت للتسوق.",
+    "en": "A 5-star stay, an afternoon desert safari with camp dinner, a dinner cruise in the Marina, and a tour of old and new Dubai with time for shopping."
+  },
+  "facts": {
+    "route": {
+      "ar": "دبي",
+      "en": "Dubai"
+    },
+    "stay": {
+      "ar": "فندق 5 نجوم",
+      "en": "5-star hotel"
+    },
+    "flights": {
+      "ar": "مباشر من بغداد والبصرة",
+      "en": "Direct from Baghdad & Basra"
+    },
+    "season": {
+      "ar": "تشرين الأول — نيسان",
+      "en": "October – April"
+    },
+    "group": {
+      "ar": "خاص أو مجموعات",
+      "en": "Private or group"
+    }
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1708361089093-beef4c4584e7",
+    "alt": {
+      "ar": "مرسى دبي في الساعة الزرقاء",
+      "en": "Dubai Marina at blue hour"
+    },
+    "credit": "Fabien Bellanger",
+    "creditUrl": "https://unsplash.com/@fabbel78"
+  },
+  "gallery": [
+    {
+      "src": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c",
+      "alt": {
+        "ar": "أفق دبي الحديث",
+        "en": "The modern Dubai skyline"
+      },
+      "credit": "David Rodrigo",
+      "creditUrl": "https://unsplash.com/@david__r"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b",
+      "alt": {
+        "ar": "مسبح فيلا خاصة عند المساء",
+        "en": "A private villa pool at dusk"
+      },
+      "credit": "Mike Swigunski",
+      "creditUrl": "https://unsplash.com/@mike_swigunski"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1516727052521-08079c40df80",
+      "alt": {
+        "ar": "عائلة على سطح عبّارة",
+        "en": "A family on a ferry deck"
+      },
+      "credit": "Spencer Watson",
+      "creditUrl": "https://unsplash.com/@thebrownspy"
+    }
+  ],
+  "departures": [
+    "2026-10-22",
+    "2026-11-19",
+    "2026-12-28",
+    "2027-01-21",
+    "2027-02-18"
+  ],
+  "itinerary": [
+    {
+      "title": {
+        "ar": "الوصول إلى دبي",
+        "en": "Arrive in Dubai"
+      },
+      "description": {
+        "ar": "استقبال والتوصيل إلى الفندق، أمسية حرة عند نافورة دبي.",
+        "en": "Welcome and hotel transfer; free evening at the Dubai Fountain."
+      },
+      "tags": [
+        {
+          "ar": "استقبال خاص",
+          "en": "Private transfer"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "جولة المدينة",
+        "en": "City tour"
+      },
+      "description": {
+        "ar": "دبي القديمة وسوق الذهب والعبرة، ثم برج خليفة ودبي مول.",
+        "en": "Old Dubai, the Gold Souk and an abra ride, then Burj Khalifa and Dubai Mall."
+      },
+      "tags": [
+        {
+          "ar": "نصف يوم",
+          "en": "Half day"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "سفاري الصحراء",
+        "en": "Desert safari"
+      },
+      "description": {
+        "ar": "صباح حر، ثم سفاري بعد الظهر مع التزلج على الرمال وعشاء في المخيم.",
+        "en": "Free morning, then an afternoon safari with sand-boarding and dinner at a desert camp."
+      },
+      "tags": [
+        {
+          "ar": "سفاري",
+          "en": "Safari"
+        },
+        {
+          "ar": "عشاء",
+          "en": "Dinner"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "المارينا",
+        "en": "The Marina"
+      },
+      "description": {
+        "ar": "يوم حر للتسوق أو الشاطئ، وعشاء على قارب في مرسى دبي.",
+        "en": "A free day for shopping or the beach, then a dinner cruise in Dubai Marina."
+      },
+      "tags": [
+        {
+          "ar": "عشاء على قارب",
+          "en": "Dinner cruise"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "العودة",
+        "en": "Departure"
+      },
+      "description": {
+        "ar": "التوصيل إلى المطار.",
+        "en": "Transfer to the airport."
+      },
+      "tags": [
+        {
+          "ar": "توديع",
+          "en": "Farewell transfer"
+        }
+      ]
+    }
+  ],
+  "includes": [
+    {
+      "ar": "تذاكر الطيران ذهاباً وإياباً",
+      "en": "Return flights"
+    },
+    {
+      "ar": "4 ليالٍ في فندق 5 نجوم مع الإفطار",
+      "en": "4 nights in a 5-star hotel with breakfast"
+    },
+    {
+      "ar": "الاستقبال والتوديع",
+      "en": "Airport transfers"
+    },
+    {
+      "ar": "رحلة سفاري مع العشاء",
+      "en": "Desert safari with dinner"
+    },
+    {
+      "ar": "عشاء على قارب في المارينا",
+      "en": "Marina dinner cruise"
+    }
+  ],
+  "excludes": [
+    {
+      "ar": "تذكرة برج خليفة",
+      "en": "Burj Khalifa ticket"
+    },
+    {
+      "ar": "رسوم التأشيرة",
+      "en": "Visa fees"
+    },
+    {
+      "ar": "رسوم السياحة في الفندق",
+      "en": "Hotel tourism dirham fee"
+    }
+  ],
+  "order": 4,
+  "featured": false
+}

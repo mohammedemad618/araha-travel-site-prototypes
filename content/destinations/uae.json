@@ -1,0 +1,32 @@
+{
+  "slug": "uae",
+  "name": {
+    "ar": "الإمارات",
+    "en": "UAE"
+  },
+  "label": "UAE",
+  "coord": "25.20° N",
+  "tagline": {
+    "ar": "مدن تسبق الغد، وصحراء تحكي بهدوء.",
+    "en": "Cities ahead of tomorrow, and a desert that speaks softly."
+  },
+  "description": {
+    "ar": "دبي وأبوظبي وجهتان مثاليتان لعطلة قصيرة: فنادق فاخرة، تسوق، مدن ترفيهية، رحلات سفاري في الصحراء، وشواطئ دافئة معظم أيام السنة.",
+    "en": "Dubai and Abu Dhabi are ideal for a short break: luxury hotels, shopping, theme parks, desert safaris and warm beaches for most of the year."
+  },
+  "bestSeason": {
+    "ar": "تشرين الأول — نيسان",
+    "en": "October – April"
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c",
+    "alt": {
+      "ar": "أفق دبي الحديث",
+      "en": "The modern Dubai skyline"
+    },
+    "credit": "David Rodrigo",
+    "creditUrl": "https://unsplash.com/@david__r"
+  },
+  "homeLayout": "mid",
+  "order": 2
+}

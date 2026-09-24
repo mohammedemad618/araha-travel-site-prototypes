@@ -1,0 +1,84 @@
+{
+  "items": [
+    {
+      "question": {
+        "ar": "كيف أحجز باقة؟",
+        "en": "How do I book a package?"
+      },
+      "answer": {
+        "ar": "اختر الباقة والموعد المناسب ثم أرسل طلب الحجز من صفحة الباقة أو راسلنا على واتساب. يتواصل معك مستشار سفر لتأكيد التفاصيل والأسعار وطريقة الدفع.",
+        "en": "Choose a package and a departure date, then send a booking request from the package page or message us on WhatsApp. A travel consultant will contact you to confirm the details, price and payment method."
+      }
+    },
+    {
+      "question": {
+        "ar": "هل الأسعار المعروضة نهائية؟",
+        "en": "Are the prices shown final?"
+      },
+      "answer": {
+        "ar": "الأسعار تبدأ من المبلغ المعروض للشخص الواحد في غرفة مزدوجة، وقد تتغير حسب الموعد وتوفر الطيران والفنادق. نؤكد لك السعر النهائي كتابياً قبل الدفع.",
+        "en": "Prices start from the amount shown per person sharing a double room and may vary with the date and flight/hotel availability. We confirm the final price in writing before you pay."
+      }
+    },
+    {
+      "question": {
+        "ar": "هل تساعدون في التأشيرة؟",
+        "en": "Do you help with visas?"
+      },
+      "answer": {
+        "ar": "نعم. نرتب الأوراق المطلوبة ونتابع طلبك حتى صدور التأشيرة، ونخبرك مسبقاً بالمتطلبات والمدة المتوقعة لكل وجهة.",
+        "en": "Yes. We prepare the required documents and follow your application until the visa is issued, and tell you the requirements and expected processing time for each destination in advance."
+      }
+    },
+    {
+      "question": {
+        "ar": "ما طرق الدفع المتاحة؟",
+        "en": "Which payment methods do you accept?"
+      },
+      "answer": {
+        "ar": "الدفع نقداً في مكتبنا في بغداد أو بالتحويل المصرفي أو عبر المحافظ الإلكترونية المحلية. يمكن تقسيط بعض الباقات، اسأل مستشارك عن التفاصيل.",
+        "en": "Cash at our Baghdad office, bank transfer or local e-wallets. Some packages can be paid in instalments—ask your consultant for details."
+      }
+    },
+    {
+      "question": {
+        "ar": "هل يمكن تعديل برنامج الباقة؟",
+        "en": "Can I customise a package?"
+      },
+      "answer": {
+        "ar": "بالتأكيد. يمكن تغيير الفندق أو عدد الليالي أو إضافة مدن وأنشطة، أو تصميم رحلة خاصة بالكامل حسب رغبتك وميزانيتك.",
+        "en": "Absolutely. You can change the hotel or number of nights, add cities and activities, or have a fully private trip designed around your wishes and budget."
+      }
+    },
+    {
+      "question": {
+        "ar": "ما سياسة الإلغاء؟",
+        "en": "What is your cancellation policy?"
+      },
+      "answer": {
+        "ar": "تختلف شروط الإلغاء حسب شركة الطيران والفندق وموعد الإلغاء. نرسل لك شروط كل حجز بوضوح قبل التأكيد. راجع صفحة الشروط والأحكام للمزيد.",
+        "en": "Cancellation terms depend on the airline, hotel and how close to departure you cancel. We send you the terms for every booking before you confirm. See our Terms & Conditions for more."
+      }
+    },
+    {
+      "question": {
+        "ar": "هل تنظمون رحلات للمجموعات والشركات؟",
+        "en": "Do you organise group and corporate trips?"
+      },
+      "answer": {
+        "ar": "نعم، ننظم رحلات المجموعات والمؤتمرات والرحلات التحفيزية للشركات بتنظيم كامل من الطيران حتى الجولات.",
+        "en": "Yes—we organise groups, conferences and corporate incentive trips end to end, from flights to tours."
+      }
+    },
+    {
+      "question": {
+        "ar": "كيف أتواصل معكم أثناء الرحلة؟",
+        "en": "How do I reach you during my trip?"
+      },
+      "answer": {
+        "ar": "فريقنا متاح على واتساب طوال رحلتك، ولديك رقم مندوبنا في الوجهة لأي طارئ.",
+        "en": "Our team is available on WhatsApp throughout your trip, and you will have our local representative’s number for any emergency."
+      }
+    }
+  ]
+}

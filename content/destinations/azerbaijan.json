@@ -1,0 +1,32 @@
+{
+  "slug": "azerbaijan",
+  "name": {
+    "ar": "أذربيجان",
+    "en": "Azerbaijan"
+  },
+  "label": "AZERBAIJAN",
+  "coord": "40.41° N",
+  "tagline": {
+    "ar": "أرض النار والحجر القديم.",
+    "en": "The land of fire and ancient stone."
+  },
+  "description": {
+    "ar": "باكو تجمع بين المدينة القديمة المسوّرة وأبراج اللهب الحديثة، وقبالا وشاماخي تقدمان الجبال والغابات والتلفريك. وجهة هادئة وقريبة بأسعار مناسبة.",
+    "en": "Baku blends a walled old city with the modern Flame Towers, while Gabala and Shamakhi offer mountains, forests and cable cars. A calm, nearby destination at great value."
+  },
+  "bestSeason": {
+    "ar": "نيسان — تشرين الأول",
+    "en": "April – October"
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1596306499300-0b7b1689b9f6",
+    "alt": {
+      "ar": "أبراج اللهب في باكو ليلاً",
+      "en": "Baku Flame Towers at night"
+    },
+    "credit": "Lloyd Alozie",
+    "creditUrl": "https://unsplash.com/@iamllwyd"
+  },
+  "homeLayout": "mid",
+  "order": 4
+}

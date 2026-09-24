@@ -1,0 +1,9 @@
+# Send visitors to the site in their browser language (Arabic by default).
+/            /en/   302!  Language=en
+/            /ar/   302!
+
+# Old prototype URLs.
+/Home.dc.html               /ar/                                301!
+/home.dc                    /ar/                                301!
+/Package%20Details.dc.html  /ar/packages/istanbul-and-trabzon/  301!
+/package%20details.dc       /ar/packages/istanbul-and-trabzon/  301!

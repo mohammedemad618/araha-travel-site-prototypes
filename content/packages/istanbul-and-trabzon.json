@@ -1,0 +1,348 @@
+{
+  "slug": "istanbul-and-trabzon",
+  "title": {
+    "ar": "إسطنبول وطرابزون",
+    "en": "Istanbul & Trabzon"
+  },
+  "destination": "turkey",
+  "styles": [
+    "family",
+    "discovery",
+    "adventure"
+  ],
+  "days": 8,
+  "nights": 7,
+  "price": 995000,
+  "priceNote": {
+    "ar": "للشخص الواحد في غرفة مزدوجة",
+    "en": "per person, sharing a double room"
+  },
+  "highlights": [
+    {
+      "ar": "فنادق 4 نجوم",
+      "en": "4-star hotels"
+    },
+    {
+      "ar": "طيران داخلي",
+      "en": "Domestic flight"
+    },
+    {
+      "ar": "هضبة أيدر وأوزنجول",
+      "en": "Ayder & Uzungöl"
+    }
+  ],
+  "lead": {
+    "ar": "أربعة أيام بين مساجد إسطنبول وأسواقها ومياه البوسفور، ثم أربعة أخرى في هضاب طرابزون الخضراء حيث الضباب والبحيرات والهواء البارد.",
+    "en": "Four days among the mosques, bazaars and waters of Istanbul, then four more in the green highlands of Trabzon—mist, lakes and cool mountain air."
+  },
+  "overview": {
+    "ar": "برنامج متوازن بين الجولات المنظمة والوقت الحر، مناسب للعائلات والأزواج. الإقامة في فنادق 4 نجوم مختارة في مواقع مركزية، مع مرشد يتحدث العربية طوال الجولات، وفريقنا على واتساب على مدار الرحلة.",
+    "en": "A balanced programme of guided tours and free time, ideal for families and couples. You stay in hand-picked, centrally located 4-star hotels, with an Arabic-speaking guide on every tour and our team on WhatsApp throughout the trip."
+  },
+  "facts": {
+    "route": {
+      "ar": "إسطنبول ← طرابزون",
+      "en": "Istanbul → Trabzon"
+    },
+    "stay": {
+      "ar": "فنادق 4 نجوم",
+      "en": "4-star hotels"
+    },
+    "flights": {
+      "ar": "مباشر من بغداد",
+      "en": "Direct from Baghdad"
+    },
+    "season": {
+      "ar": "حزيران — أيلول",
+      "en": "June – September"
+    },
+    "group": {
+      "ar": "حتى 16 مسافراً",
+      "en": "Up to 16 travellers"
+    }
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1607068798195-d26a9703b277",
+    "alt": {
+      "ar": "هضاب طرابزون الخضراء يلفها الضباب",
+      "en": "Misty green highlands of Trabzon"
+    },
+    "credit": "Mike Swigunski",
+    "creditUrl": "https://unsplash.com/@mike_swigunski"
+  },
+  "gallery": [
+    {
+      "src": "https://images.unsplash.com/photo-1518084823714-2f59a7315a39",
+      "alt": {
+        "ar": "شارع برج غلطة عند المساء",
+        "en": "Galata Tower street at dusk"
+      },
+      "credit": "Osman Köycü",
+      "creditUrl": "https://unsplash.com/@osmank"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1576740858825-9f207efc968f",
+      "alt": {
+        "ar": "عبّارة البوسفور والنوارس",
+        "en": "A Bosphorus ferry with gulls"
+      },
+      "credit": "Süheyl Burak",
+      "creditUrl": "https://unsplash.com/@suheylburak"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1529270122027-2f6929c45b7c",
+      "alt": {
+        "ar": "فوانيس البازار الكبير",
+        "en": "Lanterns in the Grand Bazaar"
+      },
+      "credit": "João Marcelo Martins",
+      "creditUrl": "https://unsplash.com/@johnnyhammer"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1713346641342-dfb698c555a9",
+      "alt": {
+        "ar": "بحيرة أوزنجول وسط الضباب",
+        "en": "Uzungöl lake in the mist"
+      },
+      "credit": "Dana Andreea Gheorghe",
+      "creditUrl": "https://unsplash.com/@dana_andreea"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1658907425244-1f02ace03618",
+      "alt": {
+        "ar": "بيوت هضبة أيدر",
+        "en": "Houses on the Ayder plateau"
+      },
+      "credit": "Mark Frost",
+      "creditUrl": "https://unsplash.com/@markfrost"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1577986696086-c96095524959",
+      "alt": {
+        "ar": "دير سوميلا المعلّق على الجبل",
+        "en": "Sumela Monastery on the cliff"
+      },
+      "credit": "Deogyeon Hwang",
+      "creditUrl": "https://unsplash.com/@lalalife"
+    }
+  ],
+  "departures": [
+    "2027-06-12",
+    "2027-06-26",
+    "2027-07-10",
+    "2027-07-24",
+    "2027-08-07"
+  ],
+  "itinerary": [
+    {
+      "title": {
+        "ar": "الوصول والاستقبال",
+        "en": "Arrival & welcome"
+      },
+      "description": {
+        "ar": "استقبال في مطار إسطنبول من مندوبنا، ثم التوصيل إلى الفندق في منطقة تقسيم. أمسية حرة للتمشي في شارع الاستقلال.",
+        "en": "Our representative meets you at Istanbul Airport and drives you to your hotel in Taksim. Free evening to stroll along İstiklal Avenue."
+      },
+      "tags": [
+        {
+          "ar": "استقبال خاص",
+          "en": "Private transfer"
+        },
+        {
+          "ar": "فندق 4 نجوم",
+          "en": "4-star hotel"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "جولة إسطنبول",
+        "en": "Istanbul city tour"
+      },
+      "description": {
+        "ar": "جولة في المدينة القديمة: آيا صوفيا، جامع السلطان أحمد، ميدان السلطان أحمد، ثم البازار الكبير.",
+        "en": "Old city tour: Hagia Sophia, the Blue Mosque, Sultanahmet Square and the Grand Bazaar."
+      },
+      "tags": [
+        {
+          "ar": "مرشد عربي",
+          "en": "Arabic-speaking guide"
+        },
+        {
+          "ar": "نصف يوم",
+          "en": "Half day"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "رحلة البوسفور",
+        "en": "Bosphorus cruise"
+      },
+      "description": {
+        "ar": "رحلة بحرية على مضيق البوسفور بين القارتين، زيارة قصر دولمة بهجة، وعشاء اختياري على الضفة الآسيوية.",
+        "en": "Cruise the Bosphorus between two continents, visit Dolmabahçe Palace, with an optional dinner on the Asian shore."
+      },
+      "tags": [
+        {
+          "ar": "رحلة بحرية",
+          "en": "Cruise"
+        },
+        {
+          "ar": "قصر دولمة بهجة",
+          "en": "Dolmabahçe Palace"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "جزر الأميرات",
+        "en": "Princes' Islands"
+      },
+      "description": {
+        "ar": "يوم هادئ في جزيرة بيوك أدا: عربات الخيل، البيوت الخشبية القديمة، والغداء على البحر.",
+        "en": "A slow day on Büyükada: horse carriages, old wooden mansions and lunch by the sea."
+      },
+      "tags": [
+        {
+          "ar": "عبّارة",
+          "en": "Ferry"
+        },
+        {
+          "ar": "يوم كامل",
+          "en": "Full day"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "الطيران إلى طرابزون",
+        "en": "Fly to Trabzon"
+      },
+      "description": {
+        "ar": "رحلة داخلية قصيرة إلى طرابزون، الاستقبال ثم التوجه إلى بحيرة أوزنجول وسط الغابات.",
+        "en": "A short domestic flight to Trabzon, then a drive to Uzungöl lake in the heart of the forest."
+      },
+      "tags": [
+        {
+          "ar": "طيران داخلي",
+          "en": "Domestic flight"
+        },
+        {
+          "ar": "أوزنجول",
+          "en": "Uzungöl"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "هضبة أيدر",
+        "en": "Ayder plateau"
+      },
+      "description": {
+        "ar": "جولة في هضبة أيدر: شلالات، ينابيع حارة، وقرى جبلية فوق الغيوم.",
+        "en": "Explore the Ayder plateau: waterfalls, hot springs and mountain villages above the clouds."
+      },
+      "tags": [
+        {
+          "ar": "طبيعة",
+          "en": "Nature"
+        },
+        {
+          "ar": "يوم كامل",
+          "en": "Full day"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "دير سوميلا والسوق",
+        "en": "Sumela & the bazaar"
+      },
+      "description": {
+        "ar": "زيارة دير سوميلا المعلّق على الجبل، ثم وقت حر في سوق طرابزون وميدانها.",
+        "en": "Visit Sumela Monastery clinging to the cliff, then free time in Trabzon’s bazaar and main square."
+      },
+      "tags": [
+        {
+          "ar": "تاريخ",
+          "en": "History"
+        },
+        {
+          "ar": "تسوق",
+          "en": "Shopping"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "العودة",
+        "en": "Departure"
+      },
+      "description": {
+        "ar": "إفطار أخير ثم التوصيل إلى مطار طرابزون للعودة إلى العراق.",
+        "en": "A last breakfast, then transfer to Trabzon Airport for your flight home to Iraq."
+      },
+      "tags": [
+        {
+          "ar": "توديع",
+          "en": "Farewell transfer"
+        }
+      ]
+    }
+  ],
+  "includes": [
+    {
+      "ar": "تذاكر الطيران ذهاباً وإياباً من بغداد",
+      "en": "Return flights from Baghdad"
+    },
+    {
+      "ar": "رحلة داخلية إسطنبول — طرابزون",
+      "en": "Istanbul – Trabzon domestic flight"
+    },
+    {
+      "ar": "7 ليالٍ في فنادق 4 نجوم مع الإفطار",
+      "en": "7 nights in 4-star hotels with breakfast"
+    },
+    {
+      "ar": "الاستقبال والتوديع في المطارات",
+      "en": "Airport meet & greet and transfers"
+    },
+    {
+      "ar": "جميع التنقلات بسيارات حديثة",
+      "en": "All transport in modern vehicles"
+    },
+    {
+      "ar": "جولات يومية بمرشد يتحدث العربية",
+      "en": "Daily tours with an Arabic-speaking guide"
+    },
+    {
+      "ar": "رحلة البوسفور البحرية",
+      "en": "Bosphorus cruise"
+    }
+  ],
+  "excludes": [
+    {
+      "ar": "رسوم التأشيرة إن وجدت",
+      "en": "Visa fees, if applicable"
+    },
+    {
+      "ar": "وجبات الغداء والعشاء",
+      "en": "Lunches and dinners"
+    },
+    {
+      "ar": "رسوم دخول المتاحف",
+      "en": "Museum entrance fees"
+    },
+    {
+      "ar": "المصاريف الشخصية والإكراميات",
+      "en": "Personal expenses and tips"
+    }
+  ],
+  "featured": false,
+  "badge": {
+    "ar": "عرض الصيف",
+    "en": "Summer offer"
+  },
+  "order": 2
+}

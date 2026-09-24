@@ -1,0 +1,32 @@
+{
+  "slug": "georgia",
+  "name": {
+    "ar": "جورجيا",
+    "en": "Georgia"
+  },
+  "label": "GEORGIA",
+  "coord": "41.72° N",
+  "tagline": {
+    "ar": "جبال خضراء وقرى تسكنها الغيوم.",
+    "en": "Green mountains and villages that live among the clouds."
+  },
+  "description": {
+    "ar": "تبليسي بأزقتها القديمة وحماماتها الكبريتية، وكازبيجي بجبالها المهيبة، وباتومي على ساحل البحر الأسود. جورجيا قريبة وسهلة ومناسبة لمحبي الطبيعة والطقس اللطيف.",
+    "en": "Tbilisi with its old lanes and sulphur baths, Kazbegi with its majestic peaks, and Batumi on the Black Sea coast. Georgia is close, easy and perfect for nature lovers and mild weather."
+  },
+  "bestSeason": {
+    "ar": "أيار — تشرين الأول",
+    "en": "May – October"
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1563284223-333497472e88",
+    "alt": {
+      "ar": "كنيسة جيرغيتي في كازبيجي",
+      "en": "Gergeti church in Kazbegi"
+    },
+    "credit": "Iman Gozal",
+    "creditUrl": "https://unsplash.com/@imangm"
+  },
+  "homeLayout": "mid",
+  "order": 3
+}

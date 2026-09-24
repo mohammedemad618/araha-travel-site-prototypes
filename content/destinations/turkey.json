@@ -1,0 +1,32 @@
+{
+  "slug": "turkey",
+  "name": {
+    "ar": "تركيا",
+    "en": "Türkiye"
+  },
+  "label": "TÜRKIYE",
+  "coord": "41.01° N",
+  "tagline": {
+    "ar": "حيث يلتقي الشرق بالغرب على ضفتي البوسفور، وتبدأ كل رحلة من فنجان قهوة.",
+    "en": "Where East meets West on the banks of the Bosphorus, and every journey starts with a cup of coffee."
+  },
+  "description": {
+    "ar": "من مساجد إسطنبول وأسواقها وعبّارات البوسفور، إلى هضاب طرابزون الخضراء وبحيراتها الضبابية. تركيا وجهة تناسب العائلات والأزواج ومحبي التسوق والطبيعة، وتصلها رحلات مباشرة من بغداد والبصرة وأربيل والنجف.",
+    "en": "From the mosques, bazaars and ferries of Istanbul to the misty green highlands and lakes of Trabzon, Türkiye suits families, couples, shoppers and nature lovers alike, with direct flights from Baghdad, Basra, Erbil and Najaf."
+  },
+  "bestSeason": {
+    "ar": "نيسان — تشرين الأول",
+    "en": "April – October"
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1621873129944-8d88a5328a0c",
+    "alt": {
+      "ar": "مناطيد كبادوكيا عند الفجر",
+      "en": "Cappadocia balloons at dawn"
+    },
+    "credit": "Mehmet Bozgedik",
+    "creditUrl": "https://unsplash.com/@bozgedik"
+  },
+  "homeLayout": "big",
+  "order": 1
+}

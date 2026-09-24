@@ -1,0 +1,291 @@
+{
+  "slug": "enchanting-istanbul",
+  "title": {
+    "ar": "إسطنبول الساحرة",
+    "en": "Enchanting Istanbul"
+  },
+  "destination": "turkey",
+  "styles": [
+    "discovery",
+    "family",
+    "romance"
+  ],
+  "days": 7,
+  "nights": 6,
+  "price": 875000,
+  "priceNote": {
+    "ar": "للشخص الواحد في غرفة مزدوجة",
+    "en": "per person, sharing a double room"
+  },
+  "highlights": [
+    {
+      "ar": "فندق 4 نجوم",
+      "en": "4-star hotel"
+    },
+    {
+      "ar": "استقبال وتوديع",
+      "en": "Airport transfers"
+    },
+    {
+      "ar": "جولات سياحية",
+      "en": "Guided tours"
+    }
+  ],
+  "lead": {
+    "ar": "أسبوع في المدينة التي تجمع قارتين: مساجد عثمانية، أسواق عمرها قرون، وغروب على البوسفور.",
+    "en": "A week in the city of two continents: Ottoman mosques, centuries-old bazaars and sunsets over the Bosphorus."
+  },
+  "overview": {
+    "ar": "إقامة مريحة في قلب إسطنبول مع جولات منظمة لأهم المعالم، ويوم كامل في بورصة أو سابانجا، وأوقات حرة للتسوق في نيشان تاشي والبازار الكبير. برنامج مثالي لأول زيارة إلى تركيا.",
+    "en": "A comfortable stay in central Istanbul with guided tours of the main sights, a full day in Bursa or Sapanca, and free time for shopping in Nişantaşı and the Grand Bazaar. The perfect first visit to Türkiye."
+  },
+  "facts": {
+    "route": {
+      "ar": "إسطنبول",
+      "en": "Istanbul"
+    },
+    "stay": {
+      "ar": "فندق 4 نجوم",
+      "en": "4-star hotel"
+    },
+    "flights": {
+      "ar": "مباشر من بغداد",
+      "en": "Direct from Baghdad"
+    },
+    "season": {
+      "ar": "طوال العام",
+      "en": "All year"
+    },
+    "group": {
+      "ar": "حتى 16 مسافراً",
+      "en": "Up to 16 travellers"
+    }
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1564407727371-3eece6c58961",
+    "alt": {
+      "ar": "حي غلطة في إسطنبول عند المساء",
+      "en": "Galata, Istanbul at dusk"
+    },
+    "credit": "Meriç Dağlı",
+    "creditUrl": "https://unsplash.com/@meric"
+  },
+  "gallery": [
+    {
+      "src": "https://images.unsplash.com/photo-1518084823714-2f59a7315a39",
+      "alt": {
+        "ar": "شارع برج غلطة عند المساء",
+        "en": "Galata Tower street at dusk"
+      },
+      "credit": "Osman Köycü",
+      "creditUrl": "https://unsplash.com/@osmank"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1653549882026-4c92d25bee4f",
+      "alt": {
+        "ar": "أسطح إسطنبول",
+        "en": "Istanbul rooftops"
+      },
+      "credit": "Enis Can Ceyhan",
+      "creditUrl": "https://unsplash.com/@enisvisuals"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1529270122027-2f6929c45b7c",
+      "alt": {
+        "ar": "فوانيس البازار الكبير",
+        "en": "Lanterns in the Grand Bazaar"
+      },
+      "credit": "João Marcelo Martins",
+      "creditUrl": "https://unsplash.com/@johnnyhammer"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1589561454226-796a8aa89b05",
+      "alt": {
+        "ar": "أفق إسطنبول ومساجدها عند الغروب",
+        "en": "Istanbul skyline and mosques at sunset"
+      },
+      "credit": "Engin Yapici",
+      "creditUrl": "https://unsplash.com/@yapici"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1576740858825-9f207efc968f",
+      "alt": {
+        "ar": "عبّارة البوسفور والنوارس",
+        "en": "A Bosphorus ferry with gulls"
+      },
+      "credit": "Süheyl Burak",
+      "creditUrl": "https://unsplash.com/@suheylburak"
+    }
+  ],
+  "departures": [
+    "2026-10-15",
+    "2026-11-05",
+    "2026-12-20",
+    "2027-03-25",
+    "2027-04-15"
+  ],
+  "itinerary": [
+    {
+      "title": {
+        "ar": "الوصول إلى إسطنبول",
+        "en": "Arrive in Istanbul"
+      },
+      "description": {
+        "ar": "استقبال في المطار والتوصيل إلى الفندق، ثم أمسية حرة في تقسيم.",
+        "en": "Airport welcome and transfer to your hotel, then a free evening in Taksim."
+      },
+      "tags": [
+        {
+          "ar": "استقبال خاص",
+          "en": "Private transfer"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "المدينة القديمة",
+        "en": "The old city"
+      },
+      "description": {
+        "ar": "آيا صوفيا، الجامع الأزرق، قصر توبكابي، والبازار الكبير بصحبة مرشد عربي.",
+        "en": "Hagia Sophia, the Blue Mosque, Topkapı Palace and the Grand Bazaar with an Arabic-speaking guide."
+      },
+      "tags": [
+        {
+          "ar": "مرشد عربي",
+          "en": "Arabic-speaking guide"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "البوسفور",
+        "en": "The Bosphorus"
+      },
+      "description": {
+        "ar": "رحلة بحرية على البوسفور، ثم زيارة تلة العرائس (تشامليجا) وإطلالتها على المدينة.",
+        "en": "A Bosphorus cruise followed by Çamlıca Hill and its sweeping view of the city."
+      },
+      "tags": [
+        {
+          "ar": "رحلة بحرية",
+          "en": "Cruise"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "يوم في بورصة أو سابانجا",
+        "en": "Bursa or Sapanca"
+      },
+      "description": {
+        "ar": "رحلة يوم كامل إلى الطبيعة: جبل أولوداغ في بورصة أو بحيرة سابانجا ومعشوقية.",
+        "en": "A full-day escape to nature: Uludağ mountain in Bursa, or Lake Sapanca and Maşukiye."
+      },
+      "tags": [
+        {
+          "ar": "يوم كامل",
+          "en": "Full day"
+        },
+        {
+          "ar": "طبيعة",
+          "en": "Nature"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "يوم حر للتسوق",
+        "en": "Free day for shopping"
+      },
+      "description": {
+        "ar": "وقت حر للتسوق في نيشان تاشي ومولات إسطنبول، مع توصيات فريقنا.",
+        "en": "Free time to shop in Nişantaşı and Istanbul’s malls, with tips from our team."
+      },
+      "tags": [
+        {
+          "ar": "تسوق",
+          "en": "Shopping"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "جزر الأميرات",
+        "en": "Princes' Islands"
+      },
+      "description": {
+        "ar": "عبّارة إلى جزيرة بيوك أدا والتجول بين البيوت الخشبية والغداء على البحر.",
+        "en": "A ferry to Büyükada to wander among wooden mansions and lunch by the sea."
+      },
+      "tags": [
+        {
+          "ar": "عبّارة",
+          "en": "Ferry"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "العودة",
+        "en": "Departure"
+      },
+      "description": {
+        "ar": "إفطار ثم التوصيل إلى المطار.",
+        "en": "Breakfast, then transfer to the airport."
+      },
+      "tags": [
+        {
+          "ar": "توديع",
+          "en": "Farewell transfer"
+        }
+      ]
+    }
+  ],
+  "includes": [
+    {
+      "ar": "تذاكر الطيران ذهاباً وإياباً من بغداد",
+      "en": "Return flights from Baghdad"
+    },
+    {
+      "ar": "6 ليالٍ في فندق 4 نجوم مع الإفطار",
+      "en": "6 nights in a 4-star hotel with breakfast"
+    },
+    {
+      "ar": "الاستقبال والتوديع في المطار",
+      "en": "Airport meet & greet and transfers"
+    },
+    {
+      "ar": "3 جولات بمرشد يتحدث العربية",
+      "en": "3 tours with an Arabic-speaking guide"
+    },
+    {
+      "ar": "رحلة البوسفور البحرية",
+      "en": "Bosphorus cruise"
+    }
+  ],
+  "excludes": [
+    {
+      "ar": "رسوم التأشيرة إن وجدت",
+      "en": "Visa fees, if applicable"
+    },
+    {
+      "ar": "وجبات الغداء والعشاء",
+      "en": "Lunches and dinners"
+    },
+    {
+      "ar": "رسوم دخول المتاحف",
+      "en": "Museum entrance fees"
+    },
+    {
+      "ar": "المصاريف الشخصية",
+      "en": "Personal expenses"
+    }
+  ],
+  "featured": true,
+  "badge": {
+    "ar": "الأكثر طلباً هذا الموسم",
+    "en": "Most requested this season"
+  },
+  "order": 1
+}

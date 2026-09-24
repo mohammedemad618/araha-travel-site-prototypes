@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Form definitions</title>
+  </head>
+  <body>
+    <!--
+      Netlify Forms reads these definitions at deploy time. The real forms are
+      rendered by React and submit to this file with fetch(); keep the field
+      names here in sync with components/forms/Forms.tsx.
+    -->
+    <form name="custom-trip" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" />
+      <input name="page" />
+      <input name="destination" />
+      <select name="travelers"></select>
+      <input name="date" />
+      <select name="budget"></select>
+      <input name="name" />
+      <input name="phone" type="tel" />
+    </form>
+    <form name="package-booking" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" />
+      <input name="page" />
+      <input name="package" />
+      <input name="name" />
+      <input name="phone" type="tel" />
+      <select name="departure"></select>
+      <select name="travelers"></select>
+    </form>
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" />
+      <input name="page" />
+      <input name="name" />
+      <input name="phone" type="tel" />
+      <input name="email" type="email" />
+      <textarea name="message"></textarea>
+    </form>
+  </body>
+</html>

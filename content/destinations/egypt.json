@@ -1,0 +1,32 @@
+{
+  "slug": "egypt",
+  "name": {
+    "ar": "مصر",
+    "en": "Egypt"
+  },
+  "label": "EGYPT",
+  "coord": "27.91° N",
+  "tagline": {
+    "ar": "شمس البحر الأحمر وتاريخ لا ينتهي.",
+    "en": "Red Sea sunshine and endless history."
+  },
+  "description": {
+    "ar": "شرم الشيخ والغردقة من أجمل وجهات الغوص والاسترخاء، بمنتجعات شاملة كلياً وشعاب مرجانية، مع إمكانية إضافة القاهرة والأهرامات إلى برنامجك.",
+    "en": "Sharm El Sheikh and Hurghada are among the best places to dive and unwind, with all-inclusive resorts and coral reefs—and Cairo and the Pyramids can be added to your trip."
+  },
+  "bestSeason": {
+    "ar": "تشرين الأول — أيار",
+    "en": "October – May"
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1496614932623-0a3a9743552e",
+    "alt": {
+      "ar": "شعاب البحر الأحمر المرجانية",
+      "en": "Red Sea coral reef"
+    },
+    "credit": "Petr Vyšohlíd",
+    "creditUrl": "https://unsplash.com/@pvysohlid"
+  },
+  "homeLayout": "mid",
+  "order": 5
+}

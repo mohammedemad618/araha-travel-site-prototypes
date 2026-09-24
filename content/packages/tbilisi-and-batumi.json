@@ -1,0 +1,267 @@
+{
+  "slug": "tbilisi-and-batumi",
+  "title": {
+    "ar": "تبليسي وباتومي",
+    "en": "Tbilisi & Batumi"
+  },
+  "destination": "georgia",
+  "styles": [
+    "adventure",
+    "family",
+    "discovery"
+  ],
+  "days": 6,
+  "nights": 5,
+  "price": 790000,
+  "priceNote": {
+    "ar": "للشخص الواحد في غرفة مزدوجة",
+    "en": "per person, sharing a double room"
+  },
+  "highlights": [
+    {
+      "ar": "فندق 4 نجوم",
+      "en": "4-star hotel"
+    },
+    {
+      "ar": "استقبال وتوديع",
+      "en": "Airport transfers"
+    },
+    {
+      "ar": "جولة كازبيجي",
+      "en": "Kazbegi tour"
+    }
+  ],
+  "lead": {
+    "ar": "من أزقة تبليسي القديمة إلى قمم كازبيجي وساحل باتومي على البحر الأسود.",
+    "en": "From Tbilisi’s old lanes to the peaks of Kazbegi and Batumi on the Black Sea."
+  },
+  "overview": {
+    "ar": "رحلة تجمع المدينة والجبل والبحر في ستة أيام. جولات بسيارات مريحة وسائقين يعرفون الطريق، وفنادق 4 نجوم في مواقع ممتازة.",
+    "en": "City, mountains and sea in six days. Tours in comfortable vehicles with drivers who know every road, and well-located 4-star hotels."
+  },
+  "facts": {
+    "route": {
+      "ar": "تبليسي ← كازبيجي ← باتومي",
+      "en": "Tbilisi → Kazbegi → Batumi"
+    },
+    "stay": {
+      "ar": "فنادق 4 نجوم",
+      "en": "4-star hotels"
+    },
+    "flights": {
+      "ar": "من بغداد وأربيل",
+      "en": "From Baghdad & Erbil"
+    },
+    "season": {
+      "ar": "أيار — تشرين الأول",
+      "en": "May – October"
+    },
+    "group": {
+      "ar": "حتى 14 مسافراً",
+      "en": "Up to 14 travellers"
+    }
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1594766722982-fb4cd139ee7c",
+    "alt": {
+      "ar": "أسطح المدينة القديمة في تبليسي",
+      "en": "Rooftops of Tbilisi old town"
+    },
+    "credit": "Mike Swigunski",
+    "creditUrl": "https://unsplash.com/@mike_swigunski"
+  },
+  "gallery": [
+    {
+      "src": "https://images.unsplash.com/photo-1563284223-333497472e88",
+      "alt": {
+        "ar": "كنيسة جيرغيتي في كازبيجي",
+        "en": "Gergeti church in Kazbegi"
+      },
+      "credit": "Iman Gozal",
+      "creditUrl": "https://unsplash.com/@imangm"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1726711340804-ee076f59f1af",
+      "alt": {
+        "ar": "جبال كازبيجي في جورجيا وقت الغروب الذهبي",
+        "en": "Kazbegi mountains in Georgia at golden hour"
+      },
+      "credit": "Slava Auchynnikau",
+      "creditUrl": "https://unsplash.com/@auchynnikau"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1568632102228-b7d3e77459c3",
+      "alt": {
+        "ar": "ساحل باتومي",
+        "en": "The Batumi coastline"
+      },
+      "credit": "Timur Kozmenko",
+      "creditUrl": "https://unsplash.com/@timrael"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1563284124-85729a7f8ac7",
+      "alt": {
+        "ar": "متنزه على قمة جبلية في جورجيا",
+        "en": "Hiker on a mountain ridge in Georgia"
+      },
+      "credit": "Iman Gozal",
+      "creditUrl": "https://unsplash.com/@imangm"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1528702748617-c64d49f918af",
+      "alt": {
+        "ar": "مرج جبلي أخضر في جورجيا",
+        "en": "A green mountain meadow in Georgia"
+      },
+      "credit": "Fredrik Öhlander",
+      "creditUrl": "https://unsplash.com/@fredrikohlander"
+    }
+  ],
+  "departures": [
+    "2026-10-08",
+    "2027-05-06",
+    "2027-06-03",
+    "2027-07-01",
+    "2027-08-05"
+  ],
+  "itinerary": [
+    {
+      "title": {
+        "ar": "الوصول إلى تبليسي",
+        "en": "Arrive in Tbilisi"
+      },
+      "description": {
+        "ar": "استقبال والتوصيل إلى الفندق، ثم جولة مسائية في المدينة القديمة.",
+        "en": "Welcome and hotel transfer, then an evening walk through the old town."
+      },
+      "tags": [
+        {
+          "ar": "استقبال خاص",
+          "en": "Private transfer"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "تبليسي",
+        "en": "Tbilisi"
+      },
+      "description": {
+        "ar": "قلعة ناريكالا بالتلفريك، الحمامات الكبريتية، وجسر السلام.",
+        "en": "Narikala Fortress by cable car, the sulphur baths and the Bridge of Peace."
+      },
+      "tags": [
+        {
+          "ar": "تلفريك",
+          "en": "Cable car"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "كازبيجي",
+        "en": "Kazbegi"
+      },
+      "description": {
+        "ar": "الطريق العسكري الجورجي، بحيرة جينفالي، وكنيسة جيرغيتي تحت جبل كازبيك.",
+        "en": "The Georgian Military Road, Zhinvali reservoir and Gergeti church beneath Mount Kazbek."
+      },
+      "tags": [
+        {
+          "ar": "يوم كامل",
+          "en": "Full day"
+        },
+        {
+          "ar": "جبال",
+          "en": "Mountains"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "إلى باتومي",
+        "en": "To Batumi"
+      },
+      "description": {
+        "ar": "التوجه إلى باتومي والتنزه على الكورنيش وأبراجها الحديثة.",
+        "en": "Travel to Batumi and stroll the seafront boulevard and modern towers."
+      },
+      "tags": [
+        {
+          "ar": "بحر",
+          "en": "Seaside"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "باتومي",
+        "en": "Batumi"
+      },
+      "description": {
+        "ar": "الحديقة النباتية، تلفريك أرغو، ووقت حر على الشاطئ.",
+        "en": "The botanical garden, the Argo cable car and free time on the beach."
+      },
+      "tags": [
+        {
+          "ar": "طبيعة",
+          "en": "Nature"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "العودة",
+        "en": "Departure"
+      },
+      "description": {
+        "ar": "التوصيل إلى المطار للعودة.",
+        "en": "Transfer to the airport for your flight home."
+      },
+      "tags": [
+        {
+          "ar": "توديع",
+          "en": "Farewell transfer"
+        }
+      ]
+    }
+  ],
+  "includes": [
+    {
+      "ar": "تذاكر الطيران ذهاباً وإياباً",
+      "en": "Return flights"
+    },
+    {
+      "ar": "5 ليالٍ في فنادق 4 نجوم مع الإفطار",
+      "en": "5 nights in 4-star hotels with breakfast"
+    },
+    {
+      "ar": "الاستقبال والتوديع",
+      "en": "Airport transfers"
+    },
+    {
+      "ar": "جولة كازبيجي بسيارة خاصة",
+      "en": "Private Kazbegi tour"
+    },
+    {
+      "ar": "التنقل بين تبليسي وباتومي",
+      "en": "Tbilisi – Batumi transfer"
+    }
+  ],
+  "excludes": [
+    {
+      "ar": "وجبات الغداء والعشاء",
+      "en": "Lunches and dinners"
+    },
+    {
+      "ar": "تذاكر التلفريك والدخول",
+      "en": "Cable car and entrance tickets"
+    },
+    {
+      "ar": "المصاريف الشخصية",
+      "en": "Personal expenses"
+    }
+  ],
+  "order": 3,
+  "featured": false
+}

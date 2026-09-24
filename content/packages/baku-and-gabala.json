@@ -1,0 +1,241 @@
+{
+  "slug": "baku-and-gabala",
+  "title": {
+    "ar": "باكو وقبالا",
+    "en": "Baku & Gabala"
+  },
+  "destination": "azerbaijan",
+  "styles": [
+    "discovery",
+    "family",
+    "adventure"
+  ],
+  "days": 6,
+  "nights": 5,
+  "price": 690000,
+  "priceNote": {
+    "ar": "للشخص الواحد في غرفة مزدوجة",
+    "en": "per person, sharing a double room"
+  },
+  "highlights": [
+    {
+      "ar": "فندق 4 نجوم",
+      "en": "4-star hotel"
+    },
+    {
+      "ar": "جولات يومية",
+      "en": "Daily tours"
+    },
+    {
+      "ar": "تلفريك قبالا",
+      "en": "Gabala cable car"
+    }
+  ],
+  "lead": {
+    "ar": "مدينة قديمة مسوّرة، أبراج من نار، وجبال خضراء على بعد ساعات قليلة.",
+    "en": "A walled old city, towers of fire and green mountains just a few hours away."
+  },
+  "overview": {
+    "ar": "ثلاث ليالٍ في باكو وليلتان في قبالا وسط الغابات. جولات يومية بسيارات حديثة ومرشدين يتحدثون العربية، وأسعار ممتازة لرحلة قريبة.",
+    "en": "Three nights in Baku and two in forested Gabala. Daily tours in modern vehicles with Arabic-speaking guides, at excellent value for a short-haul trip."
+  },
+  "facts": {
+    "route": {
+      "ar": "باكو ← قبالا",
+      "en": "Baku → Gabala"
+    },
+    "stay": {
+      "ar": "فنادق 4 نجوم",
+      "en": "4-star hotels"
+    },
+    "flights": {
+      "ar": "من بغداد",
+      "en": "From Baghdad"
+    },
+    "season": {
+      "ar": "نيسان — تشرين الأول",
+      "en": "April – October"
+    },
+    "group": {
+      "ar": "حتى 16 مسافراً",
+      "en": "Up to 16 travellers"
+    }
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1633786139955-b9a53b580a53",
+    "alt": {
+      "ar": "جبال قبالا في الخريف",
+      "en": "Gabala mountains in autumn"
+    },
+    "credit": "Tural Taqiyev",
+    "creditUrl": "https://unsplash.com/@turaltaqiyev"
+  },
+  "gallery": [
+    {
+      "src": "https://images.unsplash.com/photo-1596306499300-0b7b1689b9f6",
+      "alt": {
+        "ar": "أبراج اللهب في باكو ليلاً",
+        "en": "Baku Flame Towers at night"
+      },
+      "credit": "Lloyd Alozie",
+      "creditUrl": "https://unsplash.com/@iamllwyd"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1642856761437-5b5efcb36d81",
+      "alt": {
+        "ar": "المدينة القديمة في باكو",
+        "en": "Baku old city"
+      },
+      "credit": "Teymur Mammadov",
+      "creditUrl": "https://unsplash.com/@mammadov_tmx"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1622314621630-0d24bcb5aa67",
+      "alt": {
+        "ar": "شارع في المدينة القديمة في باكو",
+        "en": "Old town street in Baku"
+      },
+      "credit": "Orkhan Musayev",
+      "creditUrl": "https://unsplash.com/@orkhnix"
+    }
+  ],
+  "departures": [
+    "2026-10-01",
+    "2026-10-29",
+    "2027-04-22",
+    "2027-05-20",
+    "2027-06-17"
+  ],
+  "itinerary": [
+    {
+      "title": {
+        "ar": "الوصول إلى باكو",
+        "en": "Arrive in Baku"
+      },
+      "description": {
+        "ar": "استقبال والتوصيل إلى الفندق، ثم أمسية على كورنيش باكو.",
+        "en": "Welcome and hotel transfer, then an evening on the Baku Boulevard."
+      },
+      "tags": [
+        {
+          "ar": "استقبال خاص",
+          "en": "Private transfer"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "باكو",
+        "en": "Baku"
+      },
+      "description": {
+        "ar": "المدينة القديمة، قصر الشروانشاه، برج العذراء، ومنتزه المرتفعات.",
+        "en": "The Old City, the Shirvanshahs’ Palace, the Maiden Tower and Highland Park."
+      },
+      "tags": [
+        {
+          "ar": "مرشد عربي",
+          "en": "Arabic-speaking guide"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "غوبوستان وآتشكاه",
+        "en": "Gobustan & Ateshgah"
+      },
+      "description": {
+        "ar": "نقوش غوبوستان الصخرية، البراكين الطينية، ومعبد النار آتشكاه.",
+        "en": "The Gobustan rock art, mud volcanoes and the Ateshgah fire temple."
+      },
+      "tags": [
+        {
+          "ar": "تاريخ",
+          "en": "History"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "إلى قبالا",
+        "en": "To Gabala"
+      },
+      "description": {
+        "ar": "الطريق عبر شاماخي إلى قبالا، ثم بحيرة نوهور.",
+        "en": "Drive via Shamakhi to Gabala, then visit Nohur Lake."
+      },
+      "tags": [
+        {
+          "ar": "طبيعة",
+          "en": "Nature"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "قبالا",
+        "en": "Gabala"
+      },
+      "description": {
+        "ar": "تلفريك توفنداغ وشلالات يدي غوزال ووقت حر في الغابة.",
+        "en": "The Tufandag cable car, Yeddi Gozel waterfalls and free time in the forest."
+      },
+      "tags": [
+        {
+          "ar": "تلفريك",
+          "en": "Cable car"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "العودة",
+        "en": "Departure"
+      },
+      "description": {
+        "ar": "العودة إلى باكو والتوصيل إلى المطار.",
+        "en": "Return to Baku and transfer to the airport."
+      },
+      "tags": [
+        {
+          "ar": "توديع",
+          "en": "Farewell transfer"
+        }
+      ]
+    }
+  ],
+  "includes": [
+    {
+      "ar": "تذاكر الطيران ذهاباً وإياباً",
+      "en": "Return flights"
+    },
+    {
+      "ar": "5 ليالٍ في فنادق 4 نجوم مع الإفطار",
+      "en": "5 nights in 4-star hotels with breakfast"
+    },
+    {
+      "ar": "الاستقبال والتوديع",
+      "en": "Airport transfers"
+    },
+    {
+      "ar": "جولات يومية بمرشد عربي",
+      "en": "Daily tours with an Arabic-speaking guide"
+    }
+  ],
+  "excludes": [
+    {
+      "ar": "رسوم التأشيرة الإلكترونية",
+      "en": "E-visa fees"
+    },
+    {
+      "ar": "تذاكر التلفريك",
+      "en": "Cable car tickets"
+    },
+    {
+      "ar": "وجبات الغداء والعشاء",
+      "en": "Lunches and dinners"
+    }
+  ],
+  "order": 5,
+  "featured": false
+}

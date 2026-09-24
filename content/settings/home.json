@@ -1,0 +1,350 @@
+{
+  "hero": {
+    "eyebrow": "CURATED JOURNEYS FROM BAGHDAD",
+    "headline": [
+      {
+        "ar": "بعض الرحلات",
+        "en": "Some journeys"
+      },
+      {
+        "ar": "تغيّر منظورك",
+        "en": "change your view"
+      }
+    ],
+    "intro": {
+      "ar": "باقات سياحية مختارة، خدمات سفر متكاملة، وتجارب نصنعها لك من البداية إلى العودة.",
+      "en": "Curated holiday packages, complete travel services, and experiences we craft for you from departure to return."
+    },
+    "slides": [
+      {
+        "place": {
+          "ar": "إسطنبول، تركيا",
+          "en": "Istanbul, Türkiye"
+        },
+        "coord": "41.0082° N, 28.9784° E",
+        "image": {
+          "src": "https://images.unsplash.com/photo-1589561454226-796a8aa89b05",
+          "alt": {
+            "ar": "أفق إسطنبول ومساجدها عند الغروب",
+            "en": "Istanbul skyline and mosques at sunset"
+          },
+          "credit": "Engin Yapici",
+          "creditUrl": "https://unsplash.com/@yapici"
+        }
+      },
+      {
+        "place": {
+          "ar": "كازبيجي، جورجيا",
+          "en": "Kazbegi, Georgia"
+        },
+        "coord": "42.6570° N, 44.6430° E",
+        "image": {
+          "src": "https://images.unsplash.com/photo-1726711340804-ee076f59f1af",
+          "alt": {
+            "ar": "جبال كازبيجي في جورجيا وقت الغروب الذهبي",
+            "en": "Kazbegi mountains in Georgia at golden hour"
+          },
+          "credit": "Slava Auchynnikau",
+          "creditUrl": "https://unsplash.com/@auchynnikau"
+        }
+      },
+      {
+        "place": {
+          "ar": "جزر المالديف",
+          "en": "The Maldives"
+        },
+        "coord": "3.2028° N, 73.2207° E",
+        "image": {
+          "src": "https://images.unsplash.com/photo-1514282401047-d79a71a590e8",
+          "alt": {
+            "ar": "بحيرة فيروزية في جزر المالديف من الأعلى",
+            "en": "Aerial view of a turquoise Maldives lagoon"
+          },
+          "credit": "Ishan @seefromthesky",
+          "creditUrl": "https://unsplash.com/@seefromthesky"
+        }
+      }
+    ]
+  },
+  "styles": [
+    {
+      "style": "adventure",
+      "title": {
+        "ar": "مغامرة",
+        "en": "Adventure"
+      },
+      "description": {
+        "ar": "رحلات الطبيعة والتحدي",
+        "en": "Nature and challenge"
+      },
+      "image": {
+        "src": "https://images.unsplash.com/photo-1563284124-85729a7f8ac7",
+        "alt": {
+          "ar": "متنزه على قمة جبلية في جورجيا",
+          "en": "Hiker on a mountain ridge in Georgia"
+        },
+        "credit": "Iman Gozal",
+        "creditUrl": "https://unsplash.com/@imangm"
+      }
+    },
+    {
+      "style": "discovery",
+      "title": {
+        "ar": "استكشاف",
+        "en": "Discovery"
+      },
+      "description": {
+        "ar": "ثقافات ومدن جديدة",
+        "en": "New cultures and cities"
+      },
+      "image": {
+        "src": "https://images.unsplash.com/photo-1622314621630-0d24bcb5aa67",
+        "alt": {
+          "ar": "شارع في المدينة القديمة في باكو",
+          "en": "Old town street in Baku"
+        },
+        "credit": "Orkhan Musayev",
+        "creditUrl": "https://unsplash.com/@orkhnix"
+      }
+    },
+    {
+      "style": "family",
+      "title": {
+        "ar": "عائلية",
+        "en": "Family"
+      },
+      "description": {
+        "ar": "لحظات لا تُنسى",
+        "en": "Unforgettable moments"
+      },
+      "image": {
+        "src": "https://images.unsplash.com/photo-1516727052521-08079c40df80",
+        "alt": {
+          "ar": "عائلة على سطح عبّارة",
+          "en": "A family on a ferry deck"
+        },
+        "credit": "Spencer Watson",
+        "creditUrl": "https://unsplash.com/@thebrownspy"
+      }
+    },
+    {
+      "style": "romance",
+      "title": {
+        "ar": "رومانسية",
+        "en": "Romance"
+      },
+      "description": {
+        "ar": "رحلات وشهر عسل",
+        "en": "Getaways and honeymoons"
+      },
+      "image": {
+        "src": "https://images.unsplash.com/photo-1551918120-9739cb430c6d",
+        "alt": {
+          "ar": "زوجان على شرفة وقت الغروب",
+          "en": "A couple on a terrace at sunset"
+        },
+        "credit": "Chelsea Gates",
+        "creditUrl": "https://unsplash.com/@chelseacgates"
+      }
+    },
+    {
+      "style": "unwind",
+      "title": {
+        "ar": "استرخاء",
+        "en": "Unwind"
+      },
+      "description": {
+        "ar": "منتجعات وشواطئ",
+        "en": "Resorts and beaches"
+      },
+      "image": {
+        "src": "https://images.unsplash.com/photo-1576158831003-d41033ec31fd",
+        "alt": {
+          "ar": "شاطئ هادئ بمياه فيروزية",
+          "en": "A quiet beach with turquoise water"
+        },
+        "credit": "Serey Kim",
+        "creditUrl": "https://unsplash.com/@shuttergenic"
+      }
+    },
+    {
+      "style": "luxury",
+      "title": {
+        "ar": "فاخرة",
+        "en": "Luxury"
+      },
+      "description": {
+        "ar": "تجارب استثنائية",
+        "en": "Exceptional experiences"
+      },
+      "image": {
+        "src": "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b",
+        "alt": {
+          "ar": "مسبح فيلا خاصة عند المساء",
+          "en": "A private villa pool at dusk"
+        },
+        "credit": "Mike Swigunski",
+        "creditUrl": "https://unsplash.com/@mike_swigunski"
+      }
+    }
+  ],
+  "featuredPackage": "enchanting-istanbul",
+  "services": [
+    {
+      "title": {
+        "ar": "حجوزات الطيران",
+        "en": "Flight bookings"
+      },
+      "description": {
+        "ar": "أفضل المسارات والأسعار من بغداد والبصرة وأربيل والنجف.",
+        "en": "The best routes and fares from Baghdad, Basra, Erbil and Najaf."
+      }
+    },
+    {
+      "title": {
+        "ar": "حجوزات الفنادق",
+        "en": "Hotel bookings"
+      },
+      "description": {
+        "ar": "فنادق نعرفها جيداً، اخترناها للموقع والراحة والخدمة.",
+        "en": "Hotels we know well, chosen for location, comfort and service."
+      }
+    },
+    {
+      "title": {
+        "ar": "التأشيرات",
+        "en": "Visas"
+      },
+      "description": {
+        "ar": "نرتب أوراقك ونتابع طلبك خطوة بخطوة حتى الموافقة.",
+        "en": "We prepare your documents and follow your application step by step until it is approved."
+      }
+    },
+    {
+      "title": {
+        "ar": "الاستقبال والتوصيل",
+        "en": "Transfers"
+      },
+      "description": {
+        "ar": "سائق بانتظارك في المطار، وتنقلات مريحة طوال الرحلة.",
+        "en": "A driver waiting at the airport and comfortable transport throughout your trip."
+      }
+    },
+    {
+      "title": {
+        "ar": "الجولات السياحية",
+        "en": "Guided tours"
+      },
+      "description": {
+        "ar": "جولات بمرشدين يتحدثون العربية، بإيقاع يناسبك.",
+        "en": "Tours with Arabic-speaking guides, at a pace that suits you."
+      }
+    },
+    {
+      "title": {
+        "ar": "برامج شهر العسل",
+        "en": "Honeymoons"
+      },
+      "description": {
+        "ar": "تفاصيل خاصة لبداية تستحق أن تكون مختلفة.",
+        "en": "Special touches for a beginning that deserves to be different."
+      }
+    },
+    {
+      "title": {
+        "ar": "الرحلات الخاصة",
+        "en": "Private trips"
+      },
+      "description": {
+        "ar": "برنامج مصمم لك وحدك: وجهتك، مدتك، ميزانيتك.",
+        "en": "A programme designed just for you: your destination, your dates, your budget."
+      }
+    },
+    {
+      "title": {
+        "ar": "رحلات الشركات والمجموعات",
+        "en": "Corporate & group travel"
+      },
+      "description": {
+        "ar": "مؤتمرات، رحلات تحفيزية، ومجموعات بتنظيم كامل.",
+        "en": "Conferences, incentive trips and fully organised groups."
+      }
+    }
+  ],
+  "benefits": [
+    {
+      "title": {
+        "ar": "باقات مختارة بعناية",
+        "en": "Carefully chosen packages"
+      },
+      "description": {
+        "ar": "كل فندق وجولة في باقاتنا مرّ على فريقنا قبل أن يصل إليك. لا نبيع ما لا نعرفه.",
+        "en": "Every hotel and tour in our packages has been checked by our team before it reaches you. We never sell what we don’t know."
+      }
+    },
+    {
+      "title": {
+        "ar": "دعم مباشر",
+        "en": "Direct support"
+      },
+      "description": {
+        "ar": "شخص حقيقي يرد عليك قبل السفر وأثناءه، على واتساب أو الهاتف، دون انتظار.",
+        "en": "A real person answers you before and during your trip, on WhatsApp or by phone, without the wait."
+      }
+    },
+    {
+      "title": {
+        "ar": "أسعار وتفاصيل واضحة",
+        "en": "Clear prices and details"
+      },
+      "description": {
+        "ar": "ما تراه هو ما تدفعه. نكتب ما يشمله العرض وما لا يشمله بوضوح تام.",
+        "en": "What you see is what you pay. We state clearly what is and isn’t included."
+      }
+    },
+    {
+      "title": {
+        "ar": "رحلات مصممة لك",
+        "en": "Trips designed for you"
+      },
+      "description": {
+        "ar": "إن لم تجد ما يناسبك، نبني برنامجاً على مقاس وقتك وميزانيتك.",
+        "en": "If nothing fits, we build a programme around your time and budget."
+      }
+    }
+  ],
+  "offer": {
+    "package": "istanbul-and-trabzon",
+    "eyebrow": "SEASONAL OFFER — SUMMER 2027",
+    "title": {
+      "ar": "صيف تركيا",
+      "en": "Summer in Türkiye"
+    },
+    "route": {
+      "ar": "إسطنبول + طرابزون",
+      "en": "Istanbul + Trabzon"
+    },
+    "note": {
+      "ar": "مقاعد محدودة · رحلات أسبوعية من بغداد والبصرة وأربيل",
+      "en": "Limited seats · weekly departures from Baghdad, Basra and Erbil"
+    },
+    "image": {
+      "src": "https://images.unsplash.com/photo-1607068798195-d26a9703b277",
+      "alt": {
+        "ar": "هضاب طرابزون الخضراء يلفها الضباب",
+        "en": "Misty green highlands of Trabzon"
+      },
+      "credit": "Mike Swigunski",
+      "creditUrl": "https://unsplash.com/@mike_swigunski"
+    }
+  },
+  "finalImage": {
+    "src": "https://images.unsplash.com/photo-1489493512598-d08130f49bea",
+    "alt": {
+      "ar": "مسافر يطل على وادٍ في الساعة الذهبية",
+      "en": "A traveller overlooking a valley at golden hour"
+    },
+    "credit": "Sergey Pesterev",
+    "creditUrl": "https://unsplash.com/@sickle"
+  }
+}

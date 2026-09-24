@@ -1,0 +1,248 @@
+{
+  "slug": "sharm-el-sheikh",
+  "title": {
+    "ar": "شرم الشيخ",
+    "en": "Sharm El Sheikh"
+  },
+  "destination": "egypt",
+  "styles": [
+    "unwind",
+    "family",
+    "romance"
+  ],
+  "days": 7,
+  "nights": 6,
+  "price": 650000,
+  "priceNote": {
+    "ar": "للشخص الواحد في غرفة مزدوجة",
+    "en": "per person, sharing a double room"
+  },
+  "highlights": [
+    {
+      "ar": "منتجع شامل كلياً",
+      "en": "All-inclusive resort"
+    },
+    {
+      "ar": "غوص في رأس محمد",
+      "en": "Snorkelling at Ras Mohammed"
+    }
+  ],
+  "lead": {
+    "ar": "أسبوع من الشمس والبحر والشعاب المرجانية، دون أن تفكر بأي تفصيل.",
+    "en": "A week of sun, sea and coral reefs without having to think about a thing."
+  },
+  "overview": {
+    "ar": "إقامة شاملة كلياً في منتجع على البحر الأحمر، رحلة بحرية إلى محمية رأس محمد، وأمسية في خليج نعمة. مثالية للعائلات والأزواج.",
+    "en": "All-inclusive stay at a Red Sea resort, a boat trip to Ras Mohammed National Park and an evening in Naama Bay. Perfect for families and couples."
+  },
+  "facts": {
+    "route": {
+      "ar": "شرم الشيخ",
+      "en": "Sharm El Sheikh"
+    },
+    "stay": {
+      "ar": "منتجع 5 نجوم شامل",
+      "en": "5-star all-inclusive"
+    },
+    "flights": {
+      "ar": "من بغداد",
+      "en": "From Baghdad"
+    },
+    "season": {
+      "ar": "تشرين الأول — أيار",
+      "en": "October – May"
+    },
+    "group": {
+      "ar": "خاص أو مجموعات",
+      "en": "Private or group"
+    }
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1503803548695-c2a7b4a5b875",
+    "alt": {
+      "ar": "ساحل منتجع على البحر الأحمر",
+      "en": "A Red Sea resort shoreline"
+    },
+    "credit": "Sebastien Gabriel",
+    "creditUrl": "https://unsplash.com/@sgabriel"
+  },
+  "gallery": [
+    {
+      "src": "https://images.unsplash.com/photo-1496614932623-0a3a9743552e",
+      "alt": {
+        "ar": "شعاب البحر الأحمر المرجانية",
+        "en": "Red Sea coral reef"
+      },
+      "credit": "Petr Vyšohlíd",
+      "creditUrl": "https://unsplash.com/@pvysohlid"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1576158831003-d41033ec31fd",
+      "alt": {
+        "ar": "شاطئ هادئ بمياه فيروزية",
+        "en": "A quiet beach with turquoise water"
+      },
+      "credit": "Serey Kim",
+      "creditUrl": "https://unsplash.com/@shuttergenic"
+    }
+  ],
+  "departures": [
+    "2026-10-10",
+    "2026-11-14",
+    "2026-12-26",
+    "2027-02-06",
+    "2027-03-20"
+  ],
+  "itinerary": [
+    {
+      "title": {
+        "ar": "الوصول",
+        "en": "Arrival"
+      },
+      "description": {
+        "ar": "استقبال في مطار شرم الشيخ والتوصيل إلى المنتجع.",
+        "en": "Welcome at Sharm El Sheikh Airport and transfer to your resort."
+      },
+      "tags": [
+        {
+          "ar": "استقبال خاص",
+          "en": "Private transfer"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "يوم على الشاطئ",
+        "en": "Beach day"
+      },
+      "description": {
+        "ar": "يوم حر للاستمتاع بالمنتجع والشاطئ.",
+        "en": "A free day to enjoy the resort and beach."
+      },
+      "tags": [
+        {
+          "ar": "استرخاء",
+          "en": "Relax"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "رأس محمد",
+        "en": "Ras Mohammed"
+      },
+      "description": {
+        "ar": "رحلة بحرية مع السنوركل في محمية رأس محمد وغداء على القارب.",
+        "en": "A boat trip with snorkelling in Ras Mohammed National Park and lunch on board."
+      },
+      "tags": [
+        {
+          "ar": "غوص",
+          "en": "Snorkelling"
+        },
+        {
+          "ar": "يوم كامل",
+          "en": "Full day"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "يوم حر",
+        "en": "Free day"
+      },
+      "description": {
+        "ar": "استرخاء أو أنشطة اختيارية مثل الغوص أو رحلة الدراجات الرباعية.",
+        "en": "Relax, or add optional diving or a quad-bike desert trip."
+      },
+      "tags": [
+        {
+          "ar": "اختياري",
+          "en": "Optional"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "خليج نعمة",
+        "en": "Naama Bay"
+      },
+      "description": {
+        "ar": "أمسية في خليج نعمة والسوق القديم.",
+        "en": "An evening in Naama Bay and the Old Market."
+      },
+      "tags": [
+        {
+          "ar": "تسوق",
+          "en": "Shopping"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "يوم حر",
+        "en": "Free day"
+      },
+      "description": {
+        "ar": "يوم أخير على البحر.",
+        "en": "One last day by the sea."
+      },
+      "tags": [
+        {
+          "ar": "استرخاء",
+          "en": "Relax"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "العودة",
+        "en": "Departure"
+      },
+      "description": {
+        "ar": "التوصيل إلى المطار.",
+        "en": "Transfer to the airport."
+      },
+      "tags": [
+        {
+          "ar": "توديع",
+          "en": "Farewell transfer"
+        }
+      ]
+    }
+  ],
+  "includes": [
+    {
+      "ar": "تذاكر الطيران ذهاباً وإياباً",
+      "en": "Return flights"
+    },
+    {
+      "ar": "6 ليالٍ في منتجع شامل كلياً",
+      "en": "6 nights all-inclusive"
+    },
+    {
+      "ar": "الاستقبال والتوديع",
+      "en": "Airport transfers"
+    },
+    {
+      "ar": "رحلة رأس محمد البحرية",
+      "en": "Ras Mohammed boat trip"
+    }
+  ],
+  "excludes": [
+    {
+      "ar": "رسوم التأشيرة عند الوصول",
+      "en": "Visa on arrival fees"
+    },
+    {
+      "ar": "الأنشطة الاختيارية",
+      "en": "Optional activities"
+    },
+    {
+      "ar": "الإكراميات",
+      "en": "Tips"
+    }
+  ],
+  "order": 6,
+  "featured": false
+}

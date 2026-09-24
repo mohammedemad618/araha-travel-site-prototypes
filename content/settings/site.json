@@ -1,0 +1,38 @@
+{
+  "name": {
+    "ar": "أريحا للسياحة والسفر",
+    "en": "Ariha Travel & Tourism"
+  },
+  "shortName": {
+    "ar": "أريحا",
+    "en": "Ariha"
+  },
+  "tagline": {
+    "ar": "أكثر من رحلة. تجربة تستحق أن تُروى.",
+    "en": "More than a trip. A journey worth telling."
+  },
+  "description": {
+    "ar": "أريحا للسياحة والسفر في بغداد: باقات سياحية مختارة إلى تركيا وجورجيا وأذربيجان والإمارات ومصر والمالديف، مع حجوزات الطيران والفنادق والتأشيرات ورحلات مصممة لك.",
+    "en": "Ariha Travel & Tourism, Baghdad: curated holiday packages to Türkiye, Georgia, Azerbaijan, the UAE, Egypt and the Maldives, plus flights, hotels, visas and tailor-made trips."
+  },
+  "url": "https://araha-travel.netlify.app",
+  "phone": "+9647700000000",
+  "phoneDisplay": "+964 770 000 0000",
+  "whatsapp": "9647800000000",
+  "whatsappDisplay": "+964 780 000 0000",
+  "email": "info@example.com",
+  "address": {
+    "ar": "بغداد، الكرادة داخل، شارع 62، بناية النخيل، الطابق الثالث",
+    "en": "Al-Nakheel Building, 3rd floor, Street 62, Karrada Dakhil, Baghdad"
+  },
+  "hours": {
+    "ar": "السبت — الخميس · 9 صباحاً — 9 مساءً",
+    "en": "Saturday – Thursday · 9am – 9pm"
+  },
+  "mapQuery": "Karrada Dakhil, Baghdad, Iraq",
+  "social": {
+    "instagram": "",
+    "facebook": "",
+    "tiktok": ""
+  }
+}

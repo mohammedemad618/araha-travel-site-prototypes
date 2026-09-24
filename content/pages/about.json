@@ -1,0 +1,56 @@
+{
+  "title": {
+    "ar": "من نحن",
+    "en": "About us"
+  },
+  "eyebrow": "ABOUT ARIHA",
+  "intro": {
+    "ar": "أريحا للسياحة والسفر شركة عراقية مقرها بغداد، نصمم رحلات مريحة وواضحة للعائلات والأزواج والمجموعات، ونرافقك من أول سؤال حتى عودتك.",
+    "en": "Ariha Travel & Tourism is an Iraqi company based in Baghdad. We design comfortable, transparent trips for families, couples and groups, and stay with you from your first question until you are home."
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1489493512598-d08130f49bea",
+    "alt": {
+      "ar": "مسافر يطل على وادٍ في الساعة الذهبية",
+      "en": "A traveller overlooking a valley at golden hour"
+    },
+    "credit": "Sergey Pesterev",
+    "creditUrl": "https://unsplash.com/@sickle"
+  },
+  "sections": [
+    {
+      "heading": {
+        "ar": "قصتنا",
+        "en": "Our story"
+      },
+      "body": {
+        "ar": "بدأنا بفكرة بسيطة: أن يسافر العراقي براحة بال، دون مفاجآت في السعر أو البرنامج. اليوم نخدم مسافرين من بغداد والبصرة وأربيل والنجف إلى أكثر من عشر وجهات.",
+        "en": "We started with a simple idea: that travellers from Iraq should be able to travel with peace of mind, with no surprises in price or programme. Today we serve travellers from Baghdad, Basra, Erbil and Najaf to more than ten destinations."
+      }
+    },
+    {
+      "heading": {
+        "ar": "كيف نعمل",
+        "en": "How we work"
+      },
+      "body": {
+        "ar": "نختار الفنادق والجولات بأنفسنا، ونتعامل مع شركاء محليين موثوقين في كل وجهة. قبل كل حجز نرسل لك برنامجاً مكتوباً يوضح ما يشمله العرض وما لا يشمله.",
+        "en": "We choose hotels and tours ourselves and work with trusted local partners in every destination. Before every booking we send you a written programme that states exactly what is and isn’t included."
+      }
+    },
+    {
+      "heading": {
+        "ar": "وعدنا لك",
+        "en": "Our promise"
+      },
+      "body": {
+        "ar": "شخص حقيقي يرد عليك في كل مرحلة، وأسعار واضحة، ورحلة تستحق أن تُروى.",
+        "en": "A real person answering you at every step, clear prices, and a journey worth telling."
+      }
+    }
+  ],
+  "seoDescription": {
+    "ar": "تعرّف على أريحا للسياحة والسفر في بغداد: فريقنا وطريقة عملنا ووعدنا لكل مسافر.",
+    "en": "Meet Ariha Travel & Tourism in Baghdad: our team, how we work and our promise to every traveller."
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.env*.local
+.netlify/
+playwright-report/
+test-results/
+deploy-*.zip
+.lighthouseci/

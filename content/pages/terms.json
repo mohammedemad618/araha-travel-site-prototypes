@@ -1,0 +1,57 @@
+{
+  "title": {
+    "ar": "الشروط والأحكام",
+    "en": "Terms & conditions"
+  },
+  "eyebrow": "TERMS",
+  "intro": {
+    "ar": "الشروط العامة للحجز مع أريحا للسياحة والسفر. تُرسل الشروط الخاصة بكل حجز كتابياً قبل التأكيد.",
+    "en": "General booking terms with Ariha Travel & Tourism. The specific terms of each booking are sent to you in writing before confirmation."
+  },
+  "sections": [
+    {
+      "heading": {
+        "ar": "الأسعار",
+        "en": "Prices"
+      },
+      "body": {
+        "ar": "الأسعار المعروضة تبدأ من المبلغ المذكور للشخص الواحد في غرفة مزدوجة، وتخضع لتوفر المقاعد والغرف وقت الحجز. يُعتمد السعر النهائي المؤكد كتابياً.",
+        "en": "Prices shown start from the stated amount per person sharing a double room and are subject to seat and room availability at the time of booking. The final price confirmed in writing applies."
+      }
+    },
+    {
+      "heading": {
+        "ar": "الحجز والدفع",
+        "en": "Booking and payment"
+      },
+      "body": {
+        "ar": "يُثبّت الحجز بعد دفع العربون المتفق عليه، ويُستكمل المبلغ قبل موعد السفر بالمدة المحددة في عرضك.",
+        "en": "A booking is secured once the agreed deposit is paid, and the balance is due before departure by the date stated in your offer."
+      }
+    },
+    {
+      "heading": {
+        "ar": "الإلغاء والتعديل",
+        "en": "Cancellations and changes"
+      },
+      "body": {
+        "ar": "تخضع رسوم الإلغاء والتعديل لسياسات شركات الطيران والفنادق وموعد الطلب، وتُوضح في عرض كل حجز.",
+        "en": "Cancellation and change fees follow the policies of the airlines and hotels and depend on when you ask; they are stated in each booking offer."
+      }
+    },
+    {
+      "heading": {
+        "ar": "الوثائق والتأشيرات",
+        "en": "Documents and visas"
+      },
+      "body": {
+        "ar": "على المسافر التأكد من صلاحية جواز السفر لستة أشهر على الأقل. نساعد في إجراءات التأشيرة، لكن قرار منحها يعود للجهة المختصة.",
+        "en": "Travellers must hold a passport valid for at least six months. We assist with visa procedures, but the decision to grant a visa rests with the relevant authority."
+      }
+    }
+  ],
+  "seoDescription": {
+    "ar": "الشروط والأحكام العامة للحجز مع أريحا للسياحة والسفر.",
+    "en": "General booking terms and conditions with Ariha Travel & Tourism."
+  }
+}

@@ -1,0 +1,250 @@
+{
+  "slug": "maldives-escape",
+  "title": {
+    "ar": "جزر المالديف",
+    "en": "Maldives Escape"
+  },
+  "destination": "maldives",
+  "styles": [
+    "romance",
+    "luxury",
+    "unwind"
+  ],
+  "days": 6,
+  "nights": 5,
+  "price": 2450000,
+  "priceNote": {
+    "ar": "للشخص الواحد في غرفة مزدوجة",
+    "en": "per person, sharing a double room"
+  },
+  "highlights": [
+    {
+      "ar": "فيلا فوق الماء",
+      "en": "Overwater villa"
+    },
+    {
+      "ar": "نقل بالطائرة المائية",
+      "en": "Seaplane transfer"
+    }
+  ],
+  "lead": {
+    "ar": "خمس ليالٍ في فيلا فوق الماء، حيث لا يوجد ما تفعله سوى أن تكون هناك.",
+    "en": "Five nights in an overwater villa, where there is nothing to do but be there."
+  },
+  "overview": {
+    "ar": "منتجع 5 نجوم مع فيلا فوق الماء ونصف إقامة، نقل بالطائرة المائية، ورحلة غروب بالقارب. خيار مثالي لشهر العسل ويمكن تخصيصه بالكامل.",
+    "en": "A 5-star resort with an overwater villa on half board, seaplane transfers and a sunset boat cruise. The perfect honeymoon, and fully customisable."
+  },
+  "facts": {
+    "route": {
+      "ar": "ماليه ← المنتجع",
+      "en": "Malé → resort"
+    },
+    "stay": {
+      "ar": "فيلا فوق الماء 5 نجوم",
+      "en": "5-star overwater villa"
+    },
+    "flights": {
+      "ar": "عبر دبي أو الدوحة",
+      "en": "Via Dubai or Doha"
+    },
+    "season": {
+      "ar": "تشرين الثاني — نيسان",
+      "en": "November – April"
+    },
+    "group": {
+      "ar": "رحلة خاصة",
+      "en": "Private trip"
+    }
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1573843981267-be1999ff37cd",
+    "alt": {
+      "ar": "فيلا فوق الماء في الصباح",
+      "en": "An overwater villa in the morning"
+    },
+    "credit": "Rayyu Maldives",
+    "creditUrl": "https://unsplash.com/@rayyu"
+  },
+  "gallery": [
+    {
+      "src": "https://images.unsplash.com/photo-1523632117739-12cc7fa95ad0",
+      "alt": {
+        "ar": "جزيرة مرجانية في المالديف من الأعلى",
+        "en": "Aerial view of a Maldives atoll"
+      },
+      "credit": "Shifaaz shamoon",
+      "creditUrl": "https://unsplash.com/@sotti"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1514282401047-d79a71a590e8",
+      "alt": {
+        "ar": "بحيرة فيروزية في جزر المالديف من الأعلى",
+        "en": "Aerial view of a turquoise Maldives lagoon"
+      },
+      "credit": "Ishan @seefromthesky",
+      "creditUrl": "https://unsplash.com/@seefromthesky"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1586861635167-e5223aadc9fe",
+      "alt": {
+        "ar": "رصيف خشبي في المالديف وقت الغروب",
+        "en": "A wooden jetty in the Maldives at sunset"
+      },
+      "credit": "Rayyu Maldives",
+      "creditUrl": "https://unsplash.com/@rayyu"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b",
+      "alt": {
+        "ar": "مسبح فيلا خاصة عند المساء",
+        "en": "A private villa pool at dusk"
+      },
+      "credit": "Mike Swigunski",
+      "creditUrl": "https://unsplash.com/@mike_swigunski"
+    }
+  ],
+  "departures": [
+    "2026-11-01",
+    "2026-12-01",
+    "2027-01-10",
+    "2027-02-14",
+    "2027-03-15"
+  ],
+  "itinerary": [
+    {
+      "title": {
+        "ar": "الوصول إلى ماليه",
+        "en": "Arrive in Malé"
+      },
+      "description": {
+        "ar": "استقبال في المطار ثم النقل بالطائرة المائية إلى المنتجع.",
+        "en": "Airport welcome, then a seaplane transfer to your resort."
+      },
+      "tags": [
+        {
+          "ar": "طائرة مائية",
+          "en": "Seaplane"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "المنتجع",
+        "en": "At the resort"
+      },
+      "description": {
+        "ar": "يوم حر في الفيلا والشاطئ الخاص.",
+        "en": "A free day at your villa and private beach."
+      },
+      "tags": [
+        {
+          "ar": "استرخاء",
+          "en": "Relax"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "رحلة الغروب",
+        "en": "Sunset cruise"
+      },
+      "description": {
+        "ar": "سنوركل صباحي بين الشعاب، ثم رحلة غروب بالقارب التقليدي.",
+        "en": "Morning snorkelling on the reef, then a sunset cruise on a traditional dhoni."
+      },
+      "tags": [
+        {
+          "ar": "سنوركل",
+          "en": "Snorkelling"
+        },
+        {
+          "ar": "غروب",
+          "en": "Sunset"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "يوم حر",
+        "en": "Free day"
+      },
+      "description": {
+        "ar": "سبا أو عشاء خاص على الشاطئ (اختياري).",
+        "en": "Spa time or a private beach dinner (optional)."
+      },
+      "tags": [
+        {
+          "ar": "اختياري",
+          "en": "Optional"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "يوم حر",
+        "en": "Free day"
+      },
+      "description": {
+        "ar": "يوم أخير بين البحر والسماء.",
+        "en": "One last day between sea and sky."
+      },
+      "tags": [
+        {
+          "ar": "استرخاء",
+          "en": "Relax"
+        }
+      ]
+    },
+    {
+      "title": {
+        "ar": "العودة",
+        "en": "Departure"
+      },
+      "description": {
+        "ar": "النقل بالطائرة المائية إلى المطار.",
+        "en": "Seaplane transfer back to the airport."
+      },
+      "tags": [
+        {
+          "ar": "توديع",
+          "en": "Farewell transfer"
+        }
+      ]
+    }
+  ],
+  "includes": [
+    {
+      "ar": "تذاكر الطيران ذهاباً وإياباً",
+      "en": "Return flights"
+    },
+    {
+      "ar": "5 ليالٍ في فيلا فوق الماء بنصف إقامة",
+      "en": "5 nights in an overwater villa, half board"
+    },
+    {
+      "ar": "النقل بالطائرة المائية",
+      "en": "Seaplane transfers"
+    },
+    {
+      "ar": "رحلة الغروب بالقارب",
+      "en": "Sunset boat cruise"
+    }
+  ],
+  "excludes": [
+    {
+      "ar": "الضرائب الخضراء في المالديف",
+      "en": "Maldives green tax"
+    },
+    {
+      "ar": "المشروبات والوجبات الإضافية",
+      "en": "Drinks and extra meals"
+    },
+    {
+      "ar": "أنشطة السبا",
+      "en": "Spa treatments"
+    }
+  ],
+  "order": 7,
+  "featured": false
+}

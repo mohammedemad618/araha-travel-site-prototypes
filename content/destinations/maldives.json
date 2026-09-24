@@ -1,0 +1,32 @@
+{
+  "slug": "maldives",
+  "name": {
+    "ar": "المالديف",
+    "en": "Maldives"
+  },
+  "label": "MALDIVES",
+  "coord": "3.20° N",
+  "tagline": {
+    "ar": "بحر بلون السماء، ووقت يمضي ببطء كما يجب.",
+    "en": "A sea the colour of the sky, and time that slows down as it should."
+  },
+  "description": {
+    "ar": "فلل فوق الماء، رمال بيضاء وشعاب مرجانية. المالديف الخيار الأول لشهر العسل والرحلات الفاخرة، مع النقل بالطائرة المائية أو القارب السريع.",
+    "en": "Overwater villas, white sand and coral reefs. The Maldives is the first choice for honeymoons and luxury escapes, with seaplane or speedboat transfers."
+  },
+  "bestSeason": {
+    "ar": "تشرين الثاني — نيسان",
+    "en": "November – April"
+  },
+  "image": {
+    "src": "https://images.unsplash.com/photo-1523632117739-12cc7fa95ad0",
+    "alt": {
+      "ar": "جزيرة مرجانية في المالديف من الأعلى",
+      "en": "Aerial view of a Maldives atoll"
+    },
+    "credit": "Shifaaz shamoon",
+    "creditUrl": "https://unsplash.com/@sotti"
+  },
+  "homeLayout": "wide",
+  "order": 6
+}

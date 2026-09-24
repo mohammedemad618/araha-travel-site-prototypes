@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "quote": {
+        "ar": "من أول اتصال إلى يوم العودة، كل شيء كان مرتباً وواضحاً.",
+        "en": "From the first call to the day we flew home, everything was organised and clear."
+      },
+      "name": {
+        "ar": "سارة الموسوي · بغداد",
+        "en": "Sara Al-Mousawi · Baghdad"
+      },
+      "destination": "turkey",
+      "image": {
+        "src": "https://images.unsplash.com/photo-1628667473341-4db29a839e5c",
+        "alt": {
+          "ar": "مسافرة على عبّارة في إسطنبول",
+          "en": "A traveller on an Istanbul ferry"
+        },
+        "credit": "arty",
+        "creditUrl": "https://unsplash.com/@artycial"
+      }
+    },
+    {
+      "quote": {
+        "ar": "أخذنا أطفالنا إلى جورجيا لأول مرة. الفريق فكّر بكل تفصيلة قبلنا.",
+        "en": "We took our children to Georgia for the first time. The team thought of every detail before we did."
+      },
+      "name": {
+        "ar": "عائلة الجبوري · البصرة",
+        "en": "The Al-Jubouri family · Basra"
+      },
+      "destination": "georgia",
+      "image": {
+        "src": "https://images.unsplash.com/photo-1528702748617-c64d49f918af",
+        "alt": {
+          "ar": "مرج جبلي أخضر في جورجيا",
+          "en": "A green mountain meadow in Georgia"
+        },
+        "credit": "Fredrik Öhlander",
+        "creditUrl": "https://unsplash.com/@fredrikohlander"
+      }
+    },
+    {
+      "quote": {
+        "ar": "شهر عسل في المالديف كما حلمنا به تماماً، وربما أجمل.",
+        "en": "A Maldives honeymoon exactly as we dreamed it—maybe even better."
+      },
+      "name": {
+        "ar": "علي ونور · أربيل",
+        "en": "Ali & Noor · Erbil"
+      },
+      "destination": "maldives",
+      "image": {
+        "src": "https://images.unsplash.com/photo-1586861635167-e5223aadc9fe",
+        "alt": {
+          "ar": "رصيف خشبي في المالديف وقت الغروب",
+          "en": "A wooden jetty in the Maldives at sunset"
+        },
+        "credit": "Rayyu Maldives",
+        "creditUrl": "https://unsplash.com/@rayyu"
+      }
+    }
+  ]
+}
