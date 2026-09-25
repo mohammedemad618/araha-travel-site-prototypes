@@ -4,7 +4,7 @@ import { Map, Package } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { useWhatsApp } from './WhatsApp';
-import { WhatsAppGlyph } from './ui/Icon';
+import { WhatsAppGlyph } from './ui/Glyphs';
 
 /** Bottom navigation on phones. Package pages render their own booking bar instead. */
 export function MobileBar() {
@@ -17,6 +17,7 @@ export function MobileBar() {
   return (
     <nav
       aria-label={t('main')}
+      data-inert-with-menu
       className="fixed inset-x-0 bottom-0 z-70 grid grid-cols-[1fr_1fr_1.25fr] gap-2 border-t border-ivory/10 bg-ink/96 px-2.5 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] backdrop-blur-[14px] md:hidden"
     >
       <Link

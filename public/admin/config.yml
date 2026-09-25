@@ -618,7 +618,7 @@ collections:
         widget: string
         required: false
       required: false
-    - label: الوصف (155 حرفاً كحد أقصى). يمكنك كتابة {price} ليظهر السعر الحالي
+    - label: الوصف (155 حرفاً كحد أقصى). يمكنك كتابة {price} ليظهر أقل سعر بين باقات الوجهة
       name: description
       widget: object
       fields:
@@ -920,7 +920,7 @@ collections:
         widget: string
         required: false
       required: false
-    - label: الوصف (155 حرفاً كحد أقصى). يمكنك كتابة {price} ليظهر السعر الحالي
+    - label: الوصف (155 حرفاً كحد أقصى)
       name: description
       widget: object
       fields:

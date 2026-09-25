@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { Locale } from '@/i18n/routing';
 import type { Destination } from '@/lib/schema';
 import { travelStyles, type TravelStyle } from '@/lib/constants';
+import { useModal } from '@/lib/useModal';
 import { PackageCard, type PackageSummary } from './PackageCard';
 import { OpenWhatsAppButton } from '../WhatsApp';
 import { Link } from '@/i18n/navigation';
@@ -60,7 +61,7 @@ export function PackagesExplorer({
 }: {
   packages: PackageSummary[];
   destinations: Pick<Destination, 'slug' | 'name' | 'label'>[];
-  nextDepartures: Record<string, string | undefined>;
+  nextDepartures: Record<string, string[]>;
 }) {
   const locale = useLocale() as Locale;
   const t = useTranslations('packages');
@@ -84,17 +85,8 @@ export function PackagesExplorer({
     });
   }, [destMap]);
 
-  useEffect(() => {
-    if (!sheet) return;
-    document.documentElement.style.overflow = 'hidden';
-    sheetRef.current?.querySelector<HTMLElement>('button')?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setSheet(false);
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.documentElement.style.overflow = '';
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [sheet]);
+  const closeSheet = useCallback(() => setSheet(false), []);
+  useModal(sheetRef, sheet, closeSheet, 'button');
 
   const update = (patch: Partial<Filters>) => {
     const next = { ...f, ...patch };
@@ -193,8 +185,8 @@ export function PackagesExplorer({
       </div>
 
       {sheet && (
-        <div className="fixed inset-0 z-90 md:hidden">
-          <div className="absolute inset-0 bg-ink/50" onClick={() => setSheet(false)} aria-hidden="true" />
+        <div data-modal-root className="fixed inset-0 z-90 md:hidden">
+          <div className="absolute inset-0 bg-ink/50" onClick={closeSheet} aria-hidden="true" />
           <div
             ref={sheetRef}
             role="dialog"
@@ -206,7 +198,7 @@ export function PackagesExplorer({
               <span className="font-display text-lg font-medium text-ink">{t('filters')}</span>
               <button
                 type="button"
-                onClick={() => setSheet(false)}
+                onClick={closeSheet}
                 aria-label={tn('close')}
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/20 text-ink"
               >
@@ -224,10 +216,11 @@ export function PackagesExplorer({
               </button>
               <button
                 type="button"
-                onClick={() => setSheet(false)}
-                className="min-h-12 flex-1 rounded-[1px] bg-ink px-5 text-[15px] text-ivory"
+                onClick={() => results.length > 0 && closeSheet()}
+                aria-disabled={results.length === 0}
+                className="min-h-12 flex-1 rounded-[1px] bg-ink px-5 text-[15px] text-ivory aria-disabled:cursor-not-allowed aria-disabled:bg-sand aria-disabled:text-ink"
               >
-                {t('showResults', { count: results.length })}
+                {results.length === 0 ? t('noResultsApply') : t('showResults', { count: results.length })}
               </button>
             </div>
           </div>
@@ -266,7 +259,7 @@ export function PackagesExplorer({
               pkg={p}
               destination={destMap.get(p.destination)!}
               locale={locale}
-              nextDeparture={nextDepartures[p.slug]}
+              departures={nextDepartures[p.slug]}
             />
           ))}
         </div>

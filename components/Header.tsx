@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { Wordmark } from './ui/Wordmark';
 import { LanguageSwitch } from './LanguageSwitch';
@@ -21,6 +21,7 @@ const DESKTOP_QUERY = '(min-width: 73.75rem)';
 
 export function Header() {
   const t = useTranslations('nav');
+  const locale = useLocale();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -134,7 +135,7 @@ export function Header() {
           role="dialog"
           aria-modal="true"
           aria-label={t('main')}
-          className="fixed inset-0 z-55 flex flex-col justify-between overflow-y-auto bg-ink px-7 pt-[110px] pb-[120px] text-ivory xl:hidden"
+          className="fixed inset-0 z-55 flex flex-col justify-between overflow-y-auto bg-ink px-7 pt-[110px] pb-12 text-ivory xl:hidden"
         >
           <nav aria-label={t('main')} className="flex flex-col">
             {NAV.map((n) => (
@@ -146,9 +147,11 @@ export function Header() {
                 className="flex items-center justify-between border-b border-ivory/10 py-3 font-display text-[30px] font-normal text-ivory aria-[current=page]:text-gold md:text-[34px]"
               >
                 <span>{t(n.key)}</span>
-                <span lang="en" dir="ltr" aria-hidden="true" className="font-latin text-[11px] text-gold">
-                  {n.en}
-                </span>
+                {locale === 'ar' && (
+                  <span lang="en" dir="ltr" aria-hidden="true" className="font-latin text-[11px] text-gold">
+                    {n.en}
+                  </span>
+                )}
               </Link>
             ))}
           </nav>

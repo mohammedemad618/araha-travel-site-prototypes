@@ -18,6 +18,7 @@ export async function PageHero({
   tall = false,
   children,
   below,
+  size = 'display',
 }: {
   locale: Locale;
   eyebrow: string;
@@ -30,6 +31,8 @@ export async function PageHero({
   children?: React.ReactNode;
   /** Rendered under the title block (e.g. filter chips or a photo-count button). */
   below?: React.ReactNode;
+  /** `article` keeps long headlines (guides) to two or three lines. */
+  size?: 'display' | 'article';
 }) {
   const t = await getTranslations('common');
   const latin = isLatin(eyebrow);
@@ -88,8 +91,12 @@ export async function PageHero({
             </span>
           </div>
           <h1
-            className={`m-0 mb-5 font-display leading-[1.04] font-medium tracking-[-0.02em] text-balance ${
-              image ? 'text-[clamp(44px,7vw,112px)]' : 'text-[clamp(38px,5.2vw,76px)]'
+            className={`m-0 mb-5 font-display leading-[1.04] rtl:leading-[1.24] font-medium tracking-[-0.02em] text-balance ${
+              size === 'article'
+                ? 'max-w-[22ch] text-[clamp(34px,4.4vw,64px)]'
+                : image
+                  ? 'text-[clamp(44px,7vw,112px)]'
+                  : 'text-[clamp(38px,5.2vw,76px)]'
             }`}
           >
             {title}

@@ -4,8 +4,9 @@ import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Arrow } from '../ui/Arrow';
-import { WhatsAppGlyph } from '../ui/Icon';
-import { WhatsAppLink } from '../WhatsApp';
+import { Check } from 'lucide-react';
+import { WhatsAppGlyph } from '../ui/Glyphs';
+import { WhatsAppLink } from '../WhatsAppContext';
 import { Honeypot, PhoneField, SelectField, TextAreaField, TextField } from './Field';
 import { useNetlifyForm, type FormStatus } from './useNetlifyForm';
 
@@ -30,7 +31,7 @@ function Success({
         className={`flex h-11 w-11 items-center justify-center rounded-full border ${dark ? 'border-gold text-gold' : 'border-bronze text-bronze'}`}
         aria-hidden="true"
       >
-        ✓
+        <Check size={20} strokeWidth={1.5} />
       </span>
       <h3
         ref={headingRef}

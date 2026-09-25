@@ -175,13 +175,15 @@ export default async function VisaPage({ params }: Props) {
                         {v.sources.length > 0 && (
                           <details className="mt-1">
                             <summary className="cursor-pointer">{t('sources')}</summary>
-                            <ul className="m-0 mt-1 list-none p-0" lang="en" dir="ltr">
+                            <ul className="m-0 mt-1 list-none p-0">
                               {v.sources.map((s) => (
                                 <li key={s} className="truncate">
                                   <a
                                     href={s}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    lang="en"
+                                    dir="ltr"
                                     className="underline underline-offset-2"
                                   >
                                     {new URL(s).hostname}

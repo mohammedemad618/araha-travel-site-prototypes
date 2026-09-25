@@ -107,6 +107,8 @@ export default async function ContactPage({ params }: Props) {
             title={t('map')}
             loadLabel={t('loadMap')}
             openLabel={t('openMaps')}
+            address={site.address[locale]}
+            hours={site.hours[locale]}
           />
         </div>
       </section>

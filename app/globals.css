@@ -123,6 +123,9 @@
     letter-spacing: -0.01em;
     text-wrap: balance;
   }
+  [dir='rtl'] .heading-xl {
+    line-height: 1.24;
+  }
   .field {
     background: transparent;
     border: 0;
@@ -229,4 +232,9 @@ html.intro-seen .intro-loader {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* The mobile menu is modal: hide the floating controls behind it. */
+html:has(#mobile-menu) [data-inert-with-menu] {
+  visibility: hidden;
 }

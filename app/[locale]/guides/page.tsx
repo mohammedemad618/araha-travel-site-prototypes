@@ -28,6 +28,7 @@ export default async function GuidesPage({ params }: Props) {
   const t = await getTranslations('guides');
   const tn = await getTranslations('nav');
   const guides = getGuides();
+  const [latest, ...rest] = guides;
   return (
     <>
       <PageHero
@@ -38,10 +39,16 @@ export default async function GuidesPage({ params }: Props) {
         crumbs={[{ label: tn('home'), href: '/' }, { label: tn('guides') }]}
       />
       <section className="bg-ivory py-[clamp(64px,8vw,120px)]">
-        <div className="container-x grid grid-cols-1 gap-x-[clamp(20px,2vw,32px)] gap-y-14 md:grid-cols-2 lg:grid-cols-3">
-          {guides.map((g) => (
-            <GuideCard key={g.slug} guide={g} locale={locale} />
-          ))}
+        <div className="container-x">
+          <h2 className="sr-only">{t('all')}</h2>
+          {latest && <GuideCard guide={latest} locale={locale} featured />}
+          {rest.length > 0 && (
+            <div className="mt-[clamp(56px,6vw,88px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,290px),1fr))] gap-x-[clamp(20px,2vw,32px)] gap-y-14 border-t border-ink/12 pt-[clamp(40px,5vw,64px)]">
+              {rest.map((g) => (
+                <GuideCard key={g.slug} guide={g} locale={locale} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
       <CustomTrip />

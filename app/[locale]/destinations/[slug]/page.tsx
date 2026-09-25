@@ -9,10 +9,10 @@ import {
   getGuides,
   getPackages,
   getVisa,
-  upcomingDepartures,
+  openDepartureDates,
 } from '@/lib/content';
-import { formatDate } from '@/lib/format';
-import { absoluteUrl, localizedPath, ogImageUrl, pageMetadata } from '@/lib/seo';
+import { formatDate, formatPrice } from '@/lib/format';
+import { absoluteUrl, fillPrice, localizedPath, ogImageUrl, pageMetadata } from '@/lib/seo';
 import { PageHero } from '@/components/PageHero';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Photo } from '@/components/ui/Photo';
@@ -31,6 +31,14 @@ export function generateStaticParams() {
   return routing.locales.flatMap((locale) => getDestinations().map((d) => ({ locale, slug: d.slug })));
 }
 
+/** Lowest package price for a destination, formatted (empty when it has no packages). */
+function fromPrice(slug: string): string {
+  const prices = getPackages()
+    .filter((p) => p.destination === slug)
+    .map((p) => p.price);
+  return prices.length ? formatPrice(Math.min(...prices)) : '';
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   const d = getDestination(slug);
@@ -39,7 +47,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     locale,
     path: `destinations/${slug}`,
     title: d.seo?.title?.[locale] ?? d.name[locale],
-    description: d.seo?.description?.[locale] ?? d.description[locale],
+    // {price} in an SEO description becomes the lowest package price for this destination.
+    description: fillPrice(d.seo?.description?.[locale] ?? d.description[locale], fromPrice(slug)),
     image: d.image.src,
   });
 }
@@ -133,19 +142,20 @@ export default async function DestinationPage({ params }: Props) {
           <Eyebrow className="mb-5.5">{tn('packages')}</Eyebrow>
           <h2 className="heading-xl m-0 mb-12 text-ink">{t('packagesIn', { name: d.name[locale] })}</h2>
           {packages.length > 0 ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-x-[clamp(20px,2vw,32px)] gap-y-14">
-              {packages.map((p) => {
-                const next = upcomingDepartures(p).find((x) => x.status !== 'soldout');
-                return (
-                  <PackageCard
-                    key={p.slug}
-                    pkg={toSummary(p)}
-                    destination={d}
-                    locale={locale}
-                    nextDeparture={next ? formatDate(next.date, locale) : undefined}
-                  />
-                );
-              })}
+            <div
+              className={`grid grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] gap-x-[clamp(20px,2vw,32px)] gap-y-14 ${
+                packages.length === 1 ? 'max-w-[640px]' : ''
+              }`}
+            >
+              {packages.map((p) => (
+                <PackageCard
+                  key={p.slug}
+                  pkg={toSummary(p)}
+                  destination={d}
+                  locale={locale}
+                  departures={openDepartureDates(p)}
+                />
+              ))}
             </div>
           ) : (
             <p className="m-0 max-w-[560px] text-[17px] leading-[1.85] text-muted">{t('noPackages')}</p>
@@ -160,14 +170,18 @@ export default async function DestinationPage({ params }: Props) {
                 {tg('title')}
               </h2>
               <Link href="/guides" className="border-b border-gold pb-1 text-[15px] text-ink">
-                {tg('title')} <Arrow />
+                {tg('all')} <Arrow />
               </Link>
             </div>
-            <div className="grid grid-cols-1 gap-x-[clamp(20px,2vw,32px)] gap-y-14 md:grid-cols-3">
-              {guides.map((g) => (
-                <GuideCard key={g.slug} guide={g} locale={locale} />
-              ))}
-            </div>
+            {guides.length === 1 ? (
+              <GuideCard guide={guides[0]!} locale={locale} featured />
+            ) : (
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-x-[clamp(20px,2vw,32px)] gap-y-14">
+                {guides.map((g) => (
+                  <GuideCard key={g.slug} guide={g} locale={locale} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}

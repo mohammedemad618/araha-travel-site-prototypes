@@ -25,7 +25,7 @@ export default function NotFound() {
             <div dir="ltr" className="mb-6 font-latin text-[11px] font-semibold tracking-[0.34em] text-gold">
               404 · PAGE NOT FOUND
             </div>
-            <h1 className="m-0 mb-5 font-display text-[clamp(40px,6vw,80px)] leading-[1.05] font-medium">
+            <h1 className="m-0 mb-5 font-display text-[clamp(40px,6vw,80px)] leading-[1.05] rtl:leading-[1.24] font-medium">
               هذه الصفحة غير موجودة
             </h1>
             <p className="mx-auto mb-3 max-w-[480px] text-lg leading-[1.9] font-light text-mist">

@@ -9,9 +9,8 @@ import {
   getSite,
   getVerifiedTestimonials,
   offerIsActive,
-  upcomingDepartures,
+  openDeparturesBySlug,
 } from '@/lib/content';
-import { formatDate } from '@/lib/format';
 import { pageMetadata } from '@/lib/seo';
 import { Hero } from '@/components/sections/Hero';
 import {
@@ -62,12 +61,7 @@ export default async function HomePage({ params }: Props) {
   const others = packages
     .filter((p) => p.slug !== featured.slug && (!showOffer || p.slug !== offerPkg.slug))
     .slice(0, 5);
-  const nextDepartures = Object.fromEntries(
-    packages.map((p) => {
-      const next = upcomingDepartures(p).find((d) => d.status !== 'soldout');
-      return [p.slug, next ? formatDate(next.date, locale) : undefined];
-    }),
-  );
+  const nextDepartures = openDeparturesBySlug(packages);
 
   return (
     <>

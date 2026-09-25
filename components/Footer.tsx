@@ -99,6 +99,7 @@ export async function Footer({ locale }: { locale: Locale }) {
             </a>
             <a href={`mailto:${site.email}`} className={`${linkCls} flex items-center gap-2.5`}>
               <Mail size={16} strokeWidth={1.5} className="shrink-0 text-gold" aria-hidden="true" />
+              <span className="sr-only">{tc('email')}</span>
               <En className="font-latin">{site.email}</En>
             </a>
           </div>
@@ -116,7 +117,7 @@ export async function Footer({ locale }: { locale: Locale }) {
             )}
           </div>
           <div className={col}>
-            <span className={colTitle}>{tn('about')}</span>
+            <span className={colTitle}>{t('company')}</span>
             <Link href="/about" className={linkCls}>
               {tn('about')}
             </Link>

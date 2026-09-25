@@ -123,7 +123,8 @@
     },
     "filters": "Filters",
     "showResults": "Show {count, plural, =0 {results} =1 {1 package} other {# packages}}",
-    "removeFilter": "Remove {label}"
+    "removeFilter": "Remove {label}",
+    "noResultsApply": "No packages, adjust the filters"
   },
   "package": {
     "facts": "Trip facts",
@@ -144,7 +145,7 @@
     "collapseAll": "Collapse all",
     "enquireEyebrow": "ENQUIRE",
     "enquireTitle": "Ready for this trip?",
-    "perPerson": "Per person · from",
+    "perPerson": "From",
     "departures": "Next departures",
     "noDepartures": "Dates on request – contact us to choose the date that suits you.",
     "whatsappCta": "Chat on WhatsApp",
@@ -194,7 +195,9 @@
     "visaFor": "Visa for Iraqi passports",
     "visaMore": "Details in our visa guide",
     "bookingTitle": "Booking request",
-    "bookingIntro": "Leave your details and a travel consultant will call you to confirm."
+    "bookingIntro": "Leave your details and a travel consultant will call you to confirm.",
+    "moreDates": "{count, plural, =1 {1 more date} other {# more dates}}",
+    "fewerDates": "Show fewer dates"
   },
   "destinations": {
     "metaTitle": "Travel destinations from Baghdad",
@@ -324,18 +327,20 @@
     "terms": "Terms & conditions",
     "license": "Licence no.",
     "credits": "Photo credits",
-    "payments": "Payment methods"
+    "payments": "Payment methods",
+    "company": "Company"
   },
   "notFound": {
     "title": "This page doesn’t exist",
     "body": "The link may have changed or the offer may have ended. But your next journey is still waiting.",
     "home": "Back to home",
     "packages": "Browse packages",
-    "contact": "Contact us"
+    "contact": "Contact us",
+    "suggestions": "Trips you might like"
   },
   "visa": {
     "metaTitle": "Visas for Iraqi passport holders",
-    "metaDescription": "Visa guide for Iraqi passport holders: Türkiye, the UAE, Georgia, Azerbaijan, Egypt and the Maldives. How to apply, processing times and documents, with the date last checked.",
+    "metaDescription": "Visa guide for Iraqi passport holders: Türkiye, the UAE, Georgia, Azerbaijan, Egypt and the Maldives – how to apply, processing times and documents.",
     "eyebrow": "VISA GUIDE",
     "title": "Visas for Iraqi passport holders",
     "intro": "What you need to know before travelling to our destinations: visa type, how to apply and the usual documents. We can prepare your paperwork and follow your application.",
@@ -376,6 +381,7 @@
       "visas": "Visas",
       "seasons": "Seasons"
     },
-    "cta": "Like the idea? We’ll plan it with you."
+    "cta": "Like the idea? We’ll plan it with you.",
+    "all": "All guides"
   }
 }

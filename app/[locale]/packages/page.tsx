@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n/routing';
-import { getDestinations, getPackages, upcomingDepartures } from '@/lib/content';
-import { formatDate } from '@/lib/format';
+import { getDestinations, getPackages, openDeparturesBySlug } from '@/lib/content';
 import { absoluteUrl, localizedPath, pageMetadata } from '@/lib/seo';
 import { PageHero } from '@/components/PageHero';
 import { PackagesExplorer } from '@/components/package/PackagesExplorer';
@@ -31,12 +30,7 @@ export default async function PackagesPage({ params }: Props) {
   const tn = await getTranslations('nav');
   const packages = getPackages();
   const destinations = getDestinations();
-  const nextDepartures = Object.fromEntries(
-    packages.map((p) => {
-      const next = upcomingDepartures(p).find((d) => d.status !== 'soldout');
-      return [p.slug, next ? formatDate(next.date, locale) : undefined];
-    }),
-  );
+  const nextDepartures = openDeparturesBySlug(packages);
 
   return (
     <>

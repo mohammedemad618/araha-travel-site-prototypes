@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { getDestination, getPackages } from '@/lib/content';
+import { getDestination, getPackages, openDepartureDates } from '@/lib/content';
 import { PackageCard, toSummary } from '@/components/package/PackageCard';
 import { Arrow } from '@/components/ui/Arrow';
 
@@ -31,7 +31,7 @@ export default async function LocalizedNotFound({ params }: Props) {
           >
             404
           </div>
-          <h1 className="m-0 mb-5 font-display text-[clamp(40px,6vw,80px)] leading-[1.05] font-medium">
+          <h1 className="m-0 mb-5 font-display text-[clamp(40px,6vw,80px)] leading-[1.05] rtl:leading-[1.24] font-medium">
             {t('title')}
           </h1>
           <p className="mx-auto mb-10 max-w-[520px] text-lg leading-[1.9] text-mist">{t('body')}</p>
@@ -52,15 +52,21 @@ export default async function LocalizedNotFound({ params }: Props) {
         </div>
       </section>
       <section className="bg-ivory py-20">
-        <div className="container-x grid grid-cols-1 gap-x-[clamp(20px,2vw,32px)] gap-y-14 md:grid-cols-3">
-          {suggestions.map((p) => (
-            <PackageCard
-              key={p.slug}
-              pkg={toSummary(p)}
-              destination={getDestination(p.destination)!}
-              locale={locale}
-            />
-          ))}
+        <div className="container-x">
+          <h2 className="m-0 mb-10 font-display text-[clamp(26px,2.6vw,38px)] font-medium text-ink">
+            {t('suggestions')}
+          </h2>
+          <div className="grid grid-cols-1 gap-x-[clamp(20px,2vw,32px)] gap-y-14 md:grid-cols-3">
+            {suggestions.map((p) => (
+              <PackageCard
+                key={p.slug}
+                pkg={toSummary(p)}
+                destination={getDestination(p.destination)!}
+                locale={locale}
+                departures={openDepartureDates(p)}
+              />
+            ))}
+          </div>
         </div>
       </section>
     </>

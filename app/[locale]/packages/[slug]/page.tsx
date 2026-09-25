@@ -1,9 +1,18 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { X } from 'lucide-react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { routing, type Locale } from '@/i18n/routing';
-import { getDestination, getPackage, getPackages, getSite, getVisa, upcomingDepartures } from '@/lib/content';
+import {
+  getDestination,
+  getPackage,
+  getPackages,
+  getSite,
+  getVisa,
+  openDepartureDates,
+  upcomingDepartures,
+} from '@/lib/content';
 import { formatDate, formatPrice } from '@/lib/format';
 import { absoluteUrl, fillPrice, localizedPath, ogImageUrl, pageMetadata } from '@/lib/seo';
 import { PageHero } from '@/components/PageHero';
@@ -94,7 +103,7 @@ export default async function PackagePage({ params }: Props) {
         title={pkg.title[locale]}
         crumbs={crumbs}
       >
-        <div className="border-s border-gold/60 ps-6">
+        <div data-hide-booking-bar className="border-s border-gold/60 ps-6">
           <div className="mb-1.5 text-sm text-mist">{tc('from')}</div>
           <Price
             value={pkg.price}
@@ -171,9 +180,12 @@ export default async function PackagePage({ params }: Props) {
                         key={x.en}
                         className="flex items-start gap-3 border-b border-ink/10 py-[13px] text-[15.5px] text-muted"
                       >
-                        <span className="mt-0.5 w-[18px] shrink-0 text-center text-muted" aria-hidden="true">
-                          ✕
-                        </span>
+                        <X
+                          size={18}
+                          strokeWidth={1.5}
+                          className="mt-0.5 shrink-0 text-muted"
+                          aria-hidden="true"
+                        />
                         {x[locale]}
                       </li>
                     ))}
@@ -222,6 +234,7 @@ export default async function PackagePage({ params }: Props) {
               date: d.date,
               label: formatDate(d.date, locale),
               status: d.status,
+              note: d.note?.[locale] || undefined,
             }))}
             phone={site.phone}
             phoneDisplay={site.phoneDisplay}
@@ -267,6 +280,7 @@ export default async function PackagePage({ params }: Props) {
                 pkg={toSummary(p)}
                 destination={getDestination(p.destination)!}
                 locale={locale}
+                departures={openDepartureDates(p)}
               />
             ))}
           </div>

@@ -88,8 +88,30 @@ for (const path of [
     await page.goto(path);
     await page.addStyleTag({ content: '.intro-loader{display:none!important}' });
     const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa', 'best-practice'])
       .analyze();
     expect(results.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
   });
 }
+
+test('filter sheet returns focus to the Filters button', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'Mobile only');
+  await page.goto('/en/packages/');
+  const opener = page.getByRole('button', { name: /^Filters/ });
+  await opener.click();
+  const sheet = page.getByRole('dialog', { name: 'Filters' });
+  await expect(sheet).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(sheet).toBeHidden();
+  await expect(opener).toBeFocused();
+});
+
+test('menu hides the floating controls while open', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'Mobile only');
+  await page.goto('/en/');
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await expect(page.locator('nav[data-inert-with-menu]')).toBeHidden();
+  await expect(
+    page.getByRole('dialog', { name: 'Main navigation' }).getByText('HOME', { exact: true }),
+  ).toHaveCount(0);
+});

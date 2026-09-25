@@ -40,7 +40,11 @@ const optionalNumber = z.preprocess(blankToUndefined, z.number().nonnegative().o
 export const isoDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
-  .refine((s) => !Number.isNaN(Date.parse(`${s}T00:00:00Z`)), 'Not a real date');
+  // Round-trip through Date so impossible days (2026-02-30) are rejected instead of rolled over.
+  .refine((s) => {
+    const d = new Date(`${s}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+  }, 'Not a real date');
 const optionalDate = z.preprocess(blankToUndefined, isoDate.optional());
 
 // Images must be CMS uploads or Unsplash CDN photos: anything else is blocked by the CSP.
@@ -228,17 +232,34 @@ export const homeSchema = z.object({
 });
 export type Home = z.infer<typeof homeSchema>;
 
-export const pageSchema = z.object({
-  title: localized,
-  eyebrow: localized,
-  intro: localized,
-  image: z.preprocess(
-    (v) => (v && typeof v === 'object' && !(v as { src?: string }).src ? undefined : v),
-    image.optional(),
-  ),
-  sections: z.array(z.object({ heading: localized, body: localized })).default([]),
-  seoDescription: localized,
-});
+type RawPage = { title?: Record<string, string>; image?: { src?: string; alt?: Record<string, string> } };
+
+export const pageSchema = z.preprocess(
+  (v) => {
+    // A hero image added in the CMS without a description falls back to the page title.
+    const page = v as RawPage | null;
+    if (!page?.image?.src) return v;
+    const alt = page.image.alt ?? {};
+    return {
+      ...page,
+      image: {
+        ...page.image,
+        alt: { ar: alt.ar || page.title?.ar || '', en: alt.en || page.title?.en || '' },
+      },
+    };
+  },
+  z.object({
+    title: localized,
+    eyebrow: localized,
+    intro: localized,
+    image: z.preprocess(
+      (v) => (v && typeof v === 'object' && !(v as { src?: string }).src ? undefined : v),
+      image.optional(),
+    ),
+    sections: z.array(z.object({ heading: localized, body: localized })).default([]),
+    seoDescription: localized,
+  }),
+);
 export type Page = z.infer<typeof pageSchema>;
 
 /** Entry requirements for Iraqi passport holders, one file per destination. */

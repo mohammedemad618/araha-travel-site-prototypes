@@ -8,11 +8,12 @@ import { Photo } from '../ui/Photo';
 import { Price } from '../ui/Price';
 import { Arrow } from '../ui/Arrow';
 import { Eyebrow } from '../ui/Eyebrow';
-import { Icon } from '../ui/Icon';
+import { Icon, WhatsAppGlyph } from '../ui/Icon';
 import { SectionHeader } from '../ui/SectionHeader';
 import { OpenWhatsAppButton, WhatsAppLink } from '../WhatsApp';
 import { CustomTripForm } from '../forms/Forms';
 import { Duration, PackageCard, type PackageSummary } from '../package/PackageCard';
+import { NextDeparture } from '../package/NextDeparture';
 
 export function IntroLoader() {
   const t = useTranslations('meta');
@@ -93,14 +94,14 @@ export function TrustBar({
             ))}
           </ul>
         )}
-        <ul className="m-0 grid list-none grid-cols-2 gap-x-6 gap-y-7 p-0 py-9 lg:grid-cols-4">
+        <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-6 p-0 py-8 md:gap-x-6 md:gap-y-7 md:py-9 lg:grid-cols-4">
           {points.map((p) => (
-            <li key={p.title.en} className="flex items-start gap-3.5">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gold/60 text-bronze">
-                <Icon name={p.icon} size={20} />
+            <li key={p.title.en} className="flex items-center gap-2.5 md:items-start md:gap-3.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold/60 text-bronze md:h-11 md:w-11">
+                <Icon name={p.icon} size={18} />
               </span>
               <span>
-                <span className="block font-display text-[16.5px] font-medium text-ink">
+                <span className="block font-display text-[15px] leading-[1.45] font-medium text-balance text-ink md:text-[16.5px]">
                   {p.title[locale]}
                 </span>
                 <span className="mt-1 hidden text-[13.5px] leading-[1.7] text-muted md:block">
@@ -179,7 +180,7 @@ export function FeaturedPackages({
   others: PackageSummary[];
   destinations: Map<string, Destination>;
   /** Formatted next departure per package slug. */
-  nextDepartures: Record<string, string | undefined>;
+  nextDepartures: Record<string, string[]>;
   locale: Locale;
 }) {
   const t = useTranslations('home');
@@ -204,12 +205,20 @@ export function FeaturedPackages({
         </div>
 
         <div className="no-scrollbar grid snap-x snap-mandatory auto-cols-[86%] grid-flow-col gap-4 overflow-x-auto pb-2 md:auto-cols-auto md:grid-flow-row-dense md:grid-cols-12 md:gap-x-[clamp(20px,2vw,32px)] md:gap-y-[clamp(48px,4vw,64px)] md:overflow-visible md:pb-0">
-          <article className="group relative min-h-[560px] snap-start overflow-hidden rounded-[2px] bg-slate-2 md:col-span-12 md:min-h-[620px] lg:col-span-7 lg:row-span-2 lg:min-h-[720px]">
+          <article className="group relative min-h-[640px] snap-start overflow-hidden rounded-[2px] bg-slate-2 md:col-span-12 md:min-h-[620px] lg:col-span-7 lg:row-span-2 lg:min-h-[720px]">
             <span className="absolute inset-0 transition-transform duration-[1600ms] ease-soft group-hover:scale-[1.05]">
               <Photo image={featured.image} locale={locale} sizes="(min-width: 1100px) 58vw, 100vw" />
             </span>
+            {/* On phones the text block is taller, so the scrim reaches higher. */}
             <span
-              className="pointer-events-none absolute inset-0"
+              className="pointer-events-none absolute inset-0 md:hidden"
+              style={{
+                background:
+                  'linear-gradient(to top,rgba(11,29,38,.97) 0%,rgba(11,29,38,.8) 55%,rgba(11,29,38,0) 85%)',
+              }}
+            />
+            <span
+              className="pointer-events-none absolute inset-0 hidden md:block"
               style={{
                 background:
                   'linear-gradient(to top,rgba(11,29,38,.96) 0%,rgba(11,29,38,.55) 40%,rgba(11,29,38,0) 68%)',
@@ -217,16 +226,15 @@ export function FeaturedPackages({
             />
             <div className="pointer-events-none absolute inset-x-6 top-6 flex items-center justify-between gap-3">
               {featured.badge && (
-                <span className="rounded-[1px] bg-ivory px-3.5 py-[7px] text-[12.5px] text-ink">
+                <span className="rounded-[1px] bg-ivory px-3.5 py-[7px] text-[12.5px] whitespace-nowrap text-ink">
                   {featured.badge[locale]}
                 </span>
               )}
-              {nextDepartures[featured.slug] && (
-                <span className="flex items-center gap-1.5 rounded-[1px] bg-ink/70 px-3 py-[7px] text-[12.5px] text-ivory">
-                  <Icon name="calendar" size={14} className="text-gold" />
-                  {nextDepartures[featured.slug]}
-                </span>
-              )}
+              <NextDeparture
+                dates={nextDepartures[featured.slug] ?? []}
+                locale={locale}
+                className="hidden items-center gap-1.5 rounded-[1px] bg-ink/70 px-3 py-[7px] text-[12.5px] whitespace-nowrap text-ivory md:flex"
+              />
             </div>
             <div className="absolute inset-x-0 bottom-0 p-[clamp(24px,3vw,44px)] text-ivory">
               <div className="mb-3.5 flex items-center gap-3 text-sm text-gold">
@@ -245,7 +253,7 @@ export function FeaturedPackages({
                   </>
                 )}
               </div>
-              <h3 className="m-0 mb-5 font-display text-[clamp(36px,4.2vw,64px)] leading-[1.08] font-medium tracking-[-0.01em]">
+              <h3 className="m-0 mb-5 font-display text-[clamp(36px,4.2vw,64px)] leading-[1.08] rtl:leading-[1.24] font-medium tracking-[-0.01em]">
                 <Link href={`/packages/${featured.slug}`} className="hover:text-ivory">
                   {featured.title[locale]}
                 </Link>
@@ -271,7 +279,7 @@ export function FeaturedPackages({
                   <Price value={featured.price} className="text-[clamp(26px,2.4vw,34px)]" />
                   <div className="mt-1 text-[12.5px] text-fog">{featured.priceNote[locale]}</div>
                 </div>
-                <div className="flex flex-wrap gap-2.5">
+                <div className="flex w-full flex-col gap-2.5 text-center md:w-auto md:flex-row">
                   <Link
                     href={`/packages/${featured.slug}`}
                     className="rounded-[1px] bg-gold px-6 py-3.5 text-[14.5px] font-medium text-ink transition-colors hover:bg-sand hover:text-ink"
@@ -296,7 +304,7 @@ export function FeaturedPackages({
               pkg={p}
               destination={destinations.get(p.destination)!}
               locale={locale}
-              nextDeparture={nextDepartures[p.slug]}
+              departures={nextDepartures[p.slug]}
               className={i < 2 ? 'md:col-span-6 lg:col-span-5' : 'md:col-span-4'}
               imageClassName={i < 2 ? 'aspect-[4/3] lg:aspect-video' : 'aspect-[4/3]'}
               sizes={i < 2 ? '(min-width: 1100px) 42vw, (min-width: 760px) 50vw, 86vw' : undefined}
@@ -383,7 +391,9 @@ export function DestinationMosaic({
               {locale === 'ar' && <span>{d.label}</span>}
             </span>
             <span className="pointer-events-none absolute inset-x-0 bottom-0 p-[clamp(18px,2.4vw,32px)]">
-              <span className={`mb-2 block font-display leading-[1.1] font-medium ${l.title}`}>
+              <span
+                className={`mb-2 block font-display leading-[1.1] rtl:leading-[1.24] font-medium ${l.title}`}
+              >
                 {d.name[locale]}
               </span>
               <span className={`mb-3.5 max-w-[360px] text-[14.5px] leading-[1.7] text-mist ${l.desc}`}>
@@ -412,7 +422,7 @@ export function Services({ services, locale }: { services: Home['services']; loc
         >
           <div>
             <Eyebrow className="mb-5.5">{t('servicesEyebrow')}</Eyebrow>
-            <h2 className="m-0 font-display text-[clamp(34px,4.6vw,68px)] leading-[1.12] font-medium tracking-[-0.01em] text-balance text-ink">
+            <h2 className="m-0 font-display text-[clamp(34px,4.6vw,68px)] leading-[1.12] rtl:leading-[1.24] font-medium tracking-[-0.01em] text-balance text-ink">
               {t('servicesTitle')}
             </h2>
           </div>
@@ -457,7 +467,7 @@ export function CustomTrip({ id = 'custom', phone }: { id?: string; phone?: stri
           <p className="m-0 mb-3 font-display text-[clamp(20px,1.8vw,26px)] font-normal text-ink-2">
             {t('customKicker')}
           </p>
-          <h2 className="m-0 mb-7.5 font-display text-[clamp(44px,6.4vw,104px)] leading-[1.04] font-medium tracking-[-0.015em] text-balance text-ink">
+          <h2 className="m-0 mb-7.5 font-display text-[clamp(44px,6.4vw,104px)] leading-[1.04] rtl:leading-[1.24] font-medium tracking-[-0.015em] text-balance text-ink">
             {t('customTitle')}
           </h2>
           <p className="m-0 mb-7.5 max-w-[460px] text-[17.5px] leading-[1.9] text-muted-2">
@@ -520,7 +530,7 @@ export function SeasonalOffer({
               {offer.eyebrow}
             </span>
           </div>
-          <h2 className="m-0 mb-6.5 font-display text-[clamp(64px,11vw,180px)] leading-[0.95] font-semibold tracking-[-0.025em]">
+          <h2 className="m-0 mb-6.5 font-display text-[clamp(64px,11vw,180px)] leading-[0.95] rtl:leading-[1.15] font-semibold tracking-[-0.025em]">
             {offer.title[locale]}
           </h2>
           <div className="mb-11 flex flex-wrap items-center gap-x-7 gap-y-3.5 font-display text-[clamp(20px,2vw,28px)] font-light text-sand">
@@ -568,7 +578,7 @@ export function WhyUs({ benefits, locale }: { benefits: Home['benefits']; locale
       <div className="container-x">
         <div data-reveal className="mb-[clamp(48px,6vw,88px)]">
           <Eyebrow className="mb-5.5">{t('whyEyebrow')}</Eyebrow>
-          <h2 className="m-0 max-w-[14ch] font-display text-[clamp(36px,5.4vw,84px)] leading-[1.08] font-medium tracking-[-0.015em] text-balance text-ink">
+          <h2 className="m-0 max-w-[14ch] font-display text-[clamp(36px,5.4vw,84px)] leading-[1.08] rtl:leading-[1.24] font-medium tracking-[-0.015em] text-balance text-ink">
             {t('whyTitle')}
           </h2>
         </div>
@@ -671,9 +681,21 @@ export function Stories({
                 {s.name[locale]}
                 {(s.source || s.date) && (
                   <span className="text-[13px] text-fog/80">
-                    {[s.source && t(SOURCE_KEY[s.source]), s.date && formatDate(s.date, locale)]
-                      .filter(Boolean)
-                      .join(' · ')}
+                    {s.source &&
+                      (s.url ? (
+                        <a
+                          href={s.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline decoration-gold/50 underline-offset-4"
+                        >
+                          {t(SOURCE_KEY[s.source])}
+                        </a>
+                      ) : (
+                        t(SOURCE_KEY[s.source])
+                      ))}
+                    {s.source && s.date && ' · '}
+                    {s.date && formatDate(s.date, locale)}
                   </span>
                 )}
               </figcaption>
@@ -709,7 +731,7 @@ export function FinalCta({ image, locale, phone }: { image: ImageData; locale: L
         <Eyebrow tone="gold" className="mb-7 justify-center">
           {t('finalEyebrow')}
         </Eyebrow>
-        <h2 className="m-0 mb-7 font-display text-[clamp(48px,7.6vw,120px)] leading-[1.02] font-medium tracking-[-0.02em]">
+        <h2 className="m-0 mb-7 font-display text-[clamp(48px,7.6vw,120px)] leading-[1.02] rtl:leading-[1.24] font-medium tracking-[-0.02em]">
           {t('finalTitle')}
         </h2>
         <p className="mx-auto mt-0 mb-11 max-w-[480px] text-[clamp(16px,1.4vw,19px)] leading-[1.9] text-mist">
@@ -728,7 +750,7 @@ export function FinalCta({ image, locale, phone }: { image: ImageData; locale: L
             source="final-cta"
             className={`${btn} border border-ivory/50 text-ivory transition-colors hover:border-ivory hover:text-ivory`}
           >
-            <span className="h-[7px] w-[7px] rounded-full bg-whatsapp" aria-hidden="true" />
+            <WhatsAppGlyph size={17} className="text-whatsapp" />
             {tc('whatsapp')}
           </WhatsAppLink>
         </div>

@@ -29,6 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     locale,
     path: `guides/${slug}`,
     title: g.seo?.title?.[locale] ?? g.title[locale],
+    // An SEO title is written in full, so it skips the " | site name" suffix.
+    absoluteTitle: Boolean(g.seo?.title?.[locale]),
     description: g.seo?.description?.[locale] ?? g.excerpt[locale],
     image: g.image.src,
   });
@@ -52,20 +54,22 @@ export default async function GuidePage({ params }: Props) {
     .filter((x) => x.slug !== g.slug)
     .slice(0, 3);
   const url = absoluteUrl(localizedPath(locale, `guides/${g.slug}`));
+  const crumbs = [
+    { label: tn('home'), href: '/', path: '' },
+    { label: tn('guides'), href: '/guides', path: 'guides' },
+    { label: g.title[locale], path: `guides/${g.slug}` },
+  ];
 
   return (
     <>
       <PageHero
         locale={locale}
+        size="article"
         image={g.image}
         eyebrow={t(`category.${g.category}`)}
         title={g.title[locale]}
         intro={g.excerpt[locale]}
-        crumbs={[
-          { label: tn('home'), href: '/' },
-          { label: tn('guides'), href: '/guides' },
-          { label: g.title[locale] },
-        ]}
+        crumbs={crumbs}
       />
       <article className="bg-ivory py-[clamp(56px,7vw,104px)]">
         <div className="container-x">
@@ -122,7 +126,7 @@ export default async function GuidePage({ params }: Props) {
             <h2 className="m-0 mb-10 font-display text-[clamp(28px,3vw,44px)] font-medium text-ink">
               {t('related')}
             </h2>
-            <div className="grid grid-cols-1 gap-x-[clamp(20px,2vw,32px)] gap-y-14 md:grid-cols-3">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,290px),1fr))] gap-x-[clamp(20px,2vw,32px)] gap-y-14">
               {others.map((o) => (
                 <GuideCard key={o.slug} guide={o} locale={locale} />
               ))}
@@ -131,19 +135,35 @@ export default async function GuidePage({ params }: Props) {
         </section>
       )}
       <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'BlogPosting',
-          headline: g.title[locale],
-          description: g.excerpt[locale],
-          image: ogImageUrl(g.image.src),
-          datePublished: g.date,
-          dateModified: g.date,
-          inLanguage: locale,
-          mainEntityOfPage: url,
-          author: { '@type': 'Organization', name: site.name[locale] },
-          publisher: { '@id': absoluteUrl('/#organization') },
-        }}
+        data={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: g.title[locale],
+            description: g.excerpt[locale],
+            image: ogImageUrl(g.image.src),
+            datePublished: g.date,
+            dateModified: g.date,
+            inLanguage: locale,
+            mainEntityOfPage: url,
+            author: {
+              '@type': 'Organization',
+              name: site.name[locale],
+              url: absoluteUrl(localizedPath(locale, 'about')),
+            },
+            publisher: { '@id': absoluteUrl('/#organization') },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: crumbs.map((c, i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              name: c.label,
+              item: absoluteUrl(localizedPath(locale, c.path)),
+            })),
+          },
+        ]}
       />
     </>
   );

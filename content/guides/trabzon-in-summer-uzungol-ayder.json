@@ -11,13 +11,13 @@
   "category": "destinations",
   "date": "2026-09-04",
   "image": {
-    "src": "https://images.unsplash.com/photo-1713346641342-dfb698c555a9",
+    "src": "/uploads/guides/uzungol-lake.jpg",
     "alt": {
-      "ar": "بحيرة أوزنجول وسط الضباب",
-      "en": "Uzungöl lake in the mist"
+      "ar": "بحيرة أوزنجول ومسجدها وبيوت القرية الخشبية تحت الغيوم",
+      "en": "Uzungöl lake, its mosque and the wooden village houses under low cloud"
     },
-    "credit": "Dana Andreea Gheorghe",
-    "creditUrl": "https://unsplash.com/@dana_andreea"
+    "credit": "İhsan Deniz Kılıçoğlu (CC BY-SA 3.0)",
+    "creditUrl": "https://commons.wikimedia.org/wiki/File:Uzung%C3%B6l.jpg"
   },
   "destination": "turkey",
   "sections": [

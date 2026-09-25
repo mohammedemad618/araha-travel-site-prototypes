@@ -6,27 +6,44 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { Locale } from '@/i18n/routing';
 import type { ImageData } from '@/lib/schema';
+import { useModal } from '@/lib/useModal';
 
-/** Grid cell spans chosen by photo count, so there are never holes in the layout. */
-function layoutFor(count: number): string[] {
+/**
+ * Grid classes for each photo. Phones use 2 columns and larger screens 12; every
+ * layout fills whole rows so the mosaic never leaves holes.
+ */
+export function layoutFor(count: number): string[] {
   const big = 'col-span-2 row-span-2 md:col-span-6';
   const small = 'col-span-1 md:col-span-3';
   const tall = 'col-span-1 row-span-2 md:col-span-3';
   const wide = 'col-span-2 md:col-span-6';
+  const third = 'col-span-1 md:col-span-4';
+  const full = 'col-span-2 md:col-span-12';
   switch (count) {
+    case 0:
+      return [];
     case 1:
-      return ['col-span-2 row-span-2 md:col-span-12'];
+      return [full + ' row-span-2'];
     case 2:
       return [wide + ' row-span-2', wide + ' row-span-2'];
     case 3:
       return [big, wide, wide];
     case 4:
       return [big, tall, small, small];
-    case 5:
-      return [big, small, small, small, small];
-    default:
-      return Array.from({ length: count }, (_, i) => [big, small, small, tall, small, small][i % 6]!);
   }
+  // Blocks of five (one large photo and four small, alternating sides), then a
+  // closing row for whatever is left over.
+  const cells: string[] = [];
+  const blocks = Math.floor(count / 5);
+  for (let b = 0; b < blocks; b++) {
+    cells.push(...(b % 2 === 0 ? [big, small, small, small, small] : [small, small, big, small, small]));
+  }
+  const rest = count % 5;
+  if (rest === 1) cells.push(full);
+  if (rest === 2) cells.push(wide, wide);
+  if (rest === 3) cells.push(third, third, 'col-span-2 md:col-span-4');
+  if (rest === 4) cells.push(small, small, small, small);
+  return cells;
 }
 
 export function Gallery({ images }: { images: ImageData[] }) {
@@ -35,34 +52,28 @@ export function Gallery({ images }: { images: ImageData[] }) {
   const [open, setOpen] = useState<number | null>(null);
   const cells = layoutFor(images.length);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const openerRef = useRef<HTMLElement | null>(null);
   const touchX = useRef<number | null>(null);
 
-  const close = useCallback(() => {
-    setOpen(null);
-    openerRef.current?.focus({ preventScroll: true });
-  }, []);
+  const close = useCallback(() => setOpen(null), []);
   const step = useCallback(
     (delta: number) => setOpen((i) => (i === null ? i : (i + delta + images.length) % images.length)),
     [images.length],
   );
+  const isOpen = open !== null;
+  // Focus starts on the dialog itself so the arrow keys work straight away, and
+  // stays wherever the user moved it when the photo changes.
+  useModal(dialogRef, isOpen, close, '[data-autofocus]');
 
   useEffect(() => {
-    if (open === null) return;
-    document.documentElement.style.overflow = 'hidden';
-    dialogRef.current?.focus();
+    if (!isOpen) return;
     const rtl = document.documentElement.dir === 'rtl';
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
       if (e.key === 'ArrowRight') step(rtl ? -1 : 1);
       if (e.key === 'ArrowLeft') step(rtl ? 1 : -1);
     };
     window.addEventListener('keydown', onKey);
-    return () => {
-      document.documentElement.style.overflow = '';
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [open, close, step]);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, step]);
 
   const current = open === null ? null : images[open];
 
@@ -73,10 +84,7 @@ export function Gallery({ images }: { images: ImageData[] }) {
           <button
             key={img.src + i}
             type="button"
-            onClick={(e) => {
-              openerRef.current = e.currentTarget;
-              setOpen(i);
-            }}
+            onClick={() => setOpen(i)}
             aria-label={`${t('viewPhotos')}: ${img.alt[locale]} (${t('photoOf', { n: i + 1, total: images.length })})`}
             className={`group relative overflow-hidden rounded-[2px] bg-slate ${cells[i]}`}
           >
@@ -102,7 +110,7 @@ export function Gallery({ images }: { images: ImageData[] }) {
           aria-modal="true"
           aria-label={t('gallery')}
           tabIndex={-1}
-          className="fixed inset-0 z-100 flex flex-col bg-ink/95 text-ivory outline-none"
+          className="fixed inset-0 z-100 flex flex-col bg-ink text-ivory outline-none"
           onTouchStart={(e) => (touchX.current = e.touches[0]?.clientX ?? null)}
           onTouchEnd={(e) => {
             if (touchX.current === null) return;

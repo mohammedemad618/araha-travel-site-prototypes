@@ -5,7 +5,8 @@ import type { Destination, Package } from '@/lib/schema';
 import { Photo } from '../ui/Photo';
 import { Price } from '../ui/Price';
 import { Arrow } from '../ui/Arrow';
-import { Icon } from '../ui/Icon';
+import { Check } from 'lucide-react';
+import { NextDeparture } from './NextDeparture';
 import { WhatsAppLink } from '../WhatsApp';
 
 export type PackageSummary = Pick<
@@ -37,7 +38,7 @@ export function PackageCard({
   pkg,
   destination,
   locale,
-  nextDeparture,
+  departures = [],
   className = '',
   imageClassName = 'aspect-[4/3]',
   sizes = '(min-width: 1100px) 33vw, (min-width: 760px) 50vw, 86vw',
@@ -45,8 +46,8 @@ export function PackageCard({
   pkg: PackageSummary;
   destination: Pick<Destination, 'name' | 'label'>;
   locale: Locale;
-  /** Formatted date of the next open departure, if any. */
-  nextDeparture?: string;
+  /** ISO dates of the open departures, soonest first. */
+  departures?: string[];
   className?: string;
   imageClassName?: string;
   sizes?: string;
@@ -72,12 +73,11 @@ export function PackageCard({
             <Duration days={pkg.days} nights={pkg.nights} />
           </span>
         </span>
-        {nextDeparture && (
-          <span className="pointer-events-none absolute start-4 bottom-4 flex items-center gap-1.5 rounded-[1px] bg-ink/80 px-3 py-1.5 text-[12.5px] text-ivory">
-            <Icon name="calendar" size={14} className="text-gold" />
-            {nextDeparture}
-          </span>
-        )}
+        <NextDeparture
+          dates={departures}
+          locale={locale}
+          className="pointer-events-none absolute start-4 bottom-4 flex items-center gap-1.5 rounded-[1px] bg-ink/80 px-3 py-1.5 text-[12.5px] text-ivory"
+        />
       </div>
       <div className="flex flex-1 flex-col pt-5.5">
         <div className="mb-2.5 flex items-center gap-2.5 text-[13.5px] text-bronze">
@@ -105,7 +105,7 @@ export function PackageCard({
         <ul className="m-0 mb-5 flex list-none flex-wrap gap-x-4 gap-y-1.5 p-0 text-[13.5px] text-muted">
           {pkg.highlights.map((h) => (
             <li key={h.en} className="flex items-center gap-1.5">
-              <Icon name="check" size={14} className="text-bronze" />
+              <Check size={14} strokeWidth={1.5} className="text-bronze" aria-hidden="true" />
               {h[locale]}
             </li>
           ))}

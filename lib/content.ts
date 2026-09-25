@@ -129,9 +129,13 @@ export const getPage = (slug: 'about' | 'privacy' | 'terms') =>
 export const getVisas = (): Visa[] =>
   cached('visas', () => {
     const order = getDestinations().map((d) => d.slug);
+    // One file per destination, named after it, so a destination never gets two visa entries.
     const list = readFolder('visas', visaSchema).map((e) => {
       if (!order.includes(e.data.destination)) {
         throw new Error(`content/visas/${e.file}: unknown destination "${e.data.destination}"`);
+      }
+      if (e.file !== `${e.data.destination}.json`) {
+        throw new Error(`content/visas/${e.file}: file name must be "${e.data.destination}.json"`);
       }
       return e.data;
     });
@@ -159,6 +163,18 @@ export const today = () => new Date().toISOString().slice(0, 10);
 /** Departures that have not passed at build time (the browser filters again, see EnquiryCard). */
 export function upcomingDepartures(p: Package, now = today()): Departure[] {
   return p.departures.filter((d) => d.date >= now).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** Dates (ISO) of the upcoming departures that still have seats. */
+export function openDepartureDates(p: Package, now = today()): string[] {
+  return upcomingDepartures(p, now)
+    .filter((d) => d.status !== 'soldout')
+    .map((d) => d.date);
+}
+
+/** Open departure dates for every package, keyed by slug (fed to the cards). */
+export function openDeparturesBySlug(packages: Package[]): Record<string, string[]> {
+  return Object.fromEntries(packages.map((p) => [p.slug, openDepartureDates(p)]));
 }
 
 /** Whether the seasonal offer is still running. */

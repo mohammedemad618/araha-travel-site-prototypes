@@ -118,7 +118,7 @@ export function Hero({ hero }: { hero: Home['hero'] }) {
             </span>
           </div>
           <h1
-            className={`m-0 mb-7 font-display leading-[1.04] font-medium tracking-[-0.015em] text-balance ${
+            className={`m-0 mb-7 font-display leading-[1.04] rtl:leading-[1.24] font-medium tracking-[-0.015em] text-balance ${
               locale === 'ar'
                 ? 'max-w-[11ch] text-[clamp(52px,8.6vw,138px)]'
                 : 'max-w-[13ch] text-[clamp(44px,7.4vw,120px)]'
@@ -146,7 +146,7 @@ export function Hero({ hero }: { hero: Home['hero'] }) {
 
       <div className="absolute inset-x-0 bottom-0 z-5">
         <div className="container-x">
-          <div className="flex items-center justify-between gap-5 border-t border-ivory/18 pt-5.5 pb-24 md:pb-7 lg:pe-48">
+          <div className="flex items-center justify-between gap-5 border-t border-ivory/18 pt-5.5 pb-24 md:pb-7 md:pe-48">
             <div className="flex min-w-0 items-baseline gap-4.5" aria-live={running ? 'off' : 'polite'}>
               <span className="truncate font-display text-base text-ivory">{current.place[locale]}</span>
               <span
