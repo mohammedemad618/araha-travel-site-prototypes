@@ -9,11 +9,11 @@
   },
   "tagline": {
     "ar": "أكثر من رحلة. تجربة تستحق أن تُروى.",
-    "en": "More than a trip. A journey worth telling."
+    "en": "More than a trip. A story worth telling."
   },
   "description": {
-    "ar": "أريحا للسياحة والسفر في بغداد: باقات سياحية مختارة إلى تركيا وجورجيا وأذربيجان والإمارات ومصر والمالديف، مع حجوزات الطيران والفنادق والتأشيرات ورحلات مصممة لك.",
-    "en": "Ariha Travel & Tourism, Baghdad: curated holiday packages to Türkiye, Georgia, Azerbaijan, the UAE, Egypt and the Maldives, plus flights, hotels, visas and tailor-made trips."
+    "ar": "مكتب سياحة وسفر في الكرادة، بغداد: باقات إلى تركيا وجورجيا وأذربيجان ودبي ومصر والمالديف، مع حجز الطيران والفنادق والتأشيرات.",
+    "en": "Baghdad travel agency in Karrada: holiday packages to Türkiye (Turkey), Georgia, Azerbaijan, Dubai, Egypt and the Maldives, plus flights, hotels and visas."
   },
   "url": "https://araha-travel.netlify.app",
   "phone": "+9647700000000",
@@ -34,5 +34,30 @@
     "instagram": "",
     "facebook": "",
     "tiktok": ""
-  }
+  },
+  "openingHours": {
+    "days": [
+      "Saturday",
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday"
+    ],
+    "opens": "09:00",
+    "closes": "21:00"
+  },
+  "trust": {
+    "since": "",
+    "travellers": "",
+    "googleRating": "",
+    "googleReviews": "",
+    "googleMapsUrl": "",
+    "licenceUrl": ""
+  },
+  "pricing": {
+    "usdRate": "",
+    "rateUpdated": ""
+  },
+  "paymentMethods": []
 }

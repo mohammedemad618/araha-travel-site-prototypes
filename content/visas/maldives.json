@@ -1,0 +1,39 @@
+{
+  "destination": "maldives",
+  "status": "on-arrival",
+  "summary": {
+    "ar": "يحصل حامل الجواز العراقي على تأشيرة سياحية مجانية عند الوصول إلى المالديف لمدة 30 يوماً، بشرط تذكرة عودة مؤكدة وحجز فندقي مدفوع وأموال كافية.",
+    "en": "Iraqi passport holders get a free 30-day tourist visa on arrival in the Maldives, with a confirmed return ticket, prepaid hotel booking and enough funds."
+  },
+  "howToApply": {
+    "ar": "لا حاجة لتقديم طلب مسبق. املأ «إقرار المسافر» المجاني على بوابة IMUGA (imuga.immigration.gov.mv) خلال 96 ساعة قبل الوصول، ثم قدّم مستنداتك لموظف الجوازات عند الوصول.",
+    "en": "No advance application. Complete the free Traveller Declaration on the IMUGA portal (imuga.immigration.gov.mv) within 96 hours before arrival, then show your documents to immigration on arrival."
+  },
+  "processingTime": {
+    "ar": "تُمنح التأشيرة في المطار عند الوصول.",
+    "en": "Granted at the airport on arrival."
+  },
+  "stay": {
+    "ar": "حتى 30 يوماً، ويمكن طلب التمديد إلكترونياً عبر بوابة IMUGA.",
+    "en": "Up to 30 days; extensions can be requested online via IMUGA."
+  },
+  "documents": [
+    { "ar": "جواز سفر مقروء آلياً صالح لمدة شهر على الأقل (يُفضّل 6 أشهر لتجنب مشاكل شركات الطيران)", "en": "Machine-readable passport valid for at least 1 month (6 months recommended to avoid airline issues)" },
+    { "ar": "تذكرة عودة مؤكدة", "en": "Confirmed return ticket" },
+    { "ar": "حجز مدفوع مسبقاً ومؤكد في منشأة سياحية مسجلة", "en": "Prepaid, confirmed booking at a registered tourist facility" },
+    { "ar": "أموال كافية لتغطية مدة الإقامة", "en": "Sufficient funds for the stay" },
+    { "ar": "إقرار المسافر (IMUGA) لكل مسافر بمن فيهم الأطفال، ولكل طفل جواز خاص به", "en": "IMUGA Traveller Declaration for every traveller including children; each child needs their own passport" },
+    { "ar": "شهادة تطعيم ضد الحمى الصفراء إذا كنت قادماً من بلد فيه خطر انتقالها", "en": "Yellow fever certificate if arriving from a country with transmission risk" }
+  ],
+  "notes": {
+    "ar": "يقرر موظفو الجوازات السماح بالدخول عند الوصول، واكتمال المستندات لا يضمن الدخول. لا تُقبل الجوازات الممددة يدوياً.",
+    "en": "Immigration officers decide admission on arrival; complete documents do not guarantee entry. Passports with an extended validity are not accepted."
+  },
+  "officialUrl": "https://immigration.gov.mv/visa/tourist-visa",
+  "sources": [
+    "https://immigration.gov.mv/visa/tourist-visa",
+    "https://immigration.gov.mv/news/8510",
+    "https://en.wikipedia.org/wiki/Visa_requirements_for_Iraqi_citizens"
+  ],
+  "lastVerified": "2026-09-25"
+}

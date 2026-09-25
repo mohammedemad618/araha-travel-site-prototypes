@@ -23,6 +23,7 @@ export function Photo({
       fill
       sizes={sizes}
       priority={priority}
+      fetchPriority={priority ? 'high' : undefined}
       className={`object-cover ${className}`}
     />
   );

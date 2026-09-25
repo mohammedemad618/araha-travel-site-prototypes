@@ -16,7 +16,12 @@ export function Analytics() {
         </>
       )}
       {PLAUSIBLE_DOMAIN && (
-        <Script defer data-domain={PLAUSIBLE_DOMAIN} src="https://plausible.io/js/script.js" strategy="afterInteractive" />
+        <Script
+          defer
+          data-domain={PLAUSIBLE_DOMAIN}
+          src="https://plausible.io/js/script.js"
+          strategy="afterInteractive"
+        />
       )}
     </>
   );

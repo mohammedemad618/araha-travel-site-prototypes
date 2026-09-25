@@ -1,7 +1,7 @@
 {
   "slug": "maldives-escape",
   "title": {
-    "ar": "جزر المالديف",
+    "ar": "ملاذ المالديف",
     "en": "Maldives Escape"
   },
   "destination": "maldives",
@@ -28,8 +28,8 @@
     }
   ],
   "lead": {
-    "ar": "خمس ليالٍ في فيلا فوق الماء، حيث لا يوجد ما تفعله سوى أن تكون هناك.",
-    "en": "Five nights in an overwater villa, where there is nothing to do but be there."
+    "ar": "خمس ليالٍ في فيلا فوق الماء، لا شيء فيها يشغلك سوى البحر والهدوء.",
+    "en": "Five nights in an overwater villa, with nothing to do but savour the sea and the silence."
   },
   "overview": {
     "ar": "منتجع 5 نجوم مع فيلا فوق الماء ونصف إقامة، نقل بالطائرة المائية، ورحلة غروب بالقارب. خيار مثالي لشهر العسل ويمكن تخصيصه بالكامل.",
@@ -105,11 +105,26 @@
     }
   ],
   "departures": [
-    "2026-11-01",
-    "2026-12-01",
-    "2027-01-10",
-    "2027-02-14",
-    "2027-03-15"
+    {
+      "date": "2026-11-01",
+      "status": "available"
+    },
+    {
+      "date": "2026-12-01",
+      "status": "available"
+    },
+    {
+      "date": "2027-01-10",
+      "status": "available"
+    },
+    {
+      "date": "2027-02-14",
+      "status": "available"
+    },
+    {
+      "date": "2027-03-15",
+      "status": "available"
+    }
   ],
   "itinerary": [
     {
@@ -150,7 +165,7 @@
         "en": "Sunset cruise"
       },
       "description": {
-        "ar": "سنوركل صباحي بين الشعاب، ثم رحلة غروب بالقارب التقليدي.",
+        "ar": "سنوركل صباحي بين الشعاب المرجانية، ثم رحلة غروب على قارب الدوني التقليدي.",
         "en": "Morning snorkelling on the reef, then a sunset cruise on a traditional dhoni."
       },
       "tags": [
@@ -233,7 +248,7 @@
   ],
   "excludes": [
     {
-      "ar": "الضرائب الخضراء في المالديف",
+      "ar": "الضريبة الخضراء في المالديف",
       "en": "Maldives green tax"
     },
     {
@@ -246,5 +261,14 @@
     }
   ],
   "order": 7,
-  "featured": false
+  "seo": {
+    "title": {
+      "ar": "عرض شهر العسل في المالديف 6 أيام",
+      "en": "Maldives Honeymoon: Overwater Villa"
+    },
+    "description": {
+      "ar": "عرض شهر العسل في المالديف: 5 ليالٍ في فيلا فوق الماء بمنتجع 5 نجوم بنصف إقامة، مع الطائرة المائية ورحلة الغروب. ابتداءً من {price} د.ع.",
+      "en": "Maldives honeymoon: 5 nights in a 5-star overwater villa on half board, seaplane transfers and a sunset cruise. From IQD {price} per person."
+    }
+  }
 }

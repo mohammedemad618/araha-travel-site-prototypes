@@ -28,5 +28,33 @@
     "creditUrl": "https://unsplash.com/@sotti"
   },
   "homeLayout": "wide",
-  "order": 6
+  "order": 6,
+  "glance": {
+    "flightTime": {
+      "ar": "عبر دبي أو الدوحة، حوالي 8–10 ساعات مع الترانزيت",
+      "en": "Via Dubai or Doha, about 8–10 hours including the connection"
+    },
+    "currency": {
+      "ar": "الروفية، والدولار مقبول في المنتجعات",
+      "en": "Rufiyaa; US dollars accepted at resorts"
+    },
+    "language": {
+      "ar": "الديفيهية، والإنجليزية منتشرة",
+      "en": "Dhivehi; English widely spoken"
+    },
+    "timeDifference": {
+      "ar": "ساعتان أكثر من بغداد",
+      "en": "Two hours ahead of Baghdad"
+    }
+  },
+  "seo": {
+    "title": {
+      "ar": "شهر العسل في المالديف من العراق",
+      "en": "Maldives honeymoons from Iraq"
+    },
+    "description": {
+      "ar": "عروض شهر العسل في المالديف من بغداد: فلل فوق الماء، منتجعات 5 نجوم، نقل بالطائرة المائية. أفضل وقت للزيارة من تشرين الثاني إلى نيسان.",
+      "en": "Maldives honeymoon packages from Baghdad: overwater villas, 5-star resorts and seaplane transfers. Best time to visit: November to April."
+    }
+  }
 }

@@ -11,14 +11,19 @@
       },
       "destination": "turkey",
       "image": {
-        "src": "https://images.unsplash.com/photo-1628667473341-4db29a839e5c",
+        "src": "https://images.unsplash.com/photo-1576740858825-9f207efc968f",
         "alt": {
-          "ar": "مسافرة على عبّارة في إسطنبول",
-          "en": "A traveller on an Istanbul ferry"
+          "ar": "عبّارة البوسفور والنوارس",
+          "en": "A Bosphorus ferry with gulls"
         },
-        "credit": "arty",
-        "creditUrl": "https://unsplash.com/@artycial"
-      }
+        "credit": "Süheyl Burak",
+        "creditUrl": "https://unsplash.com/@suheylburak"
+      },
+      "verified": false,
+      "source": "",
+      "rating": "",
+      "date": "",
+      "url": ""
     },
     {
       "quote": {
@@ -31,19 +36,24 @@
       },
       "destination": "georgia",
       "image": {
-        "src": "https://images.unsplash.com/photo-1528702748617-c64d49f918af",
+        "src": "https://images.unsplash.com/photo-1628667473341-4db29a839e5c",
         "alt": {
-          "ar": "مرج جبلي أخضر في جورجيا",
-          "en": "A green mountain meadow in Georgia"
+          "ar": "مسافرة على عبّارة في إسطنبول",
+          "en": "A traveller on an Istanbul ferry"
         },
-        "credit": "Fredrik Öhlander",
-        "creditUrl": "https://unsplash.com/@fredrikohlander"
-      }
+        "credit": "arty",
+        "creditUrl": "https://unsplash.com/@artycial"
+      },
+      "verified": false,
+      "source": "",
+      "rating": "",
+      "date": "",
+      "url": ""
     },
     {
       "quote": {
         "ar": "شهر عسل في المالديف كما حلمنا به تماماً، وربما أجمل.",
-        "en": "A Maldives honeymoon exactly as we dreamed it—maybe even better."
+        "en": "A Maldives honeymoon exactly as we dreamed it – maybe even better."
       },
       "name": {
         "ar": "علي ونور · أربيل",
@@ -58,7 +68,12 @@
         },
         "credit": "Rayyu Maldives",
         "creditUrl": "https://unsplash.com/@rayyu"
-      }
+      },
+      "verified": false,
+      "source": "",
+      "rating": "",
+      "date": "",
+      "url": ""
     }
   ]
 }

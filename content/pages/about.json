@@ -3,7 +3,10 @@
     "ar": "من نحن",
     "en": "About us"
   },
-  "eyebrow": "ABOUT ARIHA",
+  "eyebrow": {
+    "ar": "من نحن",
+    "en": "ABOUT ARIHA"
+  },
   "intro": {
     "ar": "أريحا للسياحة والسفر شركة عراقية مقرها بغداد، نصمم رحلات مريحة وواضحة للعائلات والأزواج والمجموعات، ونرافقك من أول سؤال حتى عودتك.",
     "en": "Ariha Travel & Tourism is an Iraqi company based in Baghdad. We design comfortable, transparent trips for families, couples and groups, and stay with you from your first question until you are home."
@@ -24,8 +27,8 @@
         "en": "Our story"
       },
       "body": {
-        "ar": "بدأنا بفكرة بسيطة: أن يسافر العراقي براحة بال، دون مفاجآت في السعر أو البرنامج. اليوم نخدم مسافرين من بغداد والبصرة وأربيل والنجف إلى أكثر من عشر وجهات.",
-        "en": "We started with a simple idea: that travellers from Iraq should be able to travel with peace of mind, with no surprises in price or programme. Today we serve travellers from Baghdad, Basra, Erbil and Najaf to more than ten destinations."
+        "ar": "بدأنا بفكرة بسيطة: أن يسافر العراقي براحة بال، دون مفاجآت في السعر أو البرنامج. واليوم نخدم مسافرين من بغداد والبصرة وأربيل والنجف إلى وجهات عديدة في المنطقة والعالم.",
+        "en": "We started with a simple idea: that travellers from Iraq should be able to travel with peace of mind, with no surprises in price or programme. Today we serve travellers from Baghdad, Basra, Erbil and Najaf on trips across the region and beyond."
       }
     },
     {
@@ -45,12 +48,12 @@
       },
       "body": {
         "ar": "شخص حقيقي يرد عليك في كل مرحلة، وأسعار واضحة، ورحلة تستحق أن تُروى.",
-        "en": "A real person answering you at every step, clear prices, and a journey worth telling."
+        "en": "A real person answering you at every step, clear prices, and a trip worth talking about."
       }
     }
   ],
   "seoDescription": {
-    "ar": "تعرّف على أريحا للسياحة والسفر في بغداد: فريقنا وطريقة عملنا ووعدنا لكل مسافر.",
-    "en": "Meet Ariha Travel & Tourism in Baghdad: our team, how we work and our promise to every traveller."
+    "ar": "أريحا للسياحة والسفر شركة عراقية في الكرادة، بغداد: باقات سياحية وحجوزات طيران وفنادق وتأشيرات، بأسعار واضحة ومتابعة شخصية حتى عودتك.",
+    "en": "Ariha Travel & Tourism is an Iraqi travel agency in Karrada, Baghdad: holiday packages, flights, hotels and visas, with clear prices and personal support."
   }
 }

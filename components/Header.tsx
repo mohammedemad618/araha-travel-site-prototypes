@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { Wordmark } from './ui/Wordmark';
@@ -11,17 +11,21 @@ export const NAV = [
   { key: 'home', href: '/', en: 'HOME' },
   { key: 'packages', href: '/packages', en: 'PACKAGES' },
   { key: 'destinations', href: '/destinations', en: 'DESTINATIONS' },
-  { key: 'services', href: '/#services', en: 'SERVICES' },
+  { key: 'visa', href: '/visa', en: 'VISAS' },
+  { key: 'guides', href: '/guides', en: 'GUIDES' },
   { key: 'about', href: '/about', en: 'ABOUT' },
   { key: 'contact', href: '/contact', en: 'CONTACT' },
 ] as const;
 
+const DESKTOP_QUERY = '(min-width: 73.75rem)';
+
 export function Header() {
   const t = useTranslations('nav');
-  const tm = useTranslations('meta');
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -30,19 +34,36 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close the mobile menu on navigation and lock page scroll while it is open.
+  // Close the mobile menu on navigation.
   useEffect(() => setMenu(false), [pathname]);
+
+  // While the menu is open it behaves as a modal: page scroll is locked, the
+  // rest of the page is inert, focus moves into the menu and returns afterwards.
   useEffect(() => {
-    document.documentElement.style.overflow = menu ? 'hidden' : '';
     if (!menu) return;
+    const root = document.documentElement;
+    const outside = [...document.querySelectorAll<HTMLElement>('main, footer, [data-inert-with-menu]')];
+    root.style.overflow = 'hidden';
+    outside.forEach((el) => (el.inert = true));
+    menuRef.current?.querySelector<HTMLElement>('a')?.focus();
+    const toggle = toggleRef.current;
+
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenu(false);
+    const mq = window.matchMedia(DESKTOP_QUERY);
+    const onResize = (e: MediaQueryListEvent) => e.matches && setMenu(false);
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    mq.addEventListener('change', onResize);
+    return () => {
+      root.style.overflow = '';
+      outside.forEach((el) => (el.inert = false));
+      window.removeEventListener('keydown', onKey);
+      mq.removeEventListener('change', onResize);
+      toggle?.focus({ preventScroll: true });
+    };
   }, [menu]);
 
   const solid = scrolled || menu;
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : !href.includes('#') && pathname.startsWith(href);
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
 
   return (
     <>
@@ -52,15 +73,19 @@ export function Header() {
         }`}
       >
         <div
-          className={`container-x flex items-center justify-between gap-8 text-ivory transition-[height] duration-500 ${
+          className={`container-x flex items-center justify-between gap-6 text-ivory transition-[height] duration-500 ${
             scrolled ? 'h-[72px]' : 'h-20 md:h-24'
           }`}
         >
-          <Link href="/" className="text-ivory hover:text-ivory" aria-label={`${tm('brandWordmark')} — ${t('home')}`}>
+          <Link href="/" className="text-ivory hover:text-ivory">
             <Wordmark />
+            <span className="sr-only">{t('home')}</span>
           </Link>
 
-          <nav aria-label={t('main')} className="hidden items-center gap-[clamp(20px,2.4vw,40px)] text-[14.5px] lg:flex">
+          <nav
+            aria-label={t('main')}
+            className="hidden items-center gap-[clamp(16px,1.7vw,34px)] text-[14.5px] xl:flex"
+          >
             {NAV.map((n) => (
               <Link
                 key={n.key}
@@ -73,33 +98,43 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="hidden items-center gap-5.5 lg:flex">
+          <div className="hidden items-center gap-5 xl:flex">
             <LanguageSwitch />
             <OpenWhatsAppButton className="rounded-[1px] border border-gold/70 px-5.5 py-[11px] text-sm text-ivory transition-colors hover:bg-gold hover:text-ink">
               {t('plan')}
             </OpenWhatsAppButton>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setMenu((v) => !v)}
-            aria-expanded={menu}
-            aria-controls="mobile-menu"
-            className="flex min-h-11 items-center gap-3 text-sm text-ivory lg:hidden"
-          >
-            <span>{menu ? t('close') : t('menu')}</span>
-            <span className="flex w-6 flex-col gap-1.5" aria-hidden="true">
-              <span className="h-px bg-ivory" />
-              <span className="h-px w-4 bg-gold" />
+          <div className="flex items-center gap-5 xl:hidden">
+            <span className="hidden md:block">
+              <LanguageSwitch />
             </span>
-          </button>
+            <button
+              ref={toggleRef}
+              type="button"
+              onClick={() => setMenu((v) => !v)}
+              aria-expanded={menu}
+              aria-controls="mobile-menu"
+              className="flex min-h-11 items-center gap-3 text-sm text-ivory"
+            >
+              <span>{menu ? t('close') : t('menu')}</span>
+              <span className="flex w-6 flex-col gap-1.5" aria-hidden="true">
+                <span className="h-px bg-ivory" />
+                <span className="h-px w-4 bg-gold" />
+              </span>
+            </button>
+          </div>
         </div>
       </header>
 
       {menu && (
         <div
+          ref={menuRef}
           id="mobile-menu"
-          className="fixed inset-0 z-55 flex flex-col justify-between overflow-y-auto bg-ink px-7 pt-[110px] pb-[120px] text-ivory lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('main')}
+          className="fixed inset-0 z-55 flex flex-col justify-between overflow-y-auto bg-ink px-7 pt-[110px] pb-[120px] text-ivory xl:hidden"
         >
           <nav aria-label={t('main')} className="flex flex-col">
             {NAV.map((n) => (
@@ -107,16 +142,20 @@ export function Header() {
                 key={n.key}
                 href={n.href}
                 onClick={() => setMenu(false)}
-                className="flex items-center justify-between border-b border-ivory/10 py-3 font-display text-[34px] font-normal text-ivory"
+                aria-current={isActive(n.href) ? 'page' : undefined}
+                className="flex items-center justify-between border-b border-ivory/10 py-3 font-display text-[30px] font-normal text-ivory aria-[current=page]:text-gold md:text-[34px]"
               >
                 <span>{t(n.key)}</span>
-                <span dir="ltr" className="font-latin text-[11px] text-gold">
+                <span lang="en" dir="ltr" aria-hidden="true" className="font-latin text-[11px] text-gold">
                   {n.en}
                 </span>
               </Link>
             ))}
           </nav>
-          <div className="flex justify-end pt-8">
+          <div className="flex items-center justify-between gap-4 pt-8">
+            <OpenWhatsAppButton className="rounded-[1px] border border-gold/70 px-5 py-3 text-sm text-ivory">
+              {t('plan')}
+            </OpenWhatsAppButton>
             <LanguageSwitch large />
           </div>
         </div>

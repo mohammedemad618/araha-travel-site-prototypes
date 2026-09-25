@@ -26,8 +26,8 @@
         "en": "Do you help with visas?"
       },
       "answer": {
-        "ar": "نعم. نرتب الأوراق المطلوبة ونتابع طلبك حتى صدور التأشيرة، ونخبرك مسبقاً بالمتطلبات والمدة المتوقعة لكل وجهة.",
-        "en": "Yes. We prepare the required documents and follow your application until the visa is issued, and tell you the requirements and expected processing time for each destination in advance."
+        "ar": "نعم. نجهّز الأوراق المطلوبة ونتابع طلبك حتى صدور القرار، ونخبرك مسبقاً بمتطلبات كل وجهة لحاملي الجواز العراقي والمدة المتوقعة. قرار منح التأشيرة يعود دائماً إلى الجهة المختصة.",
+        "en": "Yes. We prepare the required documents and follow your application until a decision is issued, and tell you in advance what each destination requires from Iraqi passport holders and how long it usually takes. The final decision always rests with the issuing authority."
       }
     },
     {
@@ -36,8 +36,8 @@
         "en": "Which payment methods do you accept?"
       },
       "answer": {
-        "ar": "الدفع نقداً في مكتبنا في بغداد أو بالتحويل المصرفي أو عبر المحافظ الإلكترونية المحلية. يمكن تقسيط بعض الباقات، اسأل مستشارك عن التفاصيل.",
-        "en": "Cash at our Baghdad office, bank transfer or local e-wallets. Some packages can be paid in instalments—ask your consultant for details."
+        "ar": "الدفع نقداً في مكتبنا في بغداد، أو بالتحويل المصرفي، أو عبر المحافظ الإلكترونية المحلية. ويمكن تقسيط بعض الباقات؛ اسأل مستشارك عن التفاصيل.",
+        "en": "Cash at our Baghdad office, bank transfer or local e-wallets. Some packages can be paid in instalments – ask your consultant for details."
       }
     },
     {
@@ -67,7 +67,7 @@
       },
       "answer": {
         "ar": "نعم، ننظم رحلات المجموعات والمؤتمرات والرحلات التحفيزية للشركات بتنظيم كامل من الطيران حتى الجولات.",
-        "en": "Yes—we organise groups, conferences and corporate incentive trips end to end, from flights to tours."
+        "en": "Yes – we organise groups, conferences and corporate incentive trips end to end, from flights to tours."
       }
     },
     {
@@ -78,6 +78,36 @@
       "answer": {
         "ar": "فريقنا متاح على واتساب طوال رحلتك، ولديك رقم مندوبنا في الوجهة لأي طارئ.",
         "en": "Our team is available on WhatsApp throughout your trip, and you will have our local representative’s number for any emergency."
+      }
+    },
+    {
+      "question": {
+        "ar": "هل الأسعار بالدينار العراقي أم بالدولار؟",
+        "en": "Are prices in Iraqi dinars or US dollars?"
+      },
+      "answer": {
+        "ar": "نعرض الأسعار بالدينار العراقي، ونؤكد لك السعر النهائي وعملة الدفع كتابياً قبل الحجز.",
+        "en": "Prices are shown in Iraqi dinars; we confirm the final price and payment currency in writing before you book."
+      }
+    },
+    {
+      "question": {
+        "ar": "هل تشمل الباقات التأمين الصحي للسفر؟",
+        "en": "Do packages include travel health insurance?"
+      },
+      "answer": {
+        "ar": "لا يشمل السعر التأمين ما لم يُذكر ذلك، لكن بعض الدول تشترطه للدخول أو للتأشيرة، ونرتبه لك عند الطلب.",
+        "en": "Insurance is not included unless stated, but some countries require it for entry or for the visa, and we can arrange it for you."
+      }
+    },
+    {
+      "question": {
+        "ar": "ما الوثائق التي أحتاجها للحجز؟",
+        "en": "What documents do I need to book?"
+      },
+      "answer": {
+        "ar": "صورة واضحة لجواز سفر صالح لستة أشهر على الأقل لكل مسافر، وأي وثائق إضافية تطلبها جهة التأشيرة، ونرسل لك القائمة الكاملة لكل وجهة.",
+        "en": "A clear copy of each traveller’s passport, valid for at least six months, plus any documents the visa authority requires; we send you the full list for each destination."
       }
     }
   ]

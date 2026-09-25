@@ -1,0 +1,40 @@
+{
+  "destination": "uae",
+  "status": "visa-required",
+  "summary": {
+    "ar": "يحتاج حامل الجواز العراقي إلى تأشيرة إماراتية مسبقة تصدر عبر كفيل داخل الإمارات، مثل شركة طيران أو فندق أو وكالة سفر مرخصة. لا توجد تأشيرة عند الوصول.",
+    "en": "Iraqi passport holders need a UAE visa arranged before travel through a UAE sponsor such as an airline, hotel or licensed travel agency. No visa on arrival."
+  },
+  "howToApply": {
+    "ar": "تصدر التأشيرة إلكترونياً من السلطات الإماراتية (الهيئة الاتحادية للهوية والجنسية أو إقامة دبي) بطلب من كفيل: شركات الطيران الإماراتية (طيران الإمارات، الاتحاد، فلاي دبي) لمسافريها، أو وكالات السفر والفنادق المرخصة في الإمارات، أو قريب مقيم هناك. السفارات الإماراتية لا تصدر تأشيرات سياحية.",
+    "en": "The visa is issued electronically by UAE authorities (ICP or GDRFA Dubai) on application by a sponsor: UAE airlines (Emirates, Etihad, flydubai) for their passengers, licensed UAE travel agencies or hotels, or a resident relative. UAE embassies do not issue tourist visas."
+  },
+  "processingTime": {
+    "ar": "نحو 2–4 أيام عمل، ويُنصح بالتقديم قبل 4 أيام عمل على الأقل من السفر.",
+    "en": "About 2–4 working days; apply at least 4 working days before travel."
+  },
+  "stay": {
+    "ar": "حسب نوع التأشيرة المختارة؛ المدة المسموحة مدوّنة على التأشيرة.",
+    "en": "Depends on the visa type chosen; the permitted stay is shown on the visa."
+  },
+  "documents": [
+    { "ar": "جواز سفر مقروء آلياً ساري المفعول لمدة 6 أشهر على الأقل", "en": "Machine-readable passport valid for at least 6 months" },
+    { "ar": "نسخة ملونة من صفحة معلومات الجواز", "en": "Colour copy of the passport data page" },
+    { "ar": "صورة شخصية ملونة حديثة بخلفية فاتحة", "en": "Recent colour photo on a light background" },
+    { "ar": "تذكرة ذهاب وعودة مؤكدة", "en": "Confirmed return ticket" },
+    { "ar": "حجز فندقي لكامل مدة الإقامة، أو عقد إيجار القريب المستضيف", "en": "Hotel booking for the whole stay, or the host relative's tenancy contract" },
+    { "ar": "إثبات صلة القرابة لأفراد العائلة وشهادة ميلاد للأطفال", "en": "Proof of relationship for family members and birth certificates for children" }
+  ],
+  "notes": {
+    "ar": "منذ آب 2024 أفادت وسائل إعلام وجمعيات سياحية عراقية بتوقف أو رفض التأشيرات الفردية للشباب العزاب مع استمرار تأشيرات العوائل، دون إعلان رسمي. قد تتغير الشروط فجأة، خاصةً مع الأوضاع الإقليمية، لذا نؤكد لك الشروط الحالية قبل الحجز. الرسوم تُحدَّد عند التقديم، والموافقة من صلاحية السلطات الإماراتية.",
+    "en": "Since August 2024, Iraqi media and tourism associations have reported that individual visas for single young men are suspended or refused while family visas continue; this was never officially announced. Rules can change at short notice, especially amid regional events, so we confirm current conditions before booking. Fees are confirmed at application; approval rests with UAE authorities."
+  },
+  "officialUrl": "https://u.ae/en/information-and-services/visa-and-emirates-id/Types-of-visas/tourist-visa",
+  "sources": [
+    "https://u.ae/en/information-and-services/visa-and-emirates-id/Types-of-visas/tourist-visa",
+    "https://www.emirates.com/iq/english/before-you-fly/visa-passport-information/uae-visa-information/",
+    "https://www.rudawarabia.net/arabic/categories/iraq/816938",
+    "https://en.wikipedia.org/wiki/Visa_requirements_for_Iraqi_citizens"
+  ],
+  "lastVerified": "2026-09-25"
+}

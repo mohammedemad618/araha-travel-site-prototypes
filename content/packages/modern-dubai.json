@@ -27,7 +27,7 @@
       "en": "Desert safari"
     },
     {
-      "ar": "عشاء على المارينا",
+      "ar": "عشاء على قارب في المارينا",
       "en": "Marina dinner cruise"
     }
   ],
@@ -57,8 +57,8 @@
       "en": "October – April"
     },
     "group": {
-      "ar": "خاص أو مجموعات",
-      "en": "Private or group"
+      "ar": "رحلة خاصة أو ضمن مجموعة",
+      "en": "Private or small group"
     }
   },
   "image": {
@@ -100,11 +100,26 @@
     }
   ],
   "departures": [
-    "2026-10-22",
-    "2026-11-19",
-    "2026-12-28",
-    "2027-01-21",
-    "2027-02-18"
+    {
+      "date": "2026-10-22",
+      "status": "available"
+    },
+    {
+      "date": "2026-11-19",
+      "status": "available"
+    },
+    {
+      "date": "2026-12-28",
+      "status": "available"
+    },
+    {
+      "date": "2027-01-21",
+      "status": "available"
+    },
+    {
+      "date": "2027-02-18",
+      "status": "available"
+    }
   ],
   "itinerary": [
     {
@@ -113,8 +128,8 @@
         "en": "Arrive in Dubai"
       },
       "description": {
-        "ar": "استقبال والتوصيل إلى الفندق، أمسية حرة عند نافورة دبي.",
-        "en": "Welcome and hotel transfer; free evening at the Dubai Fountain."
+        "ar": "الاستقبال والتوصيل إلى الفندق، ثم أمسية حرة عند نافورة دبي.",
+        "en": "Welcome and hotel transfer, then a free evening at the Dubai Fountain."
       },
       "tags": [
         {
@@ -129,7 +144,7 @@
         "en": "City tour"
       },
       "description": {
-        "ar": "دبي القديمة وسوق الذهب والعبرة، ثم برج خليفة ودبي مول.",
+        "ar": "دبي القديمة وسوق الذهب وجولة بالعبرة التقليدية، ثم برج خليفة ودبي مول.",
         "en": "Old Dubai, the Gold Souk and an abra ride, then Burj Khalifa and Dubai Mall."
       },
       "tags": [
@@ -224,10 +239,19 @@
       "en": "Visa fees"
     },
     {
-      "ar": "رسوم السياحة في الفندق",
+      "ar": "رسم درهم السياحة في الفندق",
       "en": "Hotel tourism dirham fee"
     }
   ],
   "order": 4,
-  "featured": false
+  "seo": {
+    "title": {
+      "ar": "باقة دبي 5 أيام من بغداد",
+      "en": "5-Day Dubai Package from Baghdad"
+    },
+    "description": {
+      "ar": "باقة دبي 5 أيام من بغداد: فندق 5 نجوم مع الإفطار، سفاري الصحراء مع العشاء، عشاء على قارب في المارينا وجولة في المدينة. ابتداءً من {price} د.ع.",
+      "en": "5-day Dubai package from Baghdad: 5-star hotel with breakfast, desert safari with dinner, Marina dinner cruise and a city tour. From IQD {price}."
+    }
+  }
 }

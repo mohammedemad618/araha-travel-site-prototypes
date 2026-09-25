@@ -19,8 +19,8 @@
   },
   "highlights": [
     {
-      "ar": "فندق 4 نجوم",
-      "en": "4-star hotel"
+      "ar": "فنادق 4 نجوم",
+      "en": "4-star hotels"
     },
     {
       "ar": "جولات يومية",
@@ -36,7 +36,7 @@
     "en": "A walled old city, towers of fire and green mountains just a few hours away."
   },
   "overview": {
-    "ar": "ثلاث ليالٍ في باكو وليلتان في قبالا وسط الغابات. جولات يومية بسيارات حديثة ومرشدين يتحدثون العربية، وأسعار ممتازة لرحلة قريبة.",
+    "ar": "ثلاث ليالٍ في باكو وليلتان في قبالا وسط الغابات. جولات يومية بسيارات حديثة ومرشدين يتحدثون العربية، بسعر مناسب لرحلة قريبة.",
     "en": "Three nights in Baku and two in forested Gabala. Daily tours in modern vehicles with Arabic-speaking guides, at excellent value for a short-haul trip."
   },
   "facts": {
@@ -100,11 +100,26 @@
     }
   ],
   "departures": [
-    "2026-10-01",
-    "2026-10-29",
-    "2027-04-22",
-    "2027-05-20",
-    "2027-06-17"
+    {
+      "date": "2026-10-01",
+      "status": "available"
+    },
+    {
+      "date": "2026-10-29",
+      "status": "available"
+    },
+    {
+      "date": "2027-04-22",
+      "status": "available"
+    },
+    {
+      "date": "2027-05-20",
+      "status": "available"
+    },
+    {
+      "date": "2027-06-17",
+      "status": "available"
+    }
   ],
   "itinerary": [
     {
@@ -134,7 +149,7 @@
       },
       "tags": [
         {
-          "ar": "مرشد عربي",
+          "ar": "مرشد بالعربية",
           "en": "Arabic-speaking guide"
         }
       ]
@@ -161,7 +176,7 @@
         "en": "To Gabala"
       },
       "description": {
-        "ar": "الطريق عبر شاماخي إلى قبالا، ثم بحيرة نوهور.",
+        "ar": "الانطلاق براً عبر شاماخي إلى قبالا، ثم زيارة بحيرة نوهور.",
         "en": "Drive via Shamakhi to Gabala, then visit Nohur Lake."
       },
       "tags": [
@@ -218,14 +233,14 @@
       "en": "Airport transfers"
     },
     {
-      "ar": "جولات يومية بمرشد عربي",
+      "ar": "جولات يومية بمرشد يتحدث العربية",
       "en": "Daily tours with an Arabic-speaking guide"
     }
   ],
   "excludes": [
     {
-      "ar": "رسوم التأشيرة الإلكترونية",
-      "en": "E-visa fees"
+      "ar": "رسوم التأشيرة",
+      "en": "Visa fees"
     },
     {
       "ar": "تذاكر التلفريك",
@@ -237,5 +252,14 @@
     }
   ],
   "order": 5,
-  "featured": false
+  "seo": {
+    "title": {
+      "ar": "باقة أذربيجان: باكو وقبالا 6 أيام",
+      "en": "Azerbaijan Package: Baku & Gabala"
+    },
+    "description": {
+      "ar": "سفرة باكو وقبالا 6 أيام من بغداد: فنادق 4 نجوم مع الإفطار، جولات يومية بمرشد يتحدث العربية وتلفريك توفنداغ. ابتداءً من {price} د.ع للشخص.",
+      "en": "6-day Baku & Gabala package from Baghdad: 4-star hotels with breakfast, daily Arabic-speaking guided tours and the Tufandag cable car. From IQD {price}."
+    }
+  }
 }

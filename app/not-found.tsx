@@ -4,7 +4,6 @@ import { alexandria, manrope, plexArabic } from './fonts';
 
 export const metadata: Metadata = {
   title: 'الصفحة غير موجودة · Page not found | أريحا Ariha',
-  robots: { index: false },
 };
 
 /**
@@ -32,14 +31,22 @@ export default function NotFound() {
             <p className="mx-auto mb-3 max-w-[480px] text-lg leading-[1.9] font-light text-mist">
               ربما تغيّر الرابط أو انتهى العرض. لكن رحلتك القادمة ما زالت بانتظارك.
             </p>
-            <p dir="ltr" lang="en" className="mx-auto mb-10 max-w-[480px] font-latin text-base leading-[1.8] text-fog">
+            <p
+              dir="ltr"
+              lang="en"
+              className="mx-auto mb-10 max-w-[480px] font-latin text-base leading-[1.8] text-fog"
+            >
               This page doesn’t exist. The link may have changed or the offer may have ended.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link href="/ar/" className={`${cta} bg-gold text-ink hover:bg-sand`}>
                 العودة إلى الرئيسية
               </Link>
-              <Link href="/en/" lang="en" className={`${cta} border border-ivory/40 font-latin text-ivory hover:border-ivory`}>
+              <Link
+                href="/en/"
+                lang="en"
+                className={`${cta} border border-ivory/40 font-latin text-ivory hover:border-ivory`}
+              >
                 Back to home
               </Link>
             </div>

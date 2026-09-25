@@ -19,8 +19,8 @@
   },
   "highlights": [
     {
-      "ar": "فندق 4 نجوم",
-      "en": "4-star hotel"
+      "ar": "فنادق 4 نجوم",
+      "en": "4-star hotels"
     },
     {
       "ar": "استقبال وتوديع",
@@ -118,11 +118,26 @@
     }
   ],
   "departures": [
-    "2026-10-08",
-    "2027-05-06",
-    "2027-06-03",
-    "2027-07-01",
-    "2027-08-05"
+    {
+      "date": "2026-10-08",
+      "status": "available"
+    },
+    {
+      "date": "2027-05-06",
+      "status": "available"
+    },
+    {
+      "date": "2027-06-03",
+      "status": "available"
+    },
+    {
+      "date": "2027-07-01",
+      "status": "available"
+    },
+    {
+      "date": "2027-08-05",
+      "status": "available"
+    }
   ],
   "itinerary": [
     {
@@ -263,5 +278,14 @@
     }
   ],
   "order": 3,
-  "featured": false
+  "seo": {
+    "title": {
+      "ar": "باقة جورجيا: تبليسي وباتومي 6 أيام",
+      "en": "Georgia Package: Tbilisi & Batumi"
+    },
+    "description": {
+      "ar": "باقة جورجيا 6 أيام من بغداد: تبليسي وكازبيجي وباتومي، فنادق 4 نجوم مع الإفطار، جولة خاصة واستقبال وتوديع. ابتداءً من {price} د.ع للشخص.",
+      "en": "6-day Georgia package from Baghdad: Tbilisi, Kazbegi and Batumi, 4-star hotels with breakfast, private Kazbegi tour and transfers. From IQD {price}."
+    }
+  }
 }

@@ -12,7 +12,7 @@
   },
   "description": {
     "ar": "تبليسي بأزقتها القديمة وحماماتها الكبريتية، وكازبيجي بجبالها المهيبة، وباتومي على ساحل البحر الأسود. جورجيا قريبة وسهلة ومناسبة لمحبي الطبيعة والطقس اللطيف.",
-    "en": "Tbilisi with its old lanes and sulphur baths, Kazbegi with its majestic peaks, and Batumi on the Black Sea coast. Georgia is close, easy and perfect for nature lovers and mild weather."
+    "en": "Tbilisi with its old lanes and sulphur baths, Kazbegi with its majestic peaks, and Batumi on the Black Sea coast. Georgia is close and easy – perfect for nature lovers and anyone seeking mild weather."
   },
   "bestSeason": {
     "ar": "أيار — تشرين الأول",
@@ -28,5 +28,33 @@
     "creditUrl": "https://unsplash.com/@imangm"
   },
   "homeLayout": "mid",
-  "order": 3
+  "order": 3,
+  "glance": {
+    "flightTime": {
+      "ar": "حوالي ساعتين إلى ساعتين ونصف طيران",
+      "en": "About 2–2.5 hours’ flying"
+    },
+    "currency": {
+      "ar": "اللاري الجورجي",
+      "en": "Georgian lari"
+    },
+    "language": {
+      "ar": "الجورجية، والروسية والإنجليزية منتشرتان",
+      "en": "Georgian; Russian and English widely used"
+    },
+    "timeDifference": {
+      "ar": "ساعة واحدة أكثر من بغداد",
+      "en": "One hour ahead of Baghdad"
+    }
+  },
+  "seo": {
+    "title": {
+      "ar": "سفرات جورجيا من بغداد: باقات وأسعار",
+      "en": "Georgia holidays from Baghdad"
+    },
+    "description": {
+      "ar": "عروض جورجيا من بغداد: تبليسي وكازبيجي وباتومي بفنادق 4 نجوم وجولات خاصة. أفضل وقت للزيارة من أيار إلى تشرين الأول.",
+      "en": "Georgia holidays from Baghdad: Tbilisi, Kazbegi and Batumi with 4-star hotels and private tours. Best time to visit: May to October."
+    }
+  }
 }

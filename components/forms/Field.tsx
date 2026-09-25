@@ -11,6 +11,7 @@ type Common = {
   dark?: boolean;
   full?: boolean;
   hideLabel?: boolean;
+  required?: boolean;
 };
 
 function useFieldProps(name: string, errors: FieldErrors) {
@@ -31,6 +32,7 @@ function Wrapper({
   full,
   dark,
   hideLabel,
+  required,
   message,
   errorId,
   children,
@@ -40,18 +42,32 @@ function Wrapper({
   full?: boolean;
   dark?: boolean;
   hideLabel?: boolean;
+  required?: boolean;
   message: string | null;
   errorId: string;
   children: React.ReactNode;
 }) {
   return (
     <div className={`flex flex-col gap-2 ${full ? 'col-span-full' : ''}`}>
-      <label htmlFor={id} className={hideLabel ? 'sr-only' : `text-[13px] ${dark ? 'text-fog' : 'text-muted'}`}>
+      <label
+        htmlFor={id}
+        className={hideLabel ? 'sr-only' : `text-[13.5px] ${dark ? 'text-mist' : 'text-muted-2'}`}
+      >
         {label}
+        {required && (
+          <span className="text-bronze" aria-hidden="true">
+            {' '}
+            *
+          </span>
+        )}
       </label>
       {children}
       {message && (
-        <span id={errorId} role="alert" className={`text-[13px] ${dark ? 'text-[#f2b8b5]' : 'text-[#b3261e]'}`}>
+        <span
+          id={errorId}
+          role="alert"
+          className={`text-[13px] ${dark ? 'text-[#f2b8b5]' : 'text-[#b3261e]'}`}
+        >
           {message}
         </span>
       )}
@@ -84,34 +100,35 @@ export function TextField({
         dir={dir}
         autoComplete={autoComplete}
         inputMode={inputMode}
+        aria-required={props.required || undefined}
         aria-invalid={f.invalid}
         aria-describedby={f.invalid ? f.errorId : undefined}
-        className={`field ${props.dark ? 'field-dark' : ''} ${dir === 'ltr' ? 'text-end font-latin' : ''}`}
+        className={`field ${props.dark ? 'field-dark' : ''} ${dir === 'ltr' ? 'font-latin rtl:text-end' : ''}`}
       />
     </Wrapper>
   );
 }
 
 export function PhoneField(props: Common & { placeholder: string }) {
-  return (
-    <TextField
-      {...props}
-      type="tel"
-      dir="ltr"
-      inputMode="tel"
-      autoComplete="tel"
-    />
-  );
+  return <TextField {...props} type="tel" dir="ltr" inputMode="tel" autoComplete="tel" />;
 }
 
-export function SelectField({ options, defaultValue, ...props }: Common & { options: string[]; defaultValue?: string }) {
+export function SelectField({
+  options,
+  defaultValue,
+  value,
+  onChange,
+  ...props
+}: Common & { options: string[]; defaultValue?: string; value?: string; onChange?: (v: string) => void }) {
   const f = useFieldProps(props.name, props.errors);
   return (
     <Wrapper {...f} {...props}>
       <select
         id={f.id}
         name={props.name}
-        defaultValue={defaultValue}
+        defaultValue={value === undefined ? defaultValue : undefined}
+        value={value}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         className={`field ${props.dark ? 'field-dark' : ''}`}
       >
         {options.map((o) => (
@@ -133,6 +150,7 @@ export function TextAreaField(props: Common & { placeholder?: string; rows?: num
         name={props.name}
         rows={props.rows ?? 3}
         placeholder={props.placeholder}
+        aria-required={props.required || undefined}
         aria-invalid={f.invalid}
         aria-describedby={f.invalid ? f.errorId : undefined}
         className={`field resize-y ${props.dark ? 'field-dark' : ''}`}

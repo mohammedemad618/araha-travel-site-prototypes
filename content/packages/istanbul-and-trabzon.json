@@ -33,7 +33,7 @@
   ],
   "lead": {
     "ar": "أربعة أيام بين مساجد إسطنبول وأسواقها ومياه البوسفور، ثم أربعة أخرى في هضاب طرابزون الخضراء حيث الضباب والبحيرات والهواء البارد.",
-    "en": "Four days among the mosques, bazaars and waters of Istanbul, then four more in the green highlands of Trabzon—mist, lakes and cool mountain air."
+    "en": "Four days among the mosques, bazaars and waters of Istanbul, then four more in the green highlands of Trabzon – mist, lakes and cool mountain air."
   },
   "overview": {
     "ar": "برنامج متوازن بين الجولات المنظمة والوقت الحر، مناسب للعائلات والأزواج. الإقامة في فنادق 4 نجوم مختارة في مواقع مركزية، مع مرشد يتحدث العربية طوال الجولات، وفريقنا على واتساب على مدار الرحلة.",
@@ -127,11 +127,26 @@
     }
   ],
   "departures": [
-    "2027-06-12",
-    "2027-06-26",
-    "2027-07-10",
-    "2027-07-24",
-    "2027-08-07"
+    {
+      "date": "2027-06-12",
+      "status": "available"
+    },
+    {
+      "date": "2027-06-26",
+      "status": "available"
+    },
+    {
+      "date": "2027-07-10",
+      "status": "available"
+    },
+    {
+      "date": "2027-07-24",
+      "status": "available"
+    },
+    {
+      "date": "2027-08-07",
+      "status": "available"
+    }
   ],
   "itinerary": [
     {
@@ -160,12 +175,12 @@
         "en": "Istanbul city tour"
       },
       "description": {
-        "ar": "جولة في المدينة القديمة: آيا صوفيا، جامع السلطان أحمد، ميدان السلطان أحمد، ثم البازار الكبير.",
+        "ar": "جولة في المدينة القديمة: آيا صوفيا، والجامع الأزرق (جامع السلطان أحمد) وميدانه التاريخي، ثم البازار الكبير.",
         "en": "Old city tour: Hagia Sophia, the Blue Mosque, Sultanahmet Square and the Grand Bazaar."
       },
       "tags": [
         {
-          "ar": "مرشد عربي",
+          "ar": "مرشد بالعربية",
           "en": "Arabic-speaking guide"
         },
         {
@@ -220,7 +235,7 @@
         "en": "Fly to Trabzon"
       },
       "description": {
-        "ar": "رحلة داخلية قصيرة إلى طرابزون، الاستقبال ثم التوجه إلى بحيرة أوزنجول وسط الغابات.",
+        "ar": "رحلة داخلية قصيرة إلى طرابزون، ثم الاستقبال والانطلاق إلى بحيرة أوزنجول وسط الغابات.",
         "en": "A short domestic flight to Trabzon, then a drive to Uzungöl lake in the heart of the forest."
       },
       "tags": [
@@ -339,10 +354,19 @@
       "en": "Personal expenses and tips"
     }
   ],
-  "featured": false,
   "badge": {
     "ar": "عرض الصيف",
     "en": "Summer offer"
   },
-  "order": 2
+  "order": 2,
+  "seo": {
+    "title": {
+      "ar": "سفرة إسطنبول وطرابزون 8 أيام من بغداد",
+      "en": "Istanbul & Trabzon: 8-Day Package"
+    },
+    "description": {
+      "ar": "سفرة صيفية 8 أيام من بغداد: إسطنبول وطرابزون وأوزنجول وهضبة أيدر، فنادق 4 نجوم وطيران داخلي ومرشد يتحدث العربية. ابتداءً من {price} د.ع.",
+      "en": "8-day summer trip from Baghdad: Istanbul, Trabzon, Uzungöl and Ayder, 4-star hotels, domestic flight and Arabic-speaking guides. From IQD {price}."
+    }
+  }
 }

@@ -2,7 +2,7 @@
   "name": "ariha-travel",
   "version": "1.0.0",
   "private": true,
-  "description": "Ariha Travel & Tourism — bilingual (AR/EN) website built with Next.js",
+  "description": "Ariha Travel & Tourism \u2014 bilingual (AR/EN) website built with Next.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,6 +16,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "lucide-react": "^1.48.0",
     "next": "^15.5.26",
     "next-intl": "^4.14.7",
     "react": "^19.3.0",
@@ -24,6 +25,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3.3.7",
     "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4.3.3",
@@ -37,5 +39,16 @@
     "serve": "^14.2.6",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
+  },
+  "browserslist": [
+    "chrome 111",
+    "edge 111",
+    "firefox 111",
+    "safari 16.4"
+  ],
+  "overrides": {
+    "next": {
+      "postcss": "^8.5.10"
+    }
   }
 }

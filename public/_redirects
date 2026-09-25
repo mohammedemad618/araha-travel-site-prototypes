@@ -7,3 +7,7 @@
 /home.dc                    /ar/                                301!
 /Package%20Details.dc.html  /ar/packages/istanbul-and-trabzon/  301!
 /package%20details.dc       /ar/packages/istanbul-and-trabzon/  301!
+
+# Unknown pages get the "not found" page in their own language (with a real 404 status).
+/ar/*   /ar/404/   404
+/en/*   /en/404/   404

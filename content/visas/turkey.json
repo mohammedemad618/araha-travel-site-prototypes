@@ -1,0 +1,52 @@
+{
+  "destination": "turkey",
+  "status": "visa-required",
+  "summary": {
+    "ar": "يحتاج حامل الجواز العراقي إلى تأشيرة لزيارة تركيا، ويُقدَّم الطلب حضورياً عبر VFS Global في العراق. يُعفى من هم دون 15 عاماً أو فوق 50 عاماً.",
+    "en": "Iraqi passport holders need a visa for Türkiye, applied for in person via VFS Global in Iraq. Travellers under 15 or over 50 are visa-exempt."
+  },
+  "howToApply": {
+    "ar": "احجز موعداً وقدّم طلبك حضورياً مع أخذ البصمة في أحد مراكز VFS Global: بغداد، أربيل، البصرة، الموصل أو دهوك. منذ 7 نيسان 2026 أصبحت VFS Global الجهة الوحيدة المعتمدة لقبول طلبات التأشيرة التركية في العراق.",
+    "en": "Book an appointment and apply in person (with fingerprints) at a VFS Global centre in Baghdad, Erbil, Basra, Mosul or Duhok. Since 7 April 2026, VFS Global is the only accepted channel for Turkish visa applications in Iraq."
+  },
+  "processingTime": {
+    "ar": "عادةً من 5 إلى 15 يوم عمل، وقد تطول في موسم الصيف.",
+    "en": "Typically 5–15 working days; longer in the summer peak."
+  },
+  "stay": {
+    "ar": "حسب المدة المدوّنة على التأشيرة. المعفَون (دون 15 أو فوق 50 عاماً) يمكنهم البقاء حتى 90 يوماً خلال كل 180 يوماً.",
+    "en": "As stated on the visa. Exempt travellers (under 15 or over 50) may stay up to 90 days in any 180-day period."
+  },
+  "exemptions": [
+    {
+      "ar": "حاملو الجواز العراقي العادي دون 15 عاماً أو فوق 50 عاماً، لأغراض السياحة أو الترانزيت (منذ 1 أيلول 2024).",
+      "en": "Ordinary Iraqi passport holders under 15 or over 50, travelling for tourism or transit (since 1 September 2024)."
+    },
+    {
+      "ar": "من يحمل تأشيرة أو إقامة سارية من دول شنغن أو الولايات المتحدة أو بريطانيا أو إيرلندا قد يحق له التقديم على التأشيرة الإلكترونية التركية بدلاً من ذلك (لا تُقبل التأشيرات أو الإقامات الإلكترونية كوثيقة داعمة).",
+      "en": "Holders of a valid visa or residence permit from a Schengen country, the US, the UK or Ireland may qualify for a Turkish e-visa instead (e-visas and e-residence permits do not count)."
+    }
+  ],
+  "documents": [
+    { "ar": "جواز سفر ساري المفعول لمدة 6 أشهر على الأقل مع صفحات فارغة", "en": "Passport valid for at least 6 months, with blank pages" },
+    { "ar": "استمارة الطلب وتأكيد موعد VFS", "en": "Application form and VFS appointment confirmation" },
+    { "ar": "صور شخصية بايومترية حديثة بخلفية بيضاء", "en": "Recent biometric photos on a white background" },
+    { "ar": "البطاقة الوطنية الموحدة وما يثبت السكن", "en": "Iraqi national ID card and proof of address" },
+    { "ar": "كشف حساب مصرفي لآخر 3–6 أشهر", "en": "Bank statement for the last 3–6 months" },
+    { "ar": "تأييد عمل أو مستمسكات النشاط التجاري", "en": "Employment letter or business documents" },
+    { "ar": "حجز طيران ذهاب وعودة وحجز فندق", "en": "Return flight and hotel booking" },
+    { "ar": "تأمين صحي للسفر يغطي مدة الرحلة", "en": "Travel health insurance for the whole trip" }
+  ],
+  "notes": {
+    "ar": "لا تعالج السفارة التركية الطلبات المقدَّمة عبر أي جهة غير VFS Global. رسوم السفارة ورسوم خدمة VFS تُحدَّد عند التقديم. احذر من المواقع التي تعرض «فيزا إلكترونية تركية» للجواز العراقي دون تأشيرة داعمة.",
+    "en": "The Turkish embassy does not process applications submitted through anyone other than VFS Global. Embassy and VFS service fees are confirmed at application. Beware of sites offering Turkish e-visas to Iraqi passports without a supporting visa."
+  },
+  "officialUrl": "https://visa.vfsglobal.com/irq/en/tur",
+  "sources": [
+    "https://www.rudawarabia.net/arabic/categories/iraq/948649",
+    "https://thenewregion.com/posts/825/turkish-president-decree-waives-visa-fee-for-iraqis-under-15-and-above-50-years-old",
+    "https://en.wikipedia.org/wiki/Visa_policy_of_Turkey",
+    "https://www.rahal.net/blog/2026-vfs"
+  ],
+  "lastVerified": "2026-09-25"
+}

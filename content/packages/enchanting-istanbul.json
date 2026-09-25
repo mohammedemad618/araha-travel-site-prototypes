@@ -37,7 +37,7 @@
   },
   "overview": {
     "ar": "إقامة مريحة في قلب إسطنبول مع جولات منظمة لأهم المعالم، ويوم كامل في بورصة أو سابانجا، وأوقات حرة للتسوق في نيشان تاشي والبازار الكبير. برنامج مثالي لأول زيارة إلى تركيا.",
-    "en": "A comfortable stay in central Istanbul with guided tours of the main sights, a full day in Bursa or Sapanca, and free time for shopping in Nişantaşı and the Grand Bazaar. The perfect first visit to Türkiye."
+    "en": "A comfortable stay in central Istanbul with guided tours of the main sights, a full day in Bursa or Sapanca, and free time for shopping in Nişantaşı and the Grand Bazaar. Ideal for a first visit to Türkiye."
   },
   "facts": {
     "route": {
@@ -118,11 +118,26 @@
     }
   ],
   "departures": [
-    "2026-10-15",
-    "2026-11-05",
-    "2026-12-20",
-    "2027-03-25",
-    "2027-04-15"
+    {
+      "date": "2026-10-15",
+      "status": "available"
+    },
+    {
+      "date": "2026-11-05",
+      "status": "available"
+    },
+    {
+      "date": "2026-12-20",
+      "status": "available"
+    },
+    {
+      "date": "2027-03-25",
+      "status": "available"
+    },
+    {
+      "date": "2027-04-15",
+      "status": "available"
+    }
   ],
   "itinerary": [
     {
@@ -147,12 +162,12 @@
         "en": "The old city"
       },
       "description": {
-        "ar": "آيا صوفيا، الجامع الأزرق، قصر توبكابي، والبازار الكبير بصحبة مرشد عربي.",
+        "ar": "آيا صوفيا، الجامع الأزرق، قصر توبكابي، والبازار الكبير بصحبة مرشد يتحدث العربية.",
         "en": "Hagia Sophia, the Blue Mosque, Topkapı Palace and the Grand Bazaar with an Arabic-speaking guide."
       },
       "tags": [
         {
-          "ar": "مرشد عربي",
+          "ar": "مرشد بالعربية",
           "en": "Arabic-speaking guide"
         }
       ]
@@ -282,10 +297,19 @@
       "en": "Personal expenses"
     }
   ],
-  "featured": true,
   "badge": {
     "ar": "الأكثر طلباً هذا الموسم",
     "en": "Most requested this season"
   },
-  "order": 1
+  "order": 1,
+  "seo": {
+    "title": {
+      "ar": "باقة إسطنبول 7 أيام من بغداد",
+      "en": "7-Day Istanbul Package from Baghdad"
+    },
+    "description": {
+      "ar": "باقة إسطنبول 7 أيام من بغداد: طيران ذهاباً وإياباً، فندق 4 نجوم مع الإفطار، جولات بمرشد يتحدث العربية ورحلة البوسفور. ابتداءً من {price} د.ع.",
+      "en": "7-day Istanbul package from Baghdad: return flights, 4-star hotel with breakfast, Arabic-speaking guided tours and a Bosphorus cruise. From IQD {price}."
+    }
+  }
 }

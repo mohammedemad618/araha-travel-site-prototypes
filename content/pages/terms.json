@@ -3,7 +3,10 @@
     "ar": "الشروط والأحكام",
     "en": "Terms & conditions"
   },
-  "eyebrow": "TERMS",
+  "eyebrow": {
+    "ar": "الشروط",
+    "en": "TERMS"
+  },
   "intro": {
     "ar": "الشروط العامة للحجز مع أريحا للسياحة والسفر. تُرسل الشروط الخاصة بكل حجز كتابياً قبل التأكيد.",
     "en": "General booking terms with Ariha Travel & Tourism. The specific terms of each booking are sent to you in writing before confirmation."
@@ -45,13 +48,83 @@
         "en": "Documents and visas"
       },
       "body": {
-        "ar": "على المسافر التأكد من صلاحية جواز السفر لستة أشهر على الأقل. نساعد في إجراءات التأشيرة، لكن قرار منحها يعود للجهة المختصة.",
-        "en": "Travellers must hold a passport valid for at least six months. We assist with visa procedures, but the decision to grant a visa rests with the relevant authority."
+        "ar": "على المسافر التأكد من أن جواز سفره صالح لستة أشهر على الأقل من تاريخ السفر، ومن استيفاء متطلبات الدخول لكل وجهة (مثل التأمين الصحي الإلزامي في بعض الدول). نساعد في إجراءات التأشيرة، لكن قرار منحها أو رفضها يعود للجهة المختصة وحدها.",
+        "en": "Travellers must hold a passport valid for at least six months from the travel date and meet each destination’s entry requirements (such as mandatory health insurance in some countries). We assist with visa procedures, but the decision to grant or refuse a visa rests solely with the relevant authority."
+      }
+    },
+    {
+      "heading": {
+        "ar": "الاسترداد",
+        "en": "Refunds"
+      },
+      "body": {
+        "ar": "تُحسب المبالغ المستردة وفق شروط الإلغاء المذكورة في عرض الحجز، وتُدفع بالطريقة نفسها التي دُفع بها المبلغ ما أمكن. رسوم التأشيرة وبعض تذاكر الطيران غير قابلة للاسترداد.",
+        "en": "Refunds are calculated under the cancellation terms in your booking offer and paid, where possible, by the original payment method. Visa fees and some airfares are non-refundable."
+      }
+    },
+    {
+      "heading": {
+        "ar": "التأمين الصحي",
+        "en": "Travel insurance"
+      },
+      "body": {
+        "ar": "ننصح بشدة بتأمين سفر يغطي العلاج والإلغاء، وهو إلزامي لدخول بعض الدول. لا يشمل سعر الباقة التأمين ما لم يُذكر ذلك صراحة.",
+        "en": "We strongly recommend travel insurance covering medical care and cancellation; some countries require it for entry. Package prices do not include insurance unless stated."
+      }
+    },
+    {
+      "heading": {
+        "ar": "تغييرات البرنامج",
+        "en": "Changes to your programme"
+      },
+      "body": {
+        "ar": "قد نضطر لتعديل ترتيب الجولات أو استبدال فندق بآخر من الفئة نفسها لأسباب تشغيلية، ونبلغك بذلك مسبقاً قدر الإمكان.",
+        "en": "For operational reasons we may change the order of tours or replace a hotel with another of the same category, and will tell you in advance wherever possible."
+      }
+    },
+    {
+      "heading": {
+        "ar": "المسؤولية",
+        "en": "Liability"
+      },
+      "body": {
+        "ar": "نعمل وسيطاً بينك وبين شركات الطيران والفنادق ومزودي الخدمات المحليين، ولا نتحمل مسؤولية تأخير الرحلات أو إلغائها من قِبل شركات الطيران، أو فقدان الأمتعة، أو ما يقع بسبب مخالفة المسافر لقوانين بلد الوجهة. ونبذل كل جهد لمساعدتك في أي طارئ.",
+        "en": "We act as an intermediary between you and airlines, hotels and local suppliers, and are not liable for airline delays or cancellations, lost baggage, or consequences of a traveller breaking local laws. We will always do our best to help you in any emergency."
+      }
+    },
+    {
+      "heading": {
+        "ar": "القوة القاهرة",
+        "en": "Force majeure"
+      },
+      "body": {
+        "ar": "لا نتحمل مسؤولية تعذّر تنفيذ الخدمات بسبب ظروف خارجة عن إرادتنا، كإغلاق الأجواء أو الحروب أو الأوبئة أو الكوارث الطبيعية أو القرارات الحكومية، ونسعى في هذه الحالات لإيجاد بديل أو استرداد ما يمكن استرداده من المزودين.",
+        "en": "We are not liable for services that cannot be provided because of circumstances beyond our control, such as airspace closures, conflict, epidemics, natural disasters or government decisions; in such cases we will seek an alternative or recover what we can from suppliers."
+      }
+    },
+    {
+      "heading": {
+        "ar": "الشكاوى",
+        "en": "Complaints"
+      },
+      "body": {
+        "ar": "أبلغنا بأي مشكلة أثناء الرحلة فوراً عبر واتساب أو مندوبنا لنعالجها في حينها. ويمكن تقديم الشكاوى بعد العودة كتابياً، ونرد عليها في أقرب وقت.",
+        "en": "Tell us about any problem during your trip straight away on WhatsApp or through our representative so we can fix it on the spot. Complaints after your return can be made in writing, and we will reply as soon as possible."
+      }
+    },
+    {
+      "heading": {
+        "ar": "الصور والقانون الحاكم",
+        "en": "Images and governing law"
+      },
+      "body": {
+        "ar": "الصور المعروضة على الموقع توضيحية. تخضع هذه الشروط للقوانين النافذة في جمهورية العراق، وتختص محاكم بغداد بالنظر في أي نزاع.",
+        "en": "Images on this website are illustrative. These terms are governed by the laws of the Republic of Iraq, and the courts of Baghdad have jurisdiction over any dispute."
       }
     }
   ],
   "seoDescription": {
-    "ar": "الشروط والأحكام العامة للحجز مع أريحا للسياحة والسفر.",
-    "en": "General booking terms and conditions with Ariha Travel & Tourism."
+    "ar": "الشروط والأحكام العامة للحجز مع أريحا للسياحة والسفر: الأسعار والدفع والإلغاء والتعديل والتأشيرات ووثائق السفر والمسؤولية.",
+    "en": "Ariha Travel & Tourism booking terms: prices, deposits and payment, cancellations and changes, visas, travel documents and liability."
   }
 }

@@ -1,7 +1,17 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n/routing';
-import { getDestinations, getHome, getPackage, getPackages, getSite, getTestimonials } from '@/lib/content';
+import {
+  getDestinations,
+  getHome,
+  getPackage,
+  getPackages,
+  getSite,
+  getVerifiedTestimonials,
+  offerIsActive,
+  upcomingDepartures,
+} from '@/lib/content';
+import { formatDate } from '@/lib/format';
 import { pageMetadata } from '@/lib/seo';
 import { Hero } from '@/components/sections/Hero';
 import {
@@ -14,8 +24,10 @@ import {
   Services,
   Stories,
   TravelStyles,
+  TrustBar,
   WhyUs,
 } from '@/components/sections/HomeSections';
+import { toSummary } from '@/components/package/PackageCard';
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -43,22 +55,44 @@ export default async function HomePage({ params }: Props) {
   const destMap = new Map(destinations.map((d) => [d.slug, d]));
   const packages = getPackages();
 
-  const featured = getPackage(home.featuredPackage) ?? packages[0]!;
-  const offerPkg = getPackage(home.offer.package) ?? featured;
-  const others = packages.filter((p) => p.slug !== featured.slug && p.slug !== offerPkg.slug).slice(0, 5);
+  // getHome() guarantees both references exist.
+  const featured = getPackage(home.featuredPackage)!;
+  const offerPkg = getPackage(home.offer.package)!;
+  const showOffer = offerIsActive(home.offer.validUntil);
+  const others = packages
+    .filter((p) => p.slug !== featured.slug && (!showOffer || p.slug !== offerPkg.slug))
+    .slice(0, 5);
+  const nextDepartures = Object.fromEntries(
+    packages.map((p) => {
+      const next = upcomingDepartures(p).find((d) => d.status !== 'soldout');
+      return [p.slug, next ? formatDate(next.date, locale) : undefined];
+    }),
+  );
 
   return (
     <>
       <IntroLoader />
       <Hero hero={home.hero} />
-      <TravelStyles styles={home.styles} locale={locale} />
-      <FeaturedPackages featured={featured} others={others} destinations={destMap} locale={locale} />
+      <TrustBar points={home.trustPoints} site={site} locale={locale} />
+      <FeaturedPackages
+        featured={featured}
+        others={others.map(toSummary)}
+        destinations={destMap}
+        nextDepartures={nextDepartures}
+        locale={locale}
+      />
+      {showOffer && <SeasonalOffer offer={home.offer} pkg={offerPkg} locale={locale} />}
       <DestinationsGrid destinations={destinations} locale={locale} />
+      <TravelStyles styles={home.styles} locale={locale} />
       <Services services={home.services} locale={locale} />
-      <CustomTrip />
-      <SeasonalOffer offer={home.offer} pkg={offerPkg} locale={locale} />
+      <CustomTrip phone={site.phone} />
       <WhyUs benefits={home.benefits} locale={locale} />
-      <Stories stories={getTestimonials()} destinations={destMap} locale={locale} />
+      <Stories
+        stories={getVerifiedTestimonials()}
+        destinations={destMap}
+        locale={locale}
+        reviewsUrl={site.trust.googleMapsUrl}
+      />
       <FinalCta image={home.finalImage} locale={locale} phone={site.phone} />
     </>
   );

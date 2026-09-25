@@ -46,11 +46,13 @@ export default async function FaqPage({ params }: Props) {
                     +
                   </span>
                 </summary>
-                <p className="m-0 max-w-[720px] pb-7.5 text-base leading-[1.95] text-muted">{f.answer[locale]}</p>
+                <p className="m-0 max-w-[720px] pb-7.5 text-base leading-[1.95] text-muted">
+                  {f.answer[locale]}
+                </p>
               </details>
             ))}
           </div>
-          <aside className="rounded-[2px] bg-ink p-8 text-ivory lg:sticky lg:top-[104px]">
+          <aside data-fab-avoid className="rounded-[2px] bg-ink p-8 text-ivory lg:sticky lg:top-[104px]">
             <h2 className="m-0 mb-6 font-display text-[26px] font-medium">{t('more')}</h2>
             <OpenWhatsAppButton className="flex w-full items-center justify-between rounded-[1px] bg-gold px-5 py-4 text-[15.5px] font-medium text-ink">
               {tn('contact')} <Arrow />

@@ -28,5 +28,33 @@
     "creditUrl": "https://unsplash.com/@david__r"
   },
   "homeLayout": "mid",
-  "order": 2
+  "order": 2,
+  "glance": {
+    "flightTime": {
+      "ar": "حوالي ساعتين ونصف طيران",
+      "en": "About 2.5 hours’ flying"
+    },
+    "currency": {
+      "ar": "الدرهم الإماراتي",
+      "en": "UAE dirham"
+    },
+    "language": {
+      "ar": "العربية، والإنجليزية منتشرة",
+      "en": "Arabic; English widely spoken"
+    },
+    "timeDifference": {
+      "ar": "ساعة واحدة أكثر من بغداد",
+      "en": "One hour ahead of Baghdad"
+    }
+  },
+  "seo": {
+    "title": {
+      "ar": "سفرات دبي والإمارات من بغداد",
+      "en": "Dubai & UAE holidays from Baghdad"
+    },
+    "description": {
+      "ar": "عروض دبي من بغداد: فنادق 5 نجوم، سفاري الصحراء، التسوق وبرج خليفة. أفضل وقت للزيارة من تشرين الأول إلى نيسان.",
+      "en": "Dubai holidays from Baghdad: 5-star hotels, desert safaris, shopping and Burj Khalifa. Best time to visit: October to April."
+    }
+  }
 }

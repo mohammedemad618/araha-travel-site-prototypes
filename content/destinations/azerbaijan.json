@@ -28,5 +28,33 @@
     "creditUrl": "https://unsplash.com/@iamllwyd"
   },
   "homeLayout": "mid",
-  "order": 4
+  "order": 4,
+  "glance": {
+    "flightTime": {
+      "ar": "حوالي ساعتين طيران",
+      "en": "About 2 hours’ flying"
+    },
+    "currency": {
+      "ar": "المانات الأذربيجاني",
+      "en": "Azerbaijani manat"
+    },
+    "language": {
+      "ar": "الأذربيجانية، والروسية منتشرة",
+      "en": "Azerbaijani; Russian widely spoken"
+    },
+    "timeDifference": {
+      "ar": "ساعة واحدة أكثر من بغداد",
+      "en": "One hour ahead of Baghdad"
+    }
+  },
+  "seo": {
+    "title": {
+      "ar": "سفرات أذربيجان وباكو من بغداد",
+      "en": "Azerbaijan holidays from Baghdad"
+    },
+    "description": {
+      "ar": "سفرة باكو وقبالا من بغداد: المدينة القديمة وأبراج اللهب والجبال والتلفريك، بفنادق 4 نجوم ومرشد يتحدث العربية وأسعار مناسبة.",
+      "en": "Baku and Gabala holidays from Baghdad: the old city, Flame Towers, mountains and cable cars, with 4-star hotels and Arabic-speaking guides."
+    }
+  }
 }

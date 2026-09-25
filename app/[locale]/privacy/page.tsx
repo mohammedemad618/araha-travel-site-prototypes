@@ -22,8 +22,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PrivacyPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return (
-    <ContentPage page={getPage('privacy')} locale={locale}>
-    </ContentPage>
-  );
+  return <ContentPage page={getPage('privacy')} locale={locale}></ContentPage>;
 }

@@ -23,7 +23,7 @@
       "en": "All-inclusive resort"
     },
     {
-      "ar": "غوص في رأس محمد",
+      "ar": "سنوركل في رأس محمد",
       "en": "Snorkelling at Ras Mohammed"
     }
   ],
@@ -41,7 +41,7 @@
       "en": "Sharm El Sheikh"
     },
     "stay": {
-      "ar": "منتجع 5 نجوم شامل",
+      "ar": "منتجع 5 نجوم شامل كلياً",
       "en": "5-star all-inclusive"
     },
     "flights": {
@@ -53,8 +53,8 @@
       "en": "October – May"
     },
     "group": {
-      "ar": "خاص أو مجموعات",
-      "en": "Private or group"
+      "ar": "رحلة خاصة أو ضمن مجموعة",
+      "en": "Private or small group"
     }
   },
   "image": {
@@ -87,11 +87,26 @@
     }
   ],
   "departures": [
-    "2026-10-10",
-    "2026-11-14",
-    "2026-12-26",
-    "2027-02-06",
-    "2027-03-20"
+    {
+      "date": "2026-10-10",
+      "status": "available"
+    },
+    {
+      "date": "2026-11-14",
+      "status": "available"
+    },
+    {
+      "date": "2026-12-26",
+      "status": "available"
+    },
+    {
+      "date": "2027-02-06",
+      "status": "available"
+    },
+    {
+      "date": "2027-03-20",
+      "status": "available"
+    }
   ],
   "itinerary": [
     {
@@ -137,7 +152,7 @@
       },
       "tags": [
         {
-          "ar": "غوص",
+          "ar": "سنوركل",
           "en": "Snorkelling"
         },
         {
@@ -231,8 +246,8 @@
   ],
   "excludes": [
     {
-      "ar": "رسوم التأشيرة عند الوصول",
-      "en": "Visa on arrival fees"
+      "ar": "رسوم التأشيرة والموافقة الأمنية",
+      "en": "Visa and security clearance fees"
     },
     {
       "ar": "الأنشطة الاختيارية",
@@ -244,5 +259,14 @@
     }
   ],
   "order": 6,
-  "featured": false
+  "seo": {
+    "title": {
+      "ar": "باقة شرم الشيخ شامل كلياً 7 أيام",
+      "en": "7-Day All-Inclusive Sharm El Sheikh"
+    },
+    "description": {
+      "ar": "باقة شرم الشيخ 7 أيام من بغداد: منتجع 5 نجوم شامل كلياً على البحر الأحمر، رحلة بحرية إلى رأس محمد واستقبال وتوديع. ابتداءً من {price} د.ع.",
+      "en": "7-day Sharm El Sheikh package from Baghdad: 5-star all-inclusive Red Sea resort, Ras Mohammed boat trip and airport transfers. From IQD {price}."
+    }
+  }
 }

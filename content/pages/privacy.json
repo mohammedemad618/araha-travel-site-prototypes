@@ -3,10 +3,13 @@
     "ar": "سياسة الخصوصية",
     "en": "Privacy policy"
   },
-  "eyebrow": "PRIVACY",
+  "eyebrow": {
+    "ar": "الخصوصية",
+    "en": "PRIVACY"
+  },
   "intro": {
-    "ar": "نحترم خصوصيتك. توضح هذه الصفحة البيانات التي نجمعها عبر الموقع وكيف نستخدمها.",
-    "en": "We respect your privacy. This page explains what data we collect through this website and how we use it."
+    "ar": "نحترم خصوصيتك. توضح هذه الصفحة البيانات التي نجمعها عبر الموقع وواتساب والهاتف، وكيف نستخدمها ونحميها، وما حقوقك تجاهها.",
+    "en": "We respect your privacy. This page explains what data we collect through this website, WhatsApp and phone, how we use and protect it, and your rights."
   },
   "sections": [
     {
@@ -15,8 +18,8 @@
         "en": "Data we collect"
       },
       "body": {
-        "ar": "عند إرسال نموذج طلب رحلة أو استفسار نجمع ما تكتبه فقط: الاسم، رقم الهاتف، البريد الإلكتروني إن وُجد، وتفاصيل الرحلة.",
-        "en": "When you send a trip request or enquiry form we collect only what you enter: your name, phone number, email if provided, and trip details."
+        "ar": "عند إرسال نموذج طلب رحلة أو حجز أو استفسار نجمع ما تكتبه فقط: الاسم، رقم الهاتف، البريد الإلكتروني إن وُجد، وتفاصيل الرحلة. وإذا راسلتنا على واتساب أو اتصلت بنا نحتفظ برقمك ومحادثتك لمتابعة طلبك. وعند تأكيد الحجز قد نطلب نسخة من جواز السفر وبيانات المسافرين اللازمة لإصدار التذاكر والتأشيرات.",
+        "en": "When you send a trip request, booking or enquiry form we collect only what you enter: your name, phone number, email if provided, and trip details. If you message us on WhatsApp or call us, we keep your number and conversation to follow up on your request. When you confirm a booking we may ask for a copy of your passport and the traveller details needed to issue tickets and visas."
       }
     },
     {
@@ -25,8 +28,8 @@
         "en": "How we use it"
       },
       "body": {
-        "ar": "نستخدم بياناتك للتواصل معك بخصوص طلبك وإعداد عرض السفر فقط. لا نبيع بياناتك ولا نشاركها إلا مع مزودي الخدمة اللازمين لحجزك (شركات الطيران والفنادق).",
-        "en": "We use your data only to contact you about your request and prepare your travel offer. We never sell your data, and share it only with the suppliers needed for your booking (airlines and hotels)."
+        "ar": "نستخدم بياناتك للتواصل معك بخصوص طلبك وإعداد عرض السفر وتنفيذ حجزك. لا نبيع بياناتك، ولا نشاركها إلا مع الجهات اللازمة لتنفيذ الحجز (شركات الطيران والفنادق والشركاء المحليين وجهات إصدار التأشيرات)، ومع مزوّدي الخدمات التقنية الذين يشغّلون الموقع ويستقبلون النماذج نيابةً عنا.",
+        "en": "We use your data to contact you about your request, prepare your travel offer and carry out your booking. We never sell your data, and share it only with the parties needed to fulfil your booking (airlines, hotels, local partners and visa authorities) and with the technical providers that host this website and receive forms on our behalf."
       }
     },
     {
@@ -35,8 +38,8 @@
         "en": "Cookies and analytics"
       },
       "body": {
-        "ar": "قد نستخدم أدوات تحليل لقياس عدد الزيارات وتحسين الموقع، دون جمع معلومات تعرّف بك شخصياً.",
-        "en": "We may use analytics tools to measure visits and improve the site, without collecting information that personally identifies you."
+        "ar": "لا نستخدم ملفات تعريف ارتباط إعلانية. قد نستخدم أدوات تحليل مثل Google Analytics أو Plausible لقياس الزيارات وتحسين الموقع بصورة إجمالية لا تعرّف بك شخصياً. قد تضع Google Analytics ملفات تعريف ارتباط في متصفحك، ويمكنك حذفها أو حظرها من إعدادات المتصفح دون أن يؤثر ذلك على استخدام الموقع.",
+        "en": "We do not use advertising cookies. We may use analytics tools such as Google Analytics or Plausible to measure visits and improve the site in aggregate, without identifying you personally. Google Analytics may set cookies in your browser; you can delete or block them in your browser settings without affecting your use of the site."
       }
     },
     {
@@ -45,13 +48,63 @@
         "en": "Your rights"
       },
       "body": {
-        "ar": "يمكنك طلب الاطلاع على بياناتك أو حذفها في أي وقت بالتواصل معنا عبر الهاتف أو البريد الإلكتروني.",
-        "en": "You can ask to see or delete your data at any time by contacting us by phone or email."
+        "ar": "يمكنك في أي وقت طلب الاطلاع على بياناتك أو تصحيحها أو حذفها، أو إيقاف أي رسائل تسويقية، بالتواصل معنا عبر الهاتف أو واتساب أو البريد الإلكتروني.",
+        "en": "You can ask at any time to see, correct or delete your data, or to stop any marketing messages, by contacting us by phone, WhatsApp or email."
+      }
+    },
+    {
+      "heading": {
+        "ar": "مدة الاحتفاظ بالبيانات",
+        "en": "How long we keep data"
+      },
+      "body": {
+        "ar": "نحتفظ ببيانات الطلبات المدة اللازمة لخدمتك ومتابعة طلبك فقط، ونحتفظ ببيانات الحجوزات المؤكدة المدة التي تفرضها القوانين والتعليمات النافذة في العراق.",
+        "en": "We keep enquiry data only for as long as we need it to serve you and follow up your request; confirmed booking records are kept for as long as Iraqi law and regulations require."
+      }
+    },
+    {
+      "heading": {
+        "ar": "واتساب والخدمات الخارجية",
+        "en": "WhatsApp and third-party services"
+      },
+      "body": {
+        "ar": "عند مراسلتنا عبر واتساب تخضع المحادثة أيضاً لسياسة خصوصية واتساب (Meta). يُستضاف الموقع وتُستقبل نماذجه عبر مزوّد خدمة سحابية (Netlify) قد تُعالَج البيانات لديه خارج العراق، ضمن ضمانات حماية مناسبة.",
+        "en": "When you message us on WhatsApp, the conversation is also subject to WhatsApp (Meta)’s privacy policy. This website and its forms are hosted by a cloud provider (Netlify), which may process data outside Iraq under appropriate safeguards."
+      }
+    },
+    {
+      "heading": {
+        "ar": "حماية البيانات",
+        "en": "Keeping your data safe"
+      },
+      "body": {
+        "ar": "نقصر الوصول إلى بياناتك على الموظفين الذين يحتاجونها لخدمتك، ولا نطلب بيانات الدفع أو صور الجوازات عبر نماذج الموقع.",
+        "en": "Only staff who need your data to serve you can access it, and we never ask for payment details or passport copies through website forms."
+      }
+    },
+    {
+      "heading": {
+        "ar": "حجوزات الأطفال",
+        "en": "Children"
+      },
+      "body": {
+        "ar": "يُجري الحجز للأطفال دون 18 عاماً وليُّ الأمر، وهو من يزوّدنا ببياناتهم.",
+        "en": "Bookings for children under 18 are made by a parent or guardian, who provides their details."
+      }
+    },
+    {
+      "heading": {
+        "ar": "التعديلات والتواصل",
+        "en": "Changes and contact"
+      },
+      "body": {
+        "ar": "قد نحدّث هذه السياسة من وقت لآخر. لأي سؤال عن بياناتك راسلنا أو زر مكتبنا في الكرادة.",
+        "en": "We may update this policy from time to time. For any question about your data, contact us or visit our Karrada office."
       }
     }
   ],
   "seoDescription": {
-    "ar": "سياسة الخصوصية لموقع أريحا للسياحة والسفر.",
-    "en": "Privacy policy for the Ariha Travel & Tourism website."
+    "ar": "كيف تجمع أريحا للسياحة والسفر بياناتك وتستخدمها وتحميها عند طلب رحلة عبر الموقع أو واتساب، وحقوقك في الاطلاع عليها وتصحيحها وحذفها.",
+    "en": "How Ariha Travel & Tourism collects, uses and protects your data when you request a trip online or on WhatsApp, and your right to access or delete it."
   }
 }

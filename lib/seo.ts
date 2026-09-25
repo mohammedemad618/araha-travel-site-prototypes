@@ -56,9 +56,24 @@ export function pageMetadata({ locale, path, title, description, image, absolute
   };
 }
 
-function ogImageUrl(src: string): string {
+/** A 1200×630 version of an image, suitable for social cards and structured data. */
+export function ogImageUrl(src: string): string {
   if (src.startsWith('https://images.unsplash.com/')) {
-    return `${src}?auto=format&fit=crop&w=1200&h=630&q=75`;
+    const url = new URL(src);
+    url.searchParams.set('auto', 'format');
+    url.searchParams.set('fit', 'crop');
+    url.searchParams.set('w', '1200');
+    url.searchParams.set('h', '630');
+    url.searchParams.set('q', '75');
+    return url.toString();
+  }
+  if (src.startsWith('/uploads/') && process.env.NEXT_PUBLIC_IMAGE_CDN === 'netlify') {
+    return absoluteUrl(`/.netlify/images?url=${encodeURIComponent(src)}&w=1200&h=630&fit=cover`);
   }
   return absoluteUrl(src);
+}
+
+/** Fills the {price} token used in CMS SEO descriptions so they never show a stale price. */
+export function fillPrice(text: string, price: string): string {
+  return text.replaceAll('{price}', price);
 }

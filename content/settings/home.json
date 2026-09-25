@@ -12,8 +12,8 @@
       }
     ],
     "intro": {
-      "ar": "باقات سياحية مختارة، خدمات سفر متكاملة، وتجارب نصنعها لك من البداية إلى العودة.",
-      "en": "Curated holiday packages, complete travel services, and experiences we craft for you from departure to return."
+      "ar": "باقات سياحية مختارة، وحجوزات طيران وفنادق وتأشيرات، ومتابعة شخصية من لحظة الحجز حتى عودتك إلى بغداد.",
+      "en": "Curated holiday packages, flights, hotels and visas – with personal support from the moment you book until you’re home in Baghdad."
     },
     "slides": [
       {
@@ -66,6 +66,52 @@
       }
     ]
   },
+  "trustPoints": [
+    {
+      "icon": "headset",
+      "title": {
+        "ar": "دعم مباشر طوال الرحلة",
+        "en": "Support for the whole trip"
+      },
+      "description": {
+        "ar": "فريقنا معك على واتساب قبل السفر وأثناءه.",
+        "en": "Our team is with you on WhatsApp before and during your trip."
+      }
+    },
+    {
+      "icon": "check",
+      "title": {
+        "ar": "أسعار واضحة ومكتوبة",
+        "en": "Clear prices in writing"
+      },
+      "description": {
+        "ar": "نرسل لك السعر النهائي وما يشمله كتابياً قبل الدفع.",
+        "en": "We send the final price and what it includes in writing before you pay."
+      }
+    },
+    {
+      "icon": "globe",
+      "title": {
+        "ar": "مرشدون يتحدثون العربية",
+        "en": "Arabic-speaking guides"
+      },
+      "description": {
+        "ar": "جولات منظمة بلغتك وبإيقاع يناسبك.",
+        "en": "Organised tours in your language, at your pace."
+      }
+    },
+    {
+      "icon": "building",
+      "title": {
+        "ar": "مكتبنا في الكرادة",
+        "en": "Our office in Karrada"
+      },
+      "description": {
+        "ar": "زورنا في بغداد وتحدث مع مستشار سفر وجهاً لوجه.",
+        "en": "Visit us in Baghdad and talk to a consultant face to face."
+      }
+    }
+  ],
   "styles": [
     {
       "style": "adventure",
@@ -191,6 +237,7 @@
   "featuredPackage": "enchanting-istanbul",
   "services": [
     {
+      "icon": "plane",
       "title": {
         "ar": "حجوزات الطيران",
         "en": "Flight bookings"
@@ -201,6 +248,7 @@
       }
     },
     {
+      "icon": "hotel",
       "title": {
         "ar": "حجوزات الفنادق",
         "en": "Hotel bookings"
@@ -211,16 +259,18 @@
       }
     },
     {
+      "icon": "passport",
       "title": {
         "ar": "التأشيرات",
         "en": "Visas"
       },
       "description": {
-        "ar": "نرتب أوراقك ونتابع طلبك خطوة بخطوة حتى الموافقة.",
-        "en": "We prepare your documents and follow your application step by step until it is approved."
+        "ar": "نجهّز أوراقك ونتابع طلبك خطوة بخطوة حتى صدور القرار.",
+        "en": "We prepare your documents and follow your application step by step until a decision is issued."
       }
     },
     {
+      "icon": "car",
       "title": {
         "ar": "الاستقبال والتوصيل",
         "en": "Transfers"
@@ -231,6 +281,7 @@
       }
     },
     {
+      "icon": "map",
       "title": {
         "ar": "الجولات السياحية",
         "en": "Guided tours"
@@ -241,16 +292,18 @@
       }
     },
     {
+      "icon": "heart",
       "title": {
         "ar": "برامج شهر العسل",
         "en": "Honeymoons"
       },
       "description": {
-        "ar": "تفاصيل خاصة لبداية تستحق أن تكون مختلفة.",
-        "en": "Special touches for a beginning that deserves to be different."
+        "ar": "لمسات رومانسية مدروسة، من الإقامة المطلّة على البحر إلى العشاء الخاص، لبداية لا تُنسى.",
+        "en": "Thoughtful romantic touches – from a sea-view stay to a private dinner – for a beginning to remember."
       }
     },
     {
+      "icon": "compass",
       "title": {
         "ar": "الرحلات الخاصة",
         "en": "Private trips"
@@ -261,6 +314,7 @@
       }
     },
     {
+      "icon": "briefcase",
       "title": {
         "ar": "رحلات الشركات والمجموعات",
         "en": "Corporate & group travel"
@@ -288,18 +342,18 @@
         "en": "Direct support"
       },
       "description": {
-        "ar": "شخص حقيقي يرد عليك قبل السفر وأثناءه، على واتساب أو الهاتف، دون انتظار.",
-        "en": "A real person answers you before and during your trip, on WhatsApp or by phone, without the wait."
+        "ar": "شخص حقيقي يرد عليك قبل السفر وأثناءه، على واتساب أو الهاتف، بلا ردود آلية.",
+        "en": "A real person answers you before and during your trip, on WhatsApp or by phone – never an automated reply."
       }
     },
     {
       "title": {
-        "ar": "أسعار وتفاصيل واضحة",
-        "en": "Clear prices and details"
+        "ar": "أسعار واضحة بلا رسوم مخفية",
+        "en": "Clear prices, no hidden fees"
       },
       "description": {
-        "ar": "ما تراه هو ما تدفعه. نكتب ما يشمله العرض وما لا يشمله بوضوح تام.",
-        "en": "What you see is what you pay. We state clearly what is and isn’t included."
+        "ar": "نكتب ما يشمله العرض وما لا يشمله بوضوح تام، ونؤكد لك السعر النهائي كتابياً قبل أي دفع.",
+        "en": "We state clearly what is and isn’t included, and confirm your final price in writing before you pay anything."
       }
     },
     {
@@ -325,8 +379,8 @@
       "en": "Istanbul + Trabzon"
     },
     "note": {
-      "ar": "مقاعد محدودة · رحلات أسبوعية من بغداد والبصرة وأربيل",
-      "en": "Limited seats · weekly departures from Baghdad, Basra and Erbil"
+      "ar": "مقاعد محدودة · مغادرة كل أسبوعين من بغداد، حزيران — آب 2027",
+      "en": "Limited seats · fortnightly departures from Baghdad, June – August 2027"
     },
     "image": {
       "src": "https://images.unsplash.com/photo-1607068798195-d26a9703b277",
@@ -336,7 +390,8 @@
       },
       "credit": "Mike Swigunski",
       "creditUrl": "https://unsplash.com/@mike_swigunski"
-    }
+    },
+    "validUntil": ""
   },
   "finalImage": {
     "src": "https://images.unsplash.com/photo-1489493512598-d08130f49bea",

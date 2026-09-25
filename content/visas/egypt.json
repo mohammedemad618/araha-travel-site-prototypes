@@ -1,0 +1,46 @@
+{
+  "destination": "egypt",
+  "status": "e-visa",
+  "summary": {
+    "ar": "يحتاج العراقي إلى تأشيرة لمصر، والعراق مدرج في بوابة التأشيرة الإلكترونية الرسمية، لكن قد تُطلب موافقة أمنية مسبقة تستغرق أسابيع.",
+    "en": "Iraqis need a visa for Egypt. Iraq is listed on Egypt's official e-visa portal, but prior security approval may still be required and can take weeks."
+  },
+  "howToApply": {
+    "ar": "قدّم إلكترونياً عبر البوابة الرسمية لوزارة الداخلية المصرية visa2egypt.gov.eg، وادفع بالبطاقة المصرفية، ثم اطبع التأشيرة بعد الموافقة. أو قدّم عبر سفارة أو قنصلية مصرية، حيث يحتاج المتقدم العراقي إلى موافقة أمنية مسبقة.",
+    "en": "Apply online on the Egyptian Ministry of Interior portal visa2egypt.gov.eg, pay by card and print the approved e-visa. Alternatively apply at an Egyptian embassy or consulate, where Iraqi applicants need prior security approval."
+  },
+  "processingTime": {
+    "ar": "لا توجد مدة رسمية معلنة؛ التأشيرة الإلكترونية تستغرق عادةً عدة أيام عمل، أما طلبات السفارة التي تحتاج موافقة أمنية فقد تستغرق 6–8 أسابيع أو أكثر.",
+    "en": "No official timeframe. E-visas usually take several working days; embassy applications needing security approval can take 6–8 weeks or more."
+  },
+  "stay": {
+    "ar": "حتى 30 يوماً بالتأشيرة السياحية (دخول واحد أو متعدد).",
+    "en": "Up to 30 days on a tourist visa (single or multiple entry)."
+  },
+  "exemptions": [
+    {
+      "ar": "حاملو تأشيرة سارية ومستخدمة سابقاً من الولايات المتحدة أو بريطانيا أو منطقة شنغن أو كندا أو أستراليا أو نيوزيلندا أو اليابان يمكنهم الحصول على تأشيرة عند الوصول، مع تذكرة عودة وحجز فندقي وما يكفي من المال.",
+      "en": "Holders of a valid, previously used visa from the US, UK, Schengen area, Canada, Australia, New Zealand or Japan can get a visa on arrival, with a return ticket, hotel booking and sufficient funds."
+    }
+  ],
+  "documents": [
+    { "ar": "جواز سفر ساري المفعول لمدة 6 أشهر على الأقل من تاريخ الوصول", "en": "Passport valid for at least 6 months from arrival" },
+    { "ar": "نسخة مطبوعة من التأشيرة الإلكترونية", "en": "Printed e-visa" },
+    { "ar": "برنامج الرحلة وتذكرة العودة", "en": "Travel itinerary and return ticket" },
+    { "ar": "حجز فندقي أو تفاصيل أماكن الإقامة", "en": "Hotel booking or accommodation details" },
+    { "ar": "رسالة دعوة أو خطاب داعم عند الحاجة", "en": "Invitation or supporting letter where relevant" },
+    { "ar": "ما يثبت القدرة المالية", "en": "Proof of sufficient funds" }
+  ],
+  "notes": {
+    "ar": "تختلف المصادر: بوابة التأشيرة الإلكترونية المصرية تُدرج العراق ضمن الدول المؤهلة، بينما تُدرج السفارات المصرية العراق ضمن الجنسيات التي تحتاج موافقة أمنية مسبقة، وتذكر مصادر مبنية على نظام Timatic أن التأشيرة الإلكترونية للعراقيين من عمر 16 إلى 60 عاماً مع تأشيرة عند الوصول لمن هم دون 16 أو فوق 60. التأشيرة لا تضمن الدخول، والرسوم تُحدَّد عند التقديم. نؤكد لك الإجراء الحالي قبل التقديم.",
+    "en": "Sources differ: Egypt's e-visa portal lists Iraq as eligible, Egyptian embassies list Iraq among nationalities needing prior security approval, and Timatic-based sources say the e-visa covers Iraqi tourists aged 16–60, with visa on arrival for under-16s and over-60s. A visa does not guarantee entry; fees are confirmed at application. We confirm the current procedure before you apply."
+  },
+  "officialUrl": "https://visa2egypt.gov.eg/eVisa/Home",
+  "sources": [
+    "https://visa2egypt.gov.eg/eVisa/Home",
+    "https://www.egyptembassy.org/travel/visa-requirements",
+    "https://apply.joinsherpa.com/visa/egypt/iraqi-citizens",
+    "https://en.wikipedia.org/wiki/Visa_policy_of_Egypt"
+  ],
+  "lastVerified": "2026-09-25"
+}

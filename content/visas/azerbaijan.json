@@ -1,0 +1,52 @@
+{
+  "destination": "azerbaijan",
+  "status": "visa-required",
+  "summary": {
+    "ar": "يحتاج حامل الجواز العراقي إلى تأشيرة لأذربيجان تُقدَّم عبر مركز تأشيرات أذربيجان (VFS Global) في بغداد. التأشيرة الإلكترونية ASAN غير متاحة للعراقيين.",
+    "en": "Iraqi passport holders need a visa for Azerbaijan, applied for at the Azerbaijan Visa Centre run by VFS Global in Baghdad. The ASAN e-visa is not open to Iraqis."
+  },
+  "howToApply": {
+    "ar": "املأ استمارة الطلب إلكترونياً على visaapplication.mfa.gov.az، ثم قدّم المستندات في مركز تأشيرات أذربيجان الذي تديره VFS Global في بغداد (معتمد منذ 10 تموز 2024) تحت إشراف سفارة أذربيجان في العراق.",
+    "en": "Complete the online form at visaapplication.mfa.gov.az, then submit your documents at the Azerbaijan Visa Application Centre run by VFS Global in Baghdad (in place since 10 July 2024), under the Embassy of Azerbaijan in Iraq."
+  },
+  "processingTime": {
+    "ar": "حتى 15 يوماً من تاريخ التقديم وفق القانون الأذربيجاني.",
+    "en": "Up to 15 days from submission, under Azerbaijani law."
+  },
+  "stay": {
+    "ar": "حسب المدة المدوّنة على التأشيرة؛ التأشيرة السياحية تكون عادةً لدخول واحد حتى 30 يوماً.",
+    "en": "As stated on the visa; tourist visas are usually single-entry for up to 30 days."
+  },
+  "exemptions": [
+    {
+      "ar": "حاملو إقامة إماراتية سارية لأكثر من 6 أشهر يمكنهم الحصول على تأشيرة في مطار باكو لمدة تصل إلى 30 يوماً.",
+      "en": "Holders of a UAE residence visa valid for more than 6 months can get a visa at Baku airport for up to 30 days."
+    },
+    {
+      "ar": "حاملو إقامة من قطر أو عُمان أو السعودية أو البحرين أو الكويت، إذا كانوا برفقة مواطن من الدولة المُصدِرة للإقامة، يحق لهم الحصول على التأشيرة في المطار.",
+      "en": "Residents of Qatar, Oman, Saudi Arabia, Bahrain or Kuwait travelling with a citizen of the country that issued their residence card can get a visa on arrival."
+    }
+  ],
+  "documents": [
+    { "ar": "استمارة الطلب المعبأة إلكترونياً", "en": "Online application form" },
+    { "ar": "جواز سفر صالح 3 أشهر على الأقل بعد انتهاء التأشيرة، مع نسخة من صفحة المعلومات", "en": "Passport valid 3+ months beyond the visa, plus a copy of the data page" },
+    { "ar": "صورتان ملونتان بقياس 3×4 سم بمواصفات بايومترية", "en": "Two biometric colour photos, 3×4 cm" },
+    { "ar": "نسخة من وثيقة التأمين الصحي", "en": "Copy of medical insurance certificate" },
+    { "ar": "إيصال دفع رسوم التأشيرة", "en": "Proof of visa fee payment" },
+    { "ar": "ما يثبت القدرة المالية لتغطية الرحلة", "en": "Proof of sufficient funds for the trip" },
+    { "ar": "قسيمة سياحية أو برنامج الرحلة، مع تذكرة الطيران وحجز الفندق", "en": "Tour voucher or itinerary, flight ticket and hotel booking" },
+    { "ar": "للقاصرين دون 18 عاماً المسافرين دون والديهم: شهادة ميلاد مصدّقة وموافقة الوالدين", "en": "Minors under 18 travelling without parents: certified birth certificate and parental consent" }
+  ],
+  "notes": {
+    "ar": "لا تزال بعض المواقع تذكر أن العراقيين مؤهلون لتأشيرة ASAN الإلكترونية (evisa.gov.az)، وهذه معلومة قديمة: أكدت سفارة أذربيجان في تشرين الأول 2025 أن طلبات العراقيين السياحية تُعالج عبر مركز VFS في بغداد، وقائمة الدول المؤهلة للتأشيرة الإلكترونية لا تشمل العراق. تُضاف رسوم خدمة VFS إلى رسوم التأشيرة، وتُحدَّد جميع الرسوم عند التقديم وهي غير قابلة للاسترداد.",
+    "en": "Some websites still list Iraq as eligible for the ASAN e-visa (evisa.gov.az); this is outdated. The Azerbaijani embassy confirmed in October 2025 that Iraqi tourist applications go through the VFS centre in Baghdad, and the e-visa country list does not include Iraq. A VFS service fee is added to the visa fee; all fees are confirmed at application and non-refundable."
+  },
+  "officialUrl": "https://www.vfsglobal.com/one-pager/azerbaijan/iraq/english/index.html",
+  "sources": [
+    "https://www.vfsglobal.com/one-pager/azerbaijan/iraq/english/index.html",
+    "https://www.trend.az/azerbaijan/politics/4109741.html",
+    "https://airport.az/en/procedures/international-arrival/",
+    "https://apply.joinsherpa.com/visa/azerbaijan/iraqi-citizens"
+  ],
+  "lastVerified": "2026-09-25"
+}

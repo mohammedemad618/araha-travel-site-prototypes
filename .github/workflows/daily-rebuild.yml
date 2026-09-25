@@ -1,0 +1,25 @@
+name: Daily rebuild
+
+# Rebuilds the site every morning so departure dates and seasonal offers that
+# have passed disappear automatically. Needs a Netlify build hook URL stored as
+# the repository secret NETLIFY_BUILD_HOOK (Netlify → Project configuration →
+# Build & deploy → Build hooks).
+
+on:
+  schedule:
+    - cron: '7 0 * * *' # 03:07 Baghdad time
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Netlify build
+        env:
+          HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::NETLIFY_BUILD_HOOK secret is not set; skipping."
+            exit 0
+          fi
+          curl -fsS -X POST -d '{}' "$HOOK"

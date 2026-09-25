@@ -11,8 +11,8 @@
     "en": "Where East meets West on the banks of the Bosphorus, and every journey starts with a cup of coffee."
   },
   "description": {
-    "ar": "من مساجد إسطنبول وأسواقها وعبّارات البوسفور، إلى هضاب طرابزون الخضراء وبحيراتها الضبابية. تركيا وجهة تناسب العائلات والأزواج ومحبي التسوق والطبيعة، وتصلها رحلات مباشرة من بغداد والبصرة وأربيل والنجف.",
-    "en": "From the mosques, bazaars and ferries of Istanbul to the misty green highlands and lakes of Trabzon, Türkiye suits families, couples, shoppers and nature lovers alike, with direct flights from Baghdad, Basra, Erbil and Najaf."
+    "ar": "من مساجد إسطنبول وأسواقها وعبّارات البوسفور، إلى هضاب طرابزون الخضراء وبحيراتها الضبابية. تركيا وجهة تناسب العائلات والأزواج ومحبي التسوق والطبيعة، وتصلها رحلات منتظمة من بغداد ومطارات عراقية أخرى.",
+    "en": "From the mosques, bazaars and ferries of Istanbul to the misty green highlands and lakes of Trabzon, Türkiye suits families, couples, shoppers and nature lovers alike, with regular flights from Baghdad and other Iraqi airports."
   },
   "bestSeason": {
     "ar": "نيسان — تشرين الأول",
@@ -28,5 +28,33 @@
     "creditUrl": "https://unsplash.com/@bozgedik"
   },
   "homeLayout": "big",
-  "order": 1
+  "order": 1,
+  "glance": {
+    "flightTime": {
+      "ar": "حوالي 3 ساعات طيران من بغداد",
+      "en": "About 3 hours from Baghdad"
+    },
+    "currency": {
+      "ar": "الليرة التركية",
+      "en": "Turkish lira"
+    },
+    "language": {
+      "ar": "التركية، والإنجليزية في المناطق السياحية",
+      "en": "Turkish; English in tourist areas"
+    },
+    "timeDifference": {
+      "ar": "نفس توقيت بغداد",
+      "en": "Same time as Baghdad"
+    }
+  },
+  "seo": {
+    "title": {
+      "ar": "سفرات تركيا من بغداد: باقات وأسعار",
+      "en": "Türkiye holidays from Baghdad"
+    },
+    "description": {
+      "ar": "سفرات وعروض تركيا من بغداد: باقات إسطنبول وطرابزون شاملة الطيران والفندق والجولات بمرشد يتحدث العربية، مع أفضل وقت للزيارة ومساعدة في الفيزا.",
+      "en": "Türkiye holidays from Baghdad: Istanbul and Trabzon packages with flights, hotels and Arabic-speaking guides, plus visa help and when to go."
+    }
+  }
 }

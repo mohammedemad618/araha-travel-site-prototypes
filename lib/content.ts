@@ -2,18 +2,21 @@ import 'server-only';
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
-import type { Locale } from '@/i18n/routing';
 import {
   destinationSchema,
   faqSchema,
+  guideSchema,
   homeSchema,
   packageSchema,
   pageSchema,
   siteSchema,
   testimonialSchema,
+  visaSchema,
+  type Departure,
   type Destination,
-  type Localized,
+  type Guide,
   type Package,
+  type Visa,
 } from './schema';
 
 const CONTENT_DIR = path.join(process.cwd(), 'content');
@@ -31,12 +34,29 @@ function readJson<T>(file: string, schema: z.ZodType<T, z.ZodTypeDef, unknown>):
   return parsed.data;
 }
 
-function readFolder<T>(folder: string, schema: z.ZodType<T, z.ZodTypeDef, unknown>): T[] {
+function readFolder<T>(
+  folder: string,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+): { file: string; data: T }[] {
+  const dir = path.join(CONTENT_DIR, folder);
+  if (!fs.existsSync(dir)) return [];
   return fs
-    .readdirSync(path.join(CONTENT_DIR, folder))
+    .readdirSync(dir)
     .filter((f) => f.endsWith('.json'))
     .sort()
-    .map((f) => readJson(path.join(folder, f), schema));
+    .map((f) => ({ file: f, data: readJson(path.join(folder, f), schema) }));
+}
+
+/** Each entry's slug must be unique and match its file name, so URLs never collide. */
+function assertSlugs(folder: string, entries: { file: string; data: { slug: string } }[]) {
+  const seen = new Set<string>();
+  for (const { file, data } of entries) {
+    if (`${data.slug}.json` !== file) {
+      throw new Error(`content/${folder}/${file}: slug "${data.slug}" must match the file name`);
+    }
+    if (seen.has(data.slug)) throw new Error(`content/${folder}: duplicate slug "${data.slug}"`);
+    seen.add(data.slug);
+  }
 }
 
 const cache = new Map<string, unknown>();
@@ -46,32 +66,59 @@ function cached<T>(key: string, load: () => T): T {
 }
 
 export const getSite = () => cached('site', () => readJson('settings/site.json', siteSchema));
-export const getHome = () => cached('home', () => readJson('settings/home.json', homeSchema));
 
 export const getDestinations = (): Destination[] =>
-  cached('destinations', () =>
-    readFolder('destinations', destinationSchema).sort((a, b) => a.order - b.order),
-  );
+  cached('destinations', () => {
+    const entries = readFolder('destinations', destinationSchema);
+    assertSlugs('destinations', entries);
+    return entries.map((e) => e.data).sort((a, b) => a.order - b.order);
+  });
 
 export const getPackages = (): Package[] =>
   cached('packages', () => {
     const destinations = new Set(getDestinations().map((d) => d.slug));
-    const list = readFolder('packages', packageSchema);
-    for (const p of list) {
+    const entries = readFolder('packages', packageSchema);
+    assertSlugs('packages', entries);
+    for (const { data: p } of entries) {
       if (!destinations.has(p.destination)) {
         throw new Error(`Package "${p.slug}" references unknown destination "${p.destination}"`);
       }
     }
-    return list.sort((a, b) => a.order - b.order || a.price - b.price);
+    return entries.map((e) => e.data).sort((a, b) => a.order - b.order || a.price - b.price);
   });
 
 export const getPackage = (slug: string) => getPackages().find((p) => p.slug === slug);
 export const getDestination = (slug: string) => getDestinations().find((d) => d.slug === slug);
 
+export const getHome = () =>
+  cached('home', () => {
+    const home = readJson('settings/home.json', homeSchema);
+    for (const [field, slug] of [
+      ['featuredPackage', home.featuredPackage],
+      ['offer.package', home.offer.package],
+    ] as const) {
+      if (!getPackage(slug))
+        throw new Error(`content/settings/home.json: ${field} "${slug}" is not a package`);
+    }
+    return home;
+  });
+
 export const getTestimonials = () =>
-  cached('testimonials', () =>
-    readJson('settings/testimonials.json', z.object({ items: z.array(testimonialSchema) })).items,
-  );
+  cached('testimonials', () => {
+    const items = readJson(
+      'settings/testimonials.json',
+      z.object({ items: z.array(testimonialSchema) }),
+    ).items;
+    for (const t of items) {
+      if (!getDestination(t.destination)) {
+        throw new Error(`Testimonial "${t.name.en}" references unknown destination "${t.destination}"`);
+      }
+    }
+    return items;
+  });
+
+/** Only testimonials the owner has confirmed as genuine are published. */
+export const getVerifiedTestimonials = () => getTestimonials().filter((t) => t.verified);
 
 export const getFaqs = () =>
   cached('faqs', () => readJson('settings/faq.json', z.object({ items: z.array(faqSchema) })).items);
@@ -79,17 +126,52 @@ export const getFaqs = () =>
 export const getPage = (slug: 'about' | 'privacy' | 'terms') =>
   cached(`page:${slug}`, () => readJson(`pages/${slug}.json`, pageSchema));
 
-/** Departure dates that have not passed yet at build time. */
-export function upcomingDepartures(p: Package, now = new Date()): string[] {
-  const today = now.toISOString().slice(0, 10);
-  return p.departures.filter((d) => d >= today).sort();
+export const getVisas = (): Visa[] =>
+  cached('visas', () => {
+    const order = getDestinations().map((d) => d.slug);
+    const list = readFolder('visas', visaSchema).map((e) => {
+      if (!order.includes(e.data.destination)) {
+        throw new Error(`content/visas/${e.file}: unknown destination "${e.data.destination}"`);
+      }
+      return e.data;
+    });
+    return list.sort((a, b) => order.indexOf(a.destination) - order.indexOf(b.destination));
+  });
+
+export const getVisa = (destination: string) => getVisas().find((v) => v.destination === destination);
+
+export const getGuides = (): Guide[] =>
+  cached('guides', () => {
+    const entries = readFolder('guides', guideSchema);
+    assertSlugs('guides', entries);
+    for (const { data } of entries) {
+      if (data.destination && !getDestination(data.destination)) {
+        throw new Error(`Guide "${data.slug}" references unknown destination "${data.destination}"`);
+      }
+    }
+    return entries.map((e) => e.data).sort((a, b) => b.date.localeCompare(a.date));
+  });
+
+export const getGuide = (slug: string) => getGuides().find((g) => g.slug === slug);
+
+export const today = () => new Date().toISOString().slice(0, 10);
+
+/** Departures that have not passed at build time (the browser filters again, see EnquiryCard). */
+export function upcomingDepartures(p: Package, now = today()): Departure[] {
+  return p.departures.filter((d) => d.date >= now).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export function t(value: Localized, locale: Locale): string {
-  return value[locale];
+/** Whether the seasonal offer is still running. */
+export function offerIsActive(validUntil: string | undefined, now = today()): boolean {
+  return !validUntil || validUntil >= now;
 }
 
-/** Unique photographer credits for the images used on a page. */
+/** Unique photographer credits for the images used on the site. */
 export function photoCredits(images: { credit?: string }[]): string[] {
   return [...new Set(images.map((i) => i.credit).filter((c): c is string => Boolean(c)))];
+}
+
+/** True while site.json still contains the demo contact details. */
+export function hasPlaceholderContacts(): boolean {
+  return /0000000|example\.com/.test(JSON.stringify(getSite()));
 }

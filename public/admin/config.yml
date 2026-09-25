@@ -1,8 +1,11 @@
 # Decap CMS configuration — https://decapcms.org/docs/configuration-options/
-# Every change made in /admin is committed to the GitHub repository, which
-# triggers a new Netlify build. Invalid content fails the build, so the live
-# site keeps the previous version until the mistake is fixed.
+# Edits are saved as pull requests (editorial workflow): Netlify builds a
+# preview and CI runs the tests before anything reaches the live site.
+# Invalid content fails the build, so the live site keeps the previous version.
+#
+# Keep this file in sync with lib/schema.ts.
 
+# Run `npx decap-server` next to `npm run dev` to edit content locally.
 backend:
   name: github
   repo: mohammedemad618/araha-travel-site-prototypes
@@ -15,6 +18,7 @@ backend:
     delete: 'CMS: delete {{collection}} "{{slug}}"'
     uploadMedia: 'CMS: upload "{{path}}"'
     deleteMedia: 'CMS: delete "{{path}}"'
+publish_mode: editorial_workflow
 local_backend: true
 locale: ar
 media_folder: public/uploads
@@ -44,6 +48,7 @@ collections:
     pattern:
     - ^[a-z0-9-]+$
     - أحرف إنجليزية صغيرة وأرقام وشرطات فقط
+    hint: يجب أن يطابق اسم الملف. لا تغيّره بعد النشر حتى لا تتعطل الروابط.
   - label: اسم الباقة
     name: title
     widget: object
@@ -62,7 +67,6 @@ collections:
     search_fields:
     - slug
     - name.ar
-    - name.en
     display_fields:
     - name.ar
   - label: أسلوب الرحلة
@@ -93,12 +97,12 @@ collections:
     widget: number
     value_type: int
     min: 0
-  - label: السعر ابتداءً من (دينار عراقي)
+  - label: السعر ابتداءً من (دينار عراقي، للشخص)
     name: price
     widget: number
     value_type: int
     min: 1
-  - label: ملاحظة السعر
+  - label: 'أساس السعر (مثل: للشخص في غرفة مزدوجة)'
     name: priceNote
     widget: object
     fields:
@@ -108,10 +112,22 @@ collections:
     - label: English
       name: en
       widget: string
+  - label: سعر الطفل ابتداءً من (اختياري)
+    name: childPrice
+    widget: number
+    value_type: int
+    min: 0
+    required: false
+  - label: السعر ساري حتى (اختياري)
+    name: priceValidUntil
+    required: false
+    widget: datetime
+    format: YYYY-MM-DD
+    date_format: YYYY-MM-DD
+    time_format: false
   - label: أبرز المميزات (تظهر على البطاقة)
     name: highlights
     widget: list
-    min: 1
     summary: '{{fields.ar}}'
     fields:
     - label: العربية
@@ -120,6 +136,7 @@ collections:
     - label: English
       name: en
       widget: string
+    min: 1
   - label: المقدمة
     name: lead
     widget: object
@@ -202,6 +219,9 @@ collections:
       name: src
       widget: image
       choose_url: true
+      pattern:
+      - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+      - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
     - label: وصف الصورة (للمكفوفين ومحركات البحث)
       name: alt
       widget: object
@@ -220,6 +240,9 @@ collections:
       name: creditUrl
       widget: string
       required: false
+      pattern:
+      - ^https://
+      - رابط كامل يبدأ بـ https://
   - label: معرض الصور
     name: gallery
     widget: list
@@ -230,6 +253,9 @@ collections:
       name: src
       widget: image
       choose_url: true
+      pattern:
+      - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+      - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
     - label: وصف الصورة (للمكفوفين ومحركات البحث)
       name: alt
       widget: object
@@ -248,18 +274,48 @@ collections:
       name: creditUrl
       widget: string
       required: false
+      pattern:
+      - ^https://
+      - رابط كامل يبدأ بـ https://
   - label: مواعيد المغادرة
     name: departures
     widget: list
     required: false
-    hint: المواعيد السابقة تختفي تلقائياً من الموقع عند النشر التالي.
-    field:
-      label: التاريخ
+    summary: '{{fields.date}} — {{fields.status}}'
+    hint: المواعيد السابقة تختفي تلقائياً من الموقع.
+    fields:
+    - label: التاريخ
       name: date
       widget: datetime
       format: YYYY-MM-DD
       date_format: YYYY-MM-DD
       time_format: false
+    - label: الحالة
+      name: status
+      widget: select
+      default: available
+      options:
+      - label: متاح
+        value: available
+      - label: مقاعد محدودة
+        value: limited
+      - label: مكتمل
+        value: soldout
+      - label: حسب الطلب
+        value: request
+    - label: ملاحظة (اختياري)
+      name: note
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+      required: false
   - label: برنامج الرحلة
     name: itinerary
     widget: list
@@ -289,7 +345,6 @@ collections:
     - label: وسوم
       name: tags
       widget: list
-      required: false
       summary: '{{fields.ar}}'
       fields:
       - label: العربية
@@ -298,10 +353,10 @@ collections:
       - label: English
         name: en
         widget: string
+      required: false
   - label: يشمل العرض
     name: includes
     widget: list
-    min: 1
     summary: '{{fields.ar}}'
     fields:
     - label: العربية
@@ -310,10 +365,10 @@ collections:
     - label: English
       name: en
       widget: string
+    min: 1
   - label: لا يشمل العرض
     name: excludes
     widget: list
-    required: false
     summary: '{{fields.ar}}'
     fields:
     - label: العربية
@@ -322,14 +377,10 @@ collections:
     - label: English
       name: en
       widget: string
-  - label: باقة مميزة؟
-    name: featured
-    widget: boolean
-    default: false
+    required: false
   - label: 'شارة (اختياري، مثل: الأكثر طلباً)'
     name: badge
     widget: object
-    required: false
     fields:
     - label: العربية
       name: ar
@@ -339,6 +390,7 @@ collections:
       name: en
       widget: string
       required: false
+    required: false
   - label: الترتيب (الأصغر يظهر أولاً)
     name: order
     widget: number
@@ -350,10 +402,9 @@ collections:
     required: false
     collapsed: true
     fields:
-    - label: عنوان الصفحة
+    - label: عنوان الصفحة (60 حرفاً كحد أقصى)
       name: title
       widget: object
-      required: false
       fields:
       - label: العربية
         name: ar
@@ -363,10 +414,10 @@ collections:
         name: en
         widget: string
         required: false
-    - label: الوصف
+      required: false
+    - label: الوصف (155 حرفاً كحد أقصى). يمكنك كتابة {price} ليظهر السعر الحالي
       name: description
       widget: object
-      required: false
       fields:
       - label: العربية
         name: ar
@@ -376,6 +427,7 @@ collections:
         name: en
         widget: text
         required: false
+      required: false
 - name: destinations
   label: الوجهات
   label_singular: وجهة
@@ -388,12 +440,13 @@ collections:
   identifier_field: slug
   summary: '{{name.ar}}'
   fields:
-  - label: المعرّف في الرابط
+  - label: المعرّف في الرابط (إنجليزي، أحرف صغيرة وشرطات)
     name: slug
     widget: string
     pattern:
     - ^[a-z0-9-]+$
     - أحرف إنجليزية صغيرة وأرقام وشرطات فقط
+    hint: يجب أن يطابق اسم الملف. لا تغيّره بعد النشر حتى لا تتعطل الروابط.
   - label: اسم الوجهة
     name: name
     widget: object
@@ -440,6 +493,64 @@ collections:
     - label: English
       name: en
       widget: string
+  - label: نظرة سريعة
+    name: glance
+    widget: object
+    required: false
+    collapsed: true
+    fields:
+    - label: مدة الطيران
+      name: flightTime
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+      required: false
+    - label: العملة
+      name: currency
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+      required: false
+    - label: اللغة
+      name: language
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+      required: false
+    - label: فرق التوقيت عن بغداد
+      name: timeDifference
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+      required: false
   - label: الصورة
     name: image
     widget: object
@@ -448,6 +559,9 @@ collections:
       name: src
       widget: image
       choose_url: true
+      pattern:
+      - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+      - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
     - label: وصف الصورة (للمكفوفين ومحركات البحث)
       name: alt
       widget: object
@@ -466,6 +580,9 @@ collections:
       name: creditUrl
       widget: string
       required: false
+      pattern:
+      - ^https://
+      - رابط كامل يبدأ بـ https://
   - label: حجم البطاقة في الصفحة الرئيسية
     name: homeLayout
     widget: select
@@ -482,6 +599,340 @@ collections:
     widget: number
     value_type: int
     default: 100
+  - label: تحسين محركات البحث (اختياري)
+    name: seo
+    widget: object
+    required: false
+    collapsed: true
+    fields:
+    - label: عنوان الصفحة (60 حرفاً كحد أقصى)
+      name: title
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+      required: false
+    - label: الوصف (155 حرفاً كحد أقصى). يمكنك كتابة {price} ليظهر السعر الحالي
+      name: description
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+        required: false
+      - label: English
+        name: en
+        widget: text
+        required: false
+      required: false
+- name: visas
+  label: دليل التأشيرات
+  label_singular: تأشيرة
+  folder: content/visas
+  extension: json
+  format: json
+  create: true
+  delete: true
+  slug: '{{fields.destination}}'
+  identifier_field: destination
+  summary: '{{destination}} — {{status}}'
+  fields:
+  - label: الوجهة
+    name: destination
+    widget: relation
+    collection: destinations
+    value_field: slug
+    search_fields:
+    - slug
+    - name.ar
+    display_fields:
+    - name.ar
+  - label: نوع التأشيرة لحاملي الجواز العراقي
+    name: status
+    widget: select
+    options:
+    - label: بدون تأشيرة
+      value: visa-free
+    - label: تأشيرة عند الوصول
+      value: on-arrival
+    - label: تأشيرة إلكترونية
+      value: e-visa
+    - label: تأشيرة مسبقة
+      value: visa-required
+  - label: الخلاصة
+    name: summary
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: text
+    - label: English
+      name: en
+      widget: text
+  - label: طريقة التقديم
+    name: howToApply
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: text
+    - label: English
+      name: en
+      widget: text
+  - label: مدة الإصدار
+    name: processingTime
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+      required: false
+    - label: English
+      name: en
+      widget: string
+      required: false
+    required: false
+  - label: مدة الإقامة
+    name: stay
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+      required: false
+    - label: English
+      name: en
+      widget: string
+      required: false
+    required: false
+  - label: من يُعفى
+    name: exemptions
+    widget: list
+    summary: '{{fields.ar}}'
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+    required: false
+  - label: الوثائق المعتادة
+    name: documents
+    widget: list
+    summary: '{{fields.ar}}'
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+    required: false
+  - label: ملاحظات مهمة
+    name: notes
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: text
+      required: false
+    - label: English
+      name: en
+      widget: text
+      required: false
+    required: false
+  - label: الموقع الرسمي
+    name: officialUrl
+    widget: string
+    required: false
+    pattern:
+    - ^https://
+    - رابط كامل يبدأ بـ https://
+  - label: المصادر
+    name: sources
+    widget: list
+    required: false
+    field:
+      label: رابط
+      name: url
+      widget: string
+      pattern:
+      - ^https://
+      - رابط كامل يبدأ بـ https://
+  - label: تاريخ آخر تحقق
+    name: lastVerified
+    hint: حدّثه كلما راجعت المعلومات.
+    widget: datetime
+    format: YYYY-MM-DD
+    date_format: YYYY-MM-DD
+    time_format: false
+- name: guides
+  label: دليل السفر
+  label_singular: مقال
+  folder: content/guides
+  extension: json
+  format: json
+  create: true
+  delete: true
+  slug: '{{fields.slug}}'
+  identifier_field: slug
+  summary: '{{title.ar}}'
+  sortable_fields:
+  - date
+  fields:
+  - label: المعرّف في الرابط (إنجليزي، أحرف صغيرة وشرطات)
+    name: slug
+    widget: string
+    pattern:
+    - ^[a-z0-9-]+$
+    - أحرف إنجليزية صغيرة وأرقام وشرطات فقط
+    hint: يجب أن يطابق اسم الملف. لا تغيّره بعد النشر حتى لا تتعطل الروابط.
+  - label: العنوان
+    name: title
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: string
+    - label: English
+      name: en
+      widget: string
+  - label: الملخص (160 حرفاً كحد أقصى)
+    name: excerpt
+    widget: object
+    fields:
+    - label: العربية
+      name: ar
+      widget: text
+    - label: English
+      name: en
+      widget: text
+  - label: التصنيف
+    name: category
+    widget: select
+    options:
+    - label: وجهات
+      value: destinations
+    - label: نصائح
+      value: tips
+    - label: تأشيرات
+      value: visas
+    - label: مواسم
+      value: seasons
+  - label: تاريخ النشر
+    name: date
+    widget: datetime
+    format: YYYY-MM-DD
+    date_format: YYYY-MM-DD
+    time_format: false
+  - label: الصورة
+    name: image
+    widget: object
+    fields:
+    - label: الصورة
+      name: src
+      widget: image
+      choose_url: true
+      pattern:
+      - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+      - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
+    - label: وصف الصورة (للمكفوفين ومحركات البحث)
+      name: alt
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: اسم المصوّر (اختياري)
+      name: credit
+      widget: string
+      required: false
+    - label: رابط المصوّر (اختياري)
+      name: creditUrl
+      widget: string
+      required: false
+      pattern:
+      - ^https://
+      - رابط كامل يبدأ بـ https://
+  - label: الوجهة المرتبطة (اختياري)
+    name: destination
+    widget: relation
+    collection: destinations
+    value_field: slug
+    search_fields:
+    - slug
+    - name.ar
+    display_fields:
+    - name.ar
+    required: false
+  - label: الأقسام
+    name: sections
+    widget: list
+    min: 1
+    summary: '{{fields.heading.ar}}'
+    fields:
+    - label: العنوان
+      name: heading
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
+    - label: النص (افصل الفقرات بسطر فارغ، والسطر الذي يبدأ بـ "- " يصبح نقطة)
+      name: body
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+      - label: English
+        name: en
+        widget: text
+  - label: تحسين محركات البحث (اختياري)
+    name: seo
+    widget: object
+    required: false
+    collapsed: true
+    fields:
+    - label: عنوان الصفحة (60 حرفاً كحد أقصى)
+      name: title
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+        required: false
+      - label: English
+        name: en
+        widget: string
+        required: false
+      required: false
+    - label: الوصف (155 حرفاً كحد أقصى). يمكنك كتابة {price} ليظهر السعر الحالي
+      name: description
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: text
+        required: false
+      - label: English
+        name: en
+        widget: text
+        required: false
+      required: false
 - name: settings
   label: الإعدادات
   editor:
@@ -537,6 +988,9 @@ collections:
     - label: رقم الهاتف (بصيغة دولية مثل +9647701234567)
       name: phone
       widget: string
+      pattern:
+      - ^\+\d{8,15}$
+      - بالصيغة الدولية مع +
     - label: رقم الهاتف كما يظهر
       name: phoneDisplay
       widget: string
@@ -562,7 +1016,7 @@ collections:
       - label: English
         name: en
         widget: string
-    - label: ساعات العمل
+    - label: ساعات العمل (كما تظهر للزوار)
       name: hours
       widget: object
       fields:
@@ -572,10 +1026,44 @@ collections:
       - label: English
         name: en
         widget: string
+    - label: ساعات العمل (لحالة "متاح الآن" ومحركات البحث)
+      name: openingHours
+      widget: object
+      fields:
+      - label: أيام الدوام
+        name: days
+        widget: select
+        multiple: true
+        options:
+        - label: السبت
+          value: Saturday
+        - label: الأحد
+          value: Sunday
+        - label: الاثنين
+          value: Monday
+        - label: الثلاثاء
+          value: Tuesday
+        - label: الأربعاء
+          value: Wednesday
+        - label: الخميس
+          value: Thursday
+        - label: الجمعة
+          value: Friday
+      - label: يفتح (مثل 09:00)
+        name: opens
+        widget: string
+        pattern:
+        - ^\d{2}:\d{2}$
+        - مثل 09:00
+      - label: يغلق (مثل 21:00)
+        name: closes
+        widget: string
+        pattern:
+        - ^\d{2}:\d{2}$
+        - مثل 21:00
     - label: رقم الإجازة السياحية (اختياري)
       name: license
       widget: object
-      required: false
       fields:
       - label: العربية
         name: ar
@@ -585,6 +1073,7 @@ collections:
         name: en
         widget: string
         required: false
+      required: false
     - label: عنوان الخريطة (بحث Google Maps)
       name: mapQuery
       widget: string
@@ -596,14 +1085,94 @@ collections:
         name: instagram
         widget: string
         required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
       - label: Facebook
         name: facebook
         widget: string
         required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
       - label: TikTok
         name: tiktok
         widget: string
         required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
+    - label: أرقام الثقة (تظهر فقط عند تعبئتها، ويجب أن تكون حقيقية)
+      name: trust
+      widget: object
+      required: false
+      fields:
+      - label: سنة التأسيس
+        name: since
+        widget: number
+        value_type: int
+        required: false
+      - label: عدد المسافرين الذين خدمناهم
+        name: travellers
+        widget: number
+        value_type: int
+        required: false
+      - label: تقييم Google (مثل 4.8)
+        name: googleRating
+        widget: number
+        value_type: float
+        step: 0.1
+        min: 1
+        max: 5
+        required: false
+      - label: عدد تقييمات Google
+        name: googleReviews
+        widget: number
+        value_type: int
+        required: false
+      - label: رابط صفحة الشركة على Google Maps
+        name: googleMapsUrl
+        widget: string
+        required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
+      - label: رابط التحقق من الإجازة (قائمة هيئة السياحة)
+        name: licenceUrl
+        widget: string
+        required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
+    - label: السعر بالدولار (اختياري)
+      name: pricing
+      widget: object
+      required: false
+      fields:
+      - label: سعر صرف الدولار بالدينار (مثل 1310). اتركه فارغاً لإخفاء السعر بالدولار
+        name: usdRate
+        widget: number
+        value_type: int
+        required: false
+      - label: تاريخ تحديث سعر الصرف
+        name: rateUpdated
+        required: false
+        widget: datetime
+        format: YYYY-MM-DD
+        date_format: YYYY-MM-DD
+        time_format: false
+    - label: طرق الدفع المقبولة (تظهر في أسفل الموقع)
+      name: paymentMethods
+      widget: list
+      required: false
+      summary: '{{fields.ar}}'
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
   - name: home
     label: الصفحة الرئيسية
     file: content/settings/home.json
@@ -665,6 +1234,9 @@ collections:
             name: src
             widget: image
             choose_url: true
+            pattern:
+            - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+            - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
           - label: وصف الصورة (للمكفوفين ومحركات البحث)
             name: alt
             widget: object
@@ -683,6 +1255,59 @@ collections:
             name: creditUrl
             widget: string
             required: false
+            pattern:
+            - ^https://
+            - رابط كامل يبدأ بـ https://
+    - label: شريط الثقة تحت الواجهة
+      name: trustPoints
+      widget: list
+      required: false
+      summary: '{{fields.title.ar}}'
+      fields:
+      - label: الأيقونة
+        name: icon
+        widget: select
+        options:
+        - plane
+        - hotel
+        - passport
+        - car
+        - map
+        - heart
+        - compass
+        - users
+        - shield
+        - clock
+        - wallet
+        - headset
+        - star
+        - check
+        - sun
+        - globe
+        - camera
+        - briefcase
+        - message
+        - building
+      - label: العنوان
+        name: title
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: string
+        - label: English
+          name: en
+          widget: string
+      - label: الوصف
+        name: description
+        widget: object
+        fields:
+        - label: العربية
+          name: ar
+          widget: text
+        - label: English
+          name: en
+          widget: text
     - label: أساليب السفر
       name: styles
       widget: list
@@ -692,12 +1317,18 @@ collections:
         name: style
         widget: select
         options:
-        - adventure
-        - discovery
-        - family
-        - romance
-        - unwind
-        - luxury
+        - label: مغامرة
+          value: adventure
+        - label: استكشاف
+          value: discovery
+        - label: عائلية
+          value: family
+        - label: رومانسية
+          value: romance
+        - label: استرخاء
+          value: unwind
+        - label: فاخرة
+          value: luxury
       - label: العنوان
         name: title
         widget: object
@@ -726,6 +1357,9 @@ collections:
           name: src
           widget: image
           choose_url: true
+          pattern:
+          - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+          - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
         - label: وصف الصورة (للمكفوفين ومحركات البحث)
           name: alt
           widget: object
@@ -744,6 +1378,9 @@ collections:
           name: creditUrl
           widget: string
           required: false
+          pattern:
+          - ^https://
+          - رابط كامل يبدأ بـ https://
     - label: الباقة المميزة الكبيرة
       name: featuredPackage
       widget: relation
@@ -759,7 +1396,31 @@ collections:
       widget: list
       summary: '{{fields.title.ar}}'
       fields:
-      - label: الخدمة
+      - label: الأيقونة
+        name: icon
+        widget: select
+        options:
+        - plane
+        - hotel
+        - passport
+        - car
+        - map
+        - heart
+        - compass
+        - users
+        - shield
+        - clock
+        - wallet
+        - headset
+        - star
+        - check
+        - sun
+        - globe
+        - camera
+        - briefcase
+        - message
+        - building
+      - label: العنوان
         name: title
         widget: object
         fields:
@@ -851,6 +1512,13 @@ collections:
         - label: English
           name: en
           widget: string
+      - label: ينتهي العرض في (اختياري، يختفي القسم بعده تلقائياً)
+        name: validUntil
+        required: false
+        widget: datetime
+        format: YYYY-MM-DD
+        date_format: YYYY-MM-DD
+        time_format: false
       - label: الصورة
         name: image
         widget: object
@@ -859,6 +1527,9 @@ collections:
           name: src
           widget: image
           choose_url: true
+          pattern:
+          - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+          - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
         - label: وصف الصورة (للمكفوفين ومحركات البحث)
           name: alt
           widget: object
@@ -877,6 +1548,9 @@ collections:
           name: creditUrl
           widget: string
           required: false
+          pattern:
+          - ^https://
+          - رابط كامل يبدأ بـ https://
     - label: صورة الدعوة الأخيرة
       name: finalImage
       widget: object
@@ -885,6 +1559,9 @@ collections:
         name: src
         widget: image
         choose_url: true
+        pattern:
+        - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+        - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
       - label: وصف الصورة (للمكفوفين ومحركات البحث)
         name: alt
         widget: object
@@ -903,6 +1580,9 @@ collections:
         name: creditUrl
         widget: string
         required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
   - name: testimonials
     label: آراء العملاء
     file: content/settings/testimonials.json
@@ -911,8 +1591,12 @@ collections:
       name: items
       widget: list
       summary: '{{fields.name.ar}}'
-      hint: استخدم آراء حقيقية من عملائك وبموافقتهم فقط.
+      hint: تظهر على الموقع فقط الآراء المفعّل عليها "منشور على الموقع".
       fields:
+      - label: منشور على الموقع؟ (فعّله فقط لرأي حقيقي وبموافقة صاحبه)
+        name: verified
+        widget: boolean
+        default: false
       - label: الرأي
         name: quote
         widget: object
@@ -951,6 +1635,9 @@ collections:
           name: src
           widget: image
           choose_url: true
+          pattern:
+          - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+          - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
         - label: وصف الصورة (للمكفوفين ومحركات البحث)
           name: alt
           widget: object
@@ -969,6 +1656,45 @@ collections:
           name: creditUrl
           widget: string
           required: false
+          pattern:
+          - ^https://
+          - رابط كامل يبدأ بـ https://
+      - label: المصدر
+        name: source
+        widget: select
+        required: false
+        options:
+        - label: Google
+          value: google
+        - label: واتساب
+          value: whatsapp
+        - label: إنستغرام
+          value: instagram
+        - label: فيسبوك
+          value: facebook
+        - label: أخرى
+          value: other
+      - label: التقييم (1–5)
+        name: rating
+        widget: number
+        value_type: int
+        min: 1
+        max: 5
+        required: false
+      - label: التاريخ
+        name: date
+        required: false
+        widget: datetime
+        format: YYYY-MM-DD
+        date_format: YYYY-MM-DD
+        time_format: false
+      - label: رابط الرأي الأصلي (اختياري)
+        name: url
+        widget: string
+        required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
   - name: faq
     label: الأسئلة الشائعة
     file: content/settings/faq.json
@@ -1017,9 +1743,16 @@ collections:
       - label: English
         name: en
         widget: string
-    - label: السطر الصغير (إنجليزي)
+    - label: السطر الصغير
       name: eyebrow
-      widget: string
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
     - label: المقدمة
       name: intro
       widget: object
@@ -1033,12 +1766,14 @@ collections:
     - label: صورة الواجهة (اختياري)
       name: image
       widget: object
-      required: false
       fields:
       - label: الصورة
         name: src
         widget: image
         choose_url: true
+        pattern:
+        - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+        - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
         required: false
       - label: وصف الصورة (للمكفوفين ومحركات البحث)
         name: alt
@@ -1052,7 +1787,6 @@ collections:
           name: en
           widget: string
           required: false
-        required: false
       - label: اسم المصوّر (اختياري)
         name: credit
         widget: string
@@ -1061,6 +1795,10 @@ collections:
         name: creditUrl
         widget: string
         required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
+      required: false
     - label: الأقسام
       name: sections
       widget: list
@@ -1110,9 +1848,16 @@ collections:
       - label: English
         name: en
         widget: string
-    - label: السطر الصغير (إنجليزي)
+    - label: السطر الصغير
       name: eyebrow
-      widget: string
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
     - label: المقدمة
       name: intro
       widget: object
@@ -1126,12 +1871,14 @@ collections:
     - label: صورة الواجهة (اختياري)
       name: image
       widget: object
-      required: false
       fields:
       - label: الصورة
         name: src
         widget: image
         choose_url: true
+        pattern:
+        - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+        - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
         required: false
       - label: وصف الصورة (للمكفوفين ومحركات البحث)
         name: alt
@@ -1145,7 +1892,6 @@ collections:
           name: en
           widget: string
           required: false
-        required: false
       - label: اسم المصوّر (اختياري)
         name: credit
         widget: string
@@ -1154,6 +1900,10 @@ collections:
         name: creditUrl
         widget: string
         required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
+      required: false
     - label: الأقسام
       name: sections
       widget: list
@@ -1203,9 +1953,16 @@ collections:
       - label: English
         name: en
         widget: string
-    - label: السطر الصغير (إنجليزي)
+    - label: السطر الصغير
       name: eyebrow
-      widget: string
+      widget: object
+      fields:
+      - label: العربية
+        name: ar
+        widget: string
+      - label: English
+        name: en
+        widget: string
     - label: المقدمة
       name: intro
       widget: object
@@ -1219,12 +1976,14 @@ collections:
     - label: صورة الواجهة (اختياري)
       name: image
       widget: object
-      required: false
       fields:
       - label: الصورة
         name: src
         widget: image
         choose_url: true
+        pattern:
+        - ^(/uploads/[^?#\s]+|https://images\.unsplash\.com/photo-[\w-]+(\?\S*)?)$
+        - ارفع الصورة، أو استخدم رابطاً يبدأ بـ https://images.unsplash.com/photo-
         required: false
       - label: وصف الصورة (للمكفوفين ومحركات البحث)
         name: alt
@@ -1238,7 +1997,6 @@ collections:
           name: en
           widget: string
           required: false
-        required: false
       - label: اسم المصوّر (اختياري)
         name: credit
         widget: string
@@ -1247,6 +2005,10 @@ collections:
         name: creditUrl
         widget: string
         required: false
+        pattern:
+        - ^https://
+        - رابط كامل يبدأ بـ https://
+      required: false
     - label: الأقسام
       name: sections
       widget: list

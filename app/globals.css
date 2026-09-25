@@ -23,6 +23,8 @@
   /* Breakpoints taken from the prototype: phone < 760px, tablet < 1100px. */
   --breakpoint-md: 47.5rem;
   --breakpoint-lg: 68.75rem;
+  /* Full desktop navigation only where all links fit comfortably. */
+  --breakpoint-xl: 73.75rem;
 
   --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
 
@@ -52,6 +54,9 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    /* Keep focused and anchored elements clear of the fixed header and the mobile bottom bar. */
+    scroll-padding-top: 96px;
+    scroll-padding-bottom: calc(84px + env(safe-area-inset-bottom));
   }
   body {
     margin: 0;
@@ -72,9 +77,11 @@
     background: var(--color-gold);
     color: var(--color-ink);
   }
+  /* A dark ring with a light halo stays visible on both ivory and navy backgrounds (WCAG 1.4.11). */
   :focus-visible {
-    outline: 2px solid var(--color-gold);
-    outline-offset: 3px;
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px var(--color-ivory);
   }
   button {
     cursor: pointer;
@@ -101,6 +108,13 @@
     font-weight: 600;
     text-transform: uppercase;
   }
+  /* Arabic script must never be letter-spaced or set in Latin micro-type. */
+  .eyebrow:lang(ar) {
+    font-family: var(--font-body);
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
   .heading-xl {
     font-family: var(--font-display);
     font-weight: 500;
@@ -112,24 +126,37 @@
   .field {
     background: transparent;
     border: 0;
-    border-bottom: 1px solid rgb(11 29 38 / 0.28);
+    border-bottom: 1px solid rgb(11 29 38 / 0.6);
     padding: 10px 0 12px;
     font-size: 17px;
     color: var(--color-ink);
-    outline: none;
     border-radius: 0;
     width: 100%;
     transition: border-color 0.3s;
   }
+  .field::placeholder {
+    color: rgb(79 91 95 / 0.8);
+  }
   .field:focus {
-    border-bottom-color: var(--color-gold);
+    border-bottom-color: var(--color-bronze);
+  }
+  .field:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 4px;
+    box-shadow: none;
   }
   .field[aria-invalid='true'] {
     border-bottom-color: #b3261e;
   }
   .field-dark {
-    border-bottom-color: rgb(247 243 236 / 0.3);
+    border-bottom-color: rgb(247 243 236 / 0.55);
     color: var(--color-ivory);
+  }
+  .field-dark:focus {
+    border-bottom-color: var(--color-gold);
+  }
+  .field-dark:focus-visible {
+    outline-color: var(--color-gold);
   }
   .field-dark::placeholder {
     color: rgb(247 243 236 / 0.5);
@@ -139,6 +166,11 @@
   }
   select.field option {
     color: var(--color-ink);
+  }
+  /* Subtle geometric line pattern for imageless banners. */
+  .brand-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23F7F3EC' stroke-opacity='.06' stroke-width='1'%3E%3Cpath d='M60 6 114 60 60 114 6 60Z'/%3E%3Cpath d='M60 30 90 60 60 90 30 60Z'/%3E%3Cpath d='M0 0 120 120M120 0 0 120'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 120px 120px;
   }
   .no-scrollbar {
     scrollbar-width: none;
@@ -159,10 +191,11 @@
 
 /* First-visit intro screen: pure CSS so it never blocks the page if JS fails. */
 .intro-loader {
-  animation: intro-out 0.6s ease 0.9s forwards;
+  pointer-events: none;
+  animation: intro-out 0.35s ease 0.45s forwards;
 }
 .intro-loader .intro-line {
-  animation: intro-line 0.9s cubic-bezier(0.6, 0, 0.2, 1) forwards;
+  animation: intro-line 0.45s cubic-bezier(0.6, 0, 0.2, 1) forwards;
 }
 html.intro-seen .intro-loader {
   display: none;

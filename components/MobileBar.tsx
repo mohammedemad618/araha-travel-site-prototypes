@@ -1,10 +1,12 @@
 'use client';
 
+import { Map, Package } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { useWhatsApp } from './WhatsApp';
+import { WhatsAppGlyph } from './ui/Icon';
 
-/** Bottom navigation on phones and tablets. Package pages render their own booking bar instead. */
+/** Bottom navigation on phones. Package pages render their own booking bar instead. */
 export function MobileBar() {
   const t = useTranslations('nav');
   const tc = useTranslations('common');
@@ -15,22 +17,28 @@ export function MobileBar() {
   return (
     <nav
       aria-label={t('main')}
-      className="fixed inset-x-0 bottom-0 z-70 grid grid-cols-[1fr_1fr_1.25fr] gap-2 border-t border-ivory/10 bg-ink/96 px-2.5 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] backdrop-blur-[14px] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-70 grid grid-cols-[1fr_1fr_1.25fr] gap-2 border-t border-ivory/10 bg-ink/96 px-2.5 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] backdrop-blur-[14px] md:hidden"
     >
-      <Link href="/packages" className="flex min-h-[52px] flex-col items-center justify-center gap-1 text-sm text-ivory">
-        <span className="h-1.5 w-1.5 rotate-45 border border-gold" aria-hidden="true" />
+      <Link
+        href="/packages"
+        className="flex min-h-[52px] flex-col items-center justify-center gap-1 text-[13.5px] text-ivory"
+      >
+        <Package size={18} strokeWidth={1.5} className="text-gold" aria-hidden="true" />
         {t('packages')}
       </Link>
-      <Link href="/#services" className="flex min-h-[52px] flex-col items-center justify-center gap-1 text-sm text-ivory">
-        <span className="h-1.5 w-1.5 rounded-full border border-gold" aria-hidden="true" />
-        {t('services')}
+      <Link
+        href="/destinations"
+        className="flex min-h-[52px] flex-col items-center justify-center gap-1 text-[13.5px] text-ivory"
+      >
+        <Map size={18} strokeWidth={1.5} className="text-gold" aria-hidden="true" />
+        {t('destinations')}
       </Link>
       <button
         type="button"
         onClick={toggle}
         className="flex min-h-[52px] items-center justify-center gap-2.5 rounded-[2px] bg-gold text-[15px] font-medium text-ink"
       >
-        <span className="h-2 w-2 rounded-full bg-ink" aria-hidden="true" />
+        <WhatsAppGlyph size={18} />
         {tc('whatsapp')}
       </button>
     </nav>

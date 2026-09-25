@@ -1,0 +1,43 @@
+{
+  "destination": "georgia",
+  "status": "visa-required",
+  "summary": {
+    "ar": "يحتاج العراقي إلى تأشيرة لجورجيا تصدر عبر سفارة جورجية، إذ إن التأشيرة الإلكترونية غير متاحة للجواز العراقي. يُعفى حاملو تأشيرات أو إقامات أجنبية معيّنة.",
+    "en": "Iraqis need a visa for Georgia, issued by a Georgian embassy; the online e-visa is not open to Iraqi passports. Holders of certain foreign visas or residence permits are exempt."
+  },
+  "howToApply": {
+    "ar": "لا توجد سفارة جورجية داخل العراق، والسفارة الجورجية في عمّان (الأردن) هي المعتمدة لدى العراق. يُسجَّل الطلب إلكترونياً على بوابة الخدمات القنصلية لوزارة الخارجية الجورجية (geoconsul.gov.ge) ثم تُتبع تعليمات السفارة لتقديم المستندات.",
+    "en": "Georgia has no embassy inside Iraq; its embassy in Amman (Jordan) is accredited to Iraq. Register the application on the Georgian MFA consular portal (geoconsul.gov.ge), then follow the embassy's instructions for submitting documents."
+  },
+  "stay": {
+    "ar": "عادةً حتى 30 يوماً ضمن صلاحية 120 يوماً، حسب ما هو مدوّن على التأشيرة. المعفَون بإقامة أو تأشيرة مؤهلة: حتى 90 يوماً خلال كل 180 يوماً.",
+    "en": "Usually up to 30 days within a 120-day validity, as shown on the visa. Exempt holders of qualifying permits: up to 90 days in any 180 days."
+  },
+  "exemptions": [
+    {
+      "ar": "حاملو تأشيرة أو إقامة سارية صادرة من دول الاتحاد الأوروبي أو رابطة التجارة الحرة الأوروبية أو دول الخليج أو الولايات المتحدة أو بريطانيا أو كندا أو أستراليا أو اليابان أو كوريا الجنوبية أو نيوزيلندا يمكنهم الدخول دون تأشيرة حتى 90 يوماً خلال 180 يوماً (بشروط).",
+      "en": "Holders of a valid visa or residence permit from an EU or EFTA state, a GCC state, the US, UK, Canada, Australia, Japan, South Korea or New Zealand may enter visa-free for up to 90 days in 180 (conditions apply)."
+    }
+  ],
+  "documents": [
+    { "ar": "جواز سفر صادر خلال آخر 10 سنوات، صالح 3 أشهر على الأقل بعد انتهاء التأشيرة، وفيه صفحتان فارغتان", "en": "Passport issued within the last 10 years, valid 3+ months beyond the visa, with 2 blank pages" },
+    { "ar": "صورة شخصية حديثة (خلال آخر 6 أشهر)", "en": "Recent photo (taken within 6 months)" },
+    { "ar": "ما يثبت غرض الرحلة وبرنامجها", "en": "Proof of the purpose of travel and itinerary" },
+    { "ar": "حجز فندقي لكامل مدة الإقامة", "en": "Hotel booking for the whole stay" },
+    { "ar": "تأمين صحي وضد الحوادث بتغطية لا تقل عن 30,000 لاري لكامل مدة الإقامة", "en": "Health and accident insurance with at least 30,000 GEL cover for the whole stay" },
+    { "ar": "إثبات القدرة المالية: كشف حساب لآخر 3 أشهر أو تأييد عمل", "en": "Proof of funds: last 3 months' bank statement or employer letter" },
+    { "ar": "تذكرة ذهاب وعودة", "en": "Return ticket" }
+  ],
+  "notes": {
+    "ar": "منذ 1 كانون الثاني 2026 يجب على جميع الزوار الأجانب حمل تأمين صحي وضد الحوادث يغطي كامل مدة الإقامة بمبلغ لا يقل عن 30,000 لاري (قرار الحكومة رقم 602)، وقد يُمنع الصعود إلى الطائرة أو الدخول بدونه. تتحدث بعض المصادر المحلية عن «فيزا إلكترونية للعراقيين»، لكن البوابة الرسمية evisa.gov.ge لا تتيحها للجواز العراقي حالياً. تُقدَّم المستندات بالإنكليزية أو الجورجية، ونؤكد لك الإجراء الحالي قبل التقديم.",
+    "en": "Since 1 January 2026, all foreign visitors must hold health and accident insurance for the whole stay with at least 30,000 GEL cover (Government Decree No. 602); boarding or entry may be refused without it. Some local sources mention an 'e-visa for Iraqis', but the official evisa.gov.ge portal does not currently offer it to Iraqi passports. Documents must be in English or Georgian; we confirm the current procedure before you apply."
+  },
+  "officialUrl": "https://www.geoconsul.gov.ge/en/entering-georgia/",
+  "sources": [
+    "https://www.evisa.gov.ge/GeoVisa/en/VisaApp",
+    "https://www.evisa.gov.ge/GeoVisa/en/Home/FAQ",
+    "https://matsne.gov.ge/ka/document/view/6728816?publication=0",
+    "https://apply.joinsherpa.com/visa/georgia/iraqi-citizens"
+  ],
+  "lastVerified": "2026-09-25"
+}

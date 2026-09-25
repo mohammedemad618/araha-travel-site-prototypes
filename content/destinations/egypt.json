@@ -12,7 +12,7 @@
   },
   "description": {
     "ar": "شرم الشيخ والغردقة من أجمل وجهات الغوص والاسترخاء، بمنتجعات شاملة كلياً وشعاب مرجانية، مع إمكانية إضافة القاهرة والأهرامات إلى برنامجك.",
-    "en": "Sharm El Sheikh and Hurghada are among the best places to dive and unwind, with all-inclusive resorts and coral reefs—and Cairo and the Pyramids can be added to your trip."
+    "en": "Sharm El Sheikh and Hurghada are among the best places to dive and unwind, with all-inclusive resorts and coral reefs – and Cairo and the Pyramids can be added to your trip."
   },
   "bestSeason": {
     "ar": "تشرين الأول — أيار",
@@ -28,5 +28,33 @@
     "creditUrl": "https://unsplash.com/@pvysohlid"
   },
   "homeLayout": "mid",
-  "order": 5
+  "order": 5,
+  "glance": {
+    "flightTime": {
+      "ar": "حوالي 3 ساعات طيران، وقد تكون عبر القاهرة",
+      "en": "About 3 hours’ flying, sometimes via Cairo"
+    },
+    "currency": {
+      "ar": "الجنيه المصري",
+      "en": "Egyptian pound"
+    },
+    "language": {
+      "ar": "العربية",
+      "en": "Arabic"
+    },
+    "timeDifference": {
+      "ar": "نفس توقيت بغداد صيفاً، وساعة أقل شتاءً",
+      "en": "Same as Baghdad in summer, one hour behind in winter"
+    }
+  },
+  "seo": {
+    "title": {
+      "ar": "عروض شرم الشيخ ومصر من بغداد",
+      "en": "Sharm El Sheikh & Egypt holidays"
+    },
+    "description": {
+      "ar": "عروض شرم الشيخ من بغداد: منتجعات شاملة كلياً على البحر الأحمر، سنوركل في رأس محمد، مع إمكانية إضافة القاهرة والأهرامات.",
+      "en": "Sharm El Sheikh holidays from Baghdad: all-inclusive Red Sea resorts and snorkelling at Ras Mohammed, with Cairo and the Pyramids as an add-on."
+    }
+  }
 }

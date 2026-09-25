@@ -16,6 +16,7 @@ type Rules = { required?: string[]; phone?: string; email?: string };
 export function useNetlifyForm(formName: string, rules: Rules) {
   const [status, setStatus] = useState<FormStatus>('idle');
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [summary, setSummary] = useState<Record<string, string>>({});
 
   function validate(data: FormData): FieldErrors {
     const next: FieldErrors = {};
@@ -39,9 +40,12 @@ export function useNetlifyForm(formName: string, rules: Rules) {
     const data = new FormData(form);
     const found = validate(data);
     setErrors(found);
-    const first = Object.keys(found)[0];
-    if (first) {
-      form.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
+    if (Object.keys(found).length) {
+      // Focus the first invalid field in reading order.
+      const first = [...form.elements].find(
+        (el): el is HTMLElement => el instanceof HTMLElement && 'name' in el && Boolean(found[(el as HTMLInputElement).name]),
+      );
+      first?.focus();
       return;
     }
     data.set('form-name', formName);
@@ -56,6 +60,11 @@ export function useNetlifyForm(formName: string, rules: Rules) {
         body: body.toString(),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const values: Record<string, string> = {};
+      data.forEach((value, key) => {
+        if (!['form-name', 'page', 'bot-field'].includes(key)) values[key] = String(value);
+      });
+      setSummary(values);
       setStatus('sent');
       track('form_submit', { form: formName });
     } catch {
@@ -63,5 +72,10 @@ export function useNetlifyForm(formName: string, rules: Rules) {
     }
   }
 
-  return { status, errors, onSubmit, reset: () => setStatus('idle') };
+  const reset = () => {
+    setErrors({});
+    setStatus('idle');
+  };
+
+  return { status, errors, summary, onSubmit, reset };
 }
