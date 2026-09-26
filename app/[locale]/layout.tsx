@@ -132,7 +132,8 @@ function travelAgencySchema(locale: Locale) {
     address: {
       '@type': 'PostalAddress',
       streetAddress: site.address[locale],
-      addressLocality: locale === 'ar' ? 'بغداد' : 'Baghdad',
+      addressLocality: locale === 'ar' ? 'الموصل' : 'Mosul',
+      addressRegion: locale === 'ar' ? 'نينوى' : 'Nineveh',
       addressCountry: 'IQ',
     },
     openingHoursSpecification: {

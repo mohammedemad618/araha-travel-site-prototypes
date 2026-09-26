@@ -1,6 +1,6 @@
 {
   "hero": {
-    "eyebrow": "CURATED JOURNEYS FROM BAGHDAD",
+    "eyebrow": "CURATED JOURNEYS FROM MOSUL",
     "headline": [
       {
         "ar": "بعض الرحلات",
@@ -12,8 +12,8 @@
       }
     ],
     "intro": {
-      "ar": "باقات سياحية مختارة، وحجوزات طيران وفنادق وتأشيرات، ومتابعة شخصية من لحظة الحجز حتى عودتك إلى بغداد.",
-      "en": "Curated holiday packages, flights, hotels and visas – with personal support from the moment you book until you’re home in Baghdad."
+      "ar": "باقات سياحية مختارة، وحجوزات طيران وفنادق وتأشيرات، ومتابعة شخصية من لحظة الحجز حتى عودتك إلى بيتك.",
+      "en": "Curated holiday packages, flights, hotels and visas – with personal support from the moment you book until you’re back home."
     },
     "slides": [
       {
@@ -103,12 +103,12 @@
     {
       "icon": "building",
       "title": {
-        "ar": "مكتبنا في الكرادة",
-        "en": "Our office in Karrada"
+        "ar": "مكتبنا في الموصل",
+        "en": "Our office in Mosul"
       },
       "description": {
-        "ar": "زورنا في بغداد وتحدث مع مستشار سفر وجهاً لوجه.",
-        "en": "Visit us in Baghdad and talk to a consultant face to face."
+        "ar": "زورنا في حي الشرطة بالموصل وتحدث مع مستشار سفر وجهاً لوجه.",
+        "en": "Visit us in Al-Shurta, Mosul and talk to a consultant face to face."
       }
     }
   ],
@@ -243,8 +243,8 @@
         "en": "Flight bookings"
       },
       "description": {
-        "ar": "أفضل المسارات والأسعار من بغداد والبصرة وأربيل والنجف.",
-        "en": "The best routes and fares from Baghdad, Basra, Erbil and Najaf."
+        "ar": "أفضل المسارات والأسعار من أربيل وبغداد وبقية مطارات العراق.",
+        "en": "The best routes and fares from Erbil, Baghdad and Iraq’s other airports."
       }
     },
     {

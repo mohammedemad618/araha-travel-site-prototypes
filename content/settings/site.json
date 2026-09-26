@@ -12,8 +12,8 @@
     "en": "More than a trip. A story worth telling."
   },
   "description": {
-    "ar": "مكتب سياحة وسفر في الكرادة، بغداد: باقات إلى تركيا وجورجيا وأذربيجان ودبي ومصر والمالديف، مع حجز الطيران والفنادق والتأشيرات.",
-    "en": "Baghdad travel agency in Karrada: holiday packages to Türkiye (Turkey), Georgia, Azerbaijan, Dubai, Egypt and the Maldives, plus flights, hotels and visas."
+    "ar": "مكتب سياحة وسفر في الموصل، الجانب الأيسر: باقات إلى تركيا وجورجيا وأذربيجان ودبي ومصر والمالديف، مع حجز الطيران والفنادق والتأشيرات.",
+    "en": "Mosul travel agency on the Left Bank: holiday packages to Türkiye (Turkey), Georgia, Azerbaijan, Dubai, Egypt and the Maldives, plus flights, hotels and visas."
   },
   "url": "https://araha-travel.netlify.app",
   "phone": "+9647700000000",
@@ -22,14 +22,14 @@
   "whatsappDisplay": "+964 780 000 0000",
   "email": "info@example.com",
   "address": {
-    "ar": "بغداد، الكرادة داخل، شارع 62، بناية النخيل، الطابق الثالث",
-    "en": "Al-Nakheel Building, 3rd floor, Street 62, Karrada Dakhil, Baghdad"
+    "ar": "الموصل، الجانب الأيسر، حي الشرطة",
+    "en": "Al-Shurta neighbourhood, Left Bank, Mosul"
   },
   "hours": {
     "ar": "السبت — الخميس · 9 صباحاً — 9 مساءً",
     "en": "Saturday – Thursday · 9am – 9pm"
   },
-  "mapQuery": "Karrada Dakhil, Baghdad, Iraq",
+  "mapQuery": "حي الشرطة، الموصل، العراق",
   "social": {
     "instagram": "",
     "facebook": "",

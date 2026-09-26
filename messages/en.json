@@ -42,7 +42,7 @@
     "readMore": "Read more"
   },
   "home": {
-    "metaTitle": "Ariha Travel & Tourism | Holiday packages from Baghdad",
+    "metaTitle": "Ariha Travel & Tourism | Holiday packages from Mosul",
     "exploreCta": "Explore packages",
     "contactCta": "Contact us",
     "sliderLabel": "Destination photos",
@@ -59,7 +59,7 @@
     "destinationsIntro": "Places where new stories begin.",
     "servicesEyebrow": "OUR SERVICES",
     "servicesTitle": "Everything you need for a complete trip",
-    "servicesIntro": "From your first ticket until you’re back in Baghdad, one team handles every detail and stays in touch throughout your journey.",
+    "servicesIntro": "From your first ticket until you’re back home, one team handles every detail and stays in touch throughout your journey.",
     "servicesCta": "Ask about a service",
     "customEyebrow": "TAILOR-MADE",
     "customKicker": "Didn’t find the right package?",
@@ -71,7 +71,7 @@
     "whyTitle": "Why travel with Ariha",
     "storiesEyebrow": "TRAVEL STORIES",
     "storiesTitle": "Stories that began with a trip",
-    "storiesIntro": "Travellers from Baghdad, Basra and Erbil share their journeys with us.",
+    "storiesIntro": "Travellers from Mosul, Erbil and Baghdad share their journeys with us.",
     "finalEyebrow": "PLAN YOUR JOURNEY",
     "finalTitle": "Design your own journey",
     "finalIntro": "Tell us where you want to go, and we’ll help turn the idea into a trip.",
@@ -93,10 +93,10 @@
     "callUs": "Call us"
   },
   "packages": {
-    "metaTitle": "Holiday packages from Baghdad",
-    "metaDescription": "Holiday packages from Baghdad to Türkiye, Georgia, Azerbaijan, Dubai, Sharm El Sheikh and the Maldives, with IQD prices, dates and daily itineraries.",
+    "metaTitle": "Holiday packages from Mosul",
+    "metaDescription": "Holiday packages from Mosul to Türkiye, Georgia, Azerbaijan, Dubai, Sharm El Sheikh and the Maldives, with IQD prices, dates and daily itineraries.",
     "eyebrow": "ALL JOURNEYS",
-    "title": "Holiday packages from Baghdad",
+    "title": "Holiday packages from Mosul",
     "intro": "Choose your destination and travel style, and we’ll take care of the rest.",
     "filterDestination": "Destination",
     "filterStyle": "Travel style",
@@ -200,8 +200,8 @@
     "fewerDates": "Show fewer dates"
   },
   "destinations": {
-    "metaTitle": "Travel destinations from Baghdad",
-    "metaDescription": "Favourite destinations from Baghdad: Türkiye, the UAE, Georgia, Azerbaijan, Egypt and the Maldives – best time to visit and ready-made packages for each.",
+    "metaTitle": "Travel destinations from Mosul",
+    "metaDescription": "Favourite destinations from Mosul: Türkiye, the UAE, Georgia, Azerbaijan, Egypt and the Maldives – best time to visit and ready-made packages for each.",
     "eyebrow": "DESTINATIONS",
     "title": "Inspiring destinations",
     "intro": "Places where new stories begin.",
@@ -217,8 +217,8 @@
     "visa": "Visa"
   },
   "contact": {
-    "metaTitle": "Travel agency in Karrada, Baghdad",
-    "metaDescription": "Visit Ariha Travel & Tourism in Karrada Dakhil, Baghdad, or reach us by phone or WhatsApp to book flights, hotels, holiday packages and visas.",
+    "metaTitle": "Travel agency in Al-Shurta, Mosul",
+    "metaDescription": "Visit Ariha Travel & Tourism in Al-Shurta on Mosul’s Left Bank, or reach us by phone or WhatsApp to book flights, hotels, holiday packages and visas.",
     "eyebrow": "CONTACT",
     "title": "Contact us",
     "intro": "Our travel consultants are ready to answer your questions and help you plan your trip.",
@@ -233,7 +233,7 @@
   },
   "faq": {
     "metaTitle": "Booking, visa & payment FAQs",
-    "metaDescription": "Clear answers on booking holiday packages from Baghdad, IQD prices, visa help for Iraqi passport holders, payment methods and cancellations.",
+    "metaDescription": "Clear answers on booking holiday packages from Mosul, IQD prices, visa help for Iraqi passport holders, payment methods and cancellations.",
     "eyebrow": "FAQ",
     "title": "Frequently asked questions",
     "intro": "Everything you need to know before booking. Can’t find your answer? Get in touch.",
@@ -366,7 +366,7 @@
     "packagesFor": "{name} packages"
   },
   "guides": {
-    "metaTitle": "Travel guides from Baghdad",
+    "metaTitle": "Travel guides for travellers from Iraq",
     "metaDescription": "Practical articles for travellers from Iraq: choosing a destination, family travel checklists, honeymoons, Trabzon in summer and the best time to travel.",
     "eyebrow": "TRAVEL GUIDES",
     "title": "Travel guides",
