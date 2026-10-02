@@ -47,7 +47,7 @@ export const viewport: Viewport = {
 
 // The brand intro plays once per device (first visit only).
 const INTRO_SCRIPT =
-  "try{if(localStorage.getItem('neura-intro'))document.documentElement.classList.add('intro-seen');else localStorage.setItem('neura-intro','1')}catch(e){}";
+  "try{if(localStorage.getItem('niura-intro'))document.documentElement.classList.add('intro-seen');else localStorage.setItem('niura-intro','1')}catch(e){}";
 
 // Only the namespaces used by client components are sent to the browser.
 const CLIENT_NAMESPACES = ['meta', 'nav', 'common', 'form', 'whatsapp', 'package', 'packages', 'home'];
@@ -126,7 +126,7 @@ function travelAgencySchema(locale: Locale) {
     logo: absoluteUrl('/icon-512.png'),
     image: absoluteUrl('/og-default.jpg'),
     telephone: site.phone,
-    email: site.email,
+    ...(site.email ? { email: site.email } : {}),
     priceRange: '$$',
     currenciesAccepted: 'IQD, USD',
     address: {

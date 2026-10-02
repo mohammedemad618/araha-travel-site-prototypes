@@ -1003,9 +1003,10 @@ collections:
     - label: رقم واتساب كما يظهر
       name: whatsappDisplay
       widget: string
-    - label: البريد الإلكتروني
+    - label: البريد الإلكتروني (اختياري)
       name: email
       widget: string
+      required: false
     - label: العنوان
       name: address
       widget: object

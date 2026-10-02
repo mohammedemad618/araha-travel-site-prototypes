@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { alexandria, manrope, plexArabic } from './fonts';
 
 export const metadata: Metadata = {
-  title: 'الصفحة غير موجودة · Page not found | نيورا Neura',
+  title: 'الصفحة غير موجودة · Page not found | نيورا Niura',
 };
 
 /**

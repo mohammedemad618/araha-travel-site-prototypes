@@ -163,7 +163,8 @@ export const siteSchema = z.object({
   phoneDisplay: z.string(),
   whatsapp: z.string().regex(/^\d{8,15}$/, 'Digits only, with country code'),
   whatsappDisplay: z.string(),
-  email: z.string().email(),
+  // Optional: the footer and contact page hide the email row when it is empty.
+  email: z.preprocess(blankToUndefined, z.string().email().optional()),
   address: localized,
   hours: localized,
   openingHours: z

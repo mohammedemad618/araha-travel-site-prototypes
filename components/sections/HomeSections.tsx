@@ -26,7 +26,7 @@ export function IntroLoader() {
         {t('brandWordmark')}
       </div>
       <div dir="ltr" className="font-latin text-[10px] tracking-[0.42em] text-gold">
-        NEURA · {t('brandSub')}
+        NIURA · {t('brandSub')}
       </div>
       <div className="relative h-px w-[120px] overflow-hidden bg-ivory/12">
         <span className="intro-line absolute inset-y-0 start-0 bg-gold" />

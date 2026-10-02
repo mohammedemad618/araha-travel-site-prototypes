@@ -5,7 +5,7 @@
 export function RichText({ text, className = '' }: { text: string; className?: string }) {
   const blocks = text.trim().split(/\n\s*\n/);
   return (
-    <div className={`prose-neura ${className}`}>
+    <div className={`prose-niura ${className}`}>
       {blocks.map((block, i) => {
         const lines = block
           .split('\n')

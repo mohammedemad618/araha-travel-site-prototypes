@@ -97,11 +97,13 @@ export async function Footer({ locale }: { locale: Locale }) {
               <span className="sr-only">{tc('whatsapp')}</span>
               <En className="font-latin">{site.whatsappDisplay}</En>
             </a>
-            <a href={`mailto:${site.email}`} className={`${linkCls} flex items-center gap-2.5`}>
-              <Mail size={16} strokeWidth={1.5} className="shrink-0 text-gold" aria-hidden="true" />
-              <span className="sr-only">{tc('email')}</span>
-              <En className="font-latin">{site.email}</En>
-            </a>
+            {site.email && (
+              <a href={`mailto:${site.email}`} className={`${linkCls} flex items-center gap-2.5`}>
+                <Mail size={16} strokeWidth={1.5} className="shrink-0 text-gold" aria-hidden="true" />
+                <span className="sr-only">{tc('email')}</span>
+                <En className="font-latin">{site.email}</En>
+              </a>
+            )}
           </div>
           <div className={col}>
             <span className={colTitle}>{t('office')}</span>

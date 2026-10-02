@@ -1,4 +1,4 @@
-# Netlify configuration for the Neura Travel & Tourism website.
+# Netlify configuration for the Niura Travel & Tourism website.
 # The site is a fully static Next.js export (see next.config.ts).
 
 [build]

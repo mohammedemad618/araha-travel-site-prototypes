@@ -66,14 +66,16 @@ export default async function ContactPage({ params }: Props) {
                 <En>{site.phoneDisplay}</En>
               </a>
             </div>
-            <div className="border-t border-ink/20 pt-6">
-              <span className={label}>
-                <Mail size={16} strokeWidth={1.5} aria-hidden="true" /> {tc('email')}
-              </span>
-              <a href={`mailto:${site.email}`} className="font-latin text-xl text-ink hover:text-bronze">
-                <En>{site.email}</En>
-              </a>
-            </div>
+            {site.email && (
+              <div className="border-t border-ink/20 pt-6">
+                <span className={label}>
+                  <Mail size={16} strokeWidth={1.5} aria-hidden="true" /> {tc('email')}
+                </span>
+                <a href={`mailto:${site.email}`} className="font-latin text-xl text-ink hover:text-bronze">
+                  <En>{site.email}</En>
+                </a>
+              </div>
+            )}
             <div className="border-t border-ink/20 pt-6">
               <span className={label}>
                 <MapPin size={16} strokeWidth={1.5} aria-hidden="true" /> {t('office')}

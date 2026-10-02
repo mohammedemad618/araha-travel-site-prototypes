@@ -1,6 +1,6 @@
 {
   "meta": {
-    "brandWordmark": "Neura",
+    "brandWordmark": "Niura",
     "brandSub": "TRAVEL & TOURISM",
     "skip": "Skip to content"
   },
@@ -42,7 +42,7 @@
     "readMore": "Read more"
   },
   "home": {
-    "metaTitle": "Neura Travel & Tourism | Holiday packages from Mosul",
+    "metaTitle": "Niura Travel & Tourism | Holiday packages from Mosul",
     "exploreCta": "Explore packages",
     "contactCta": "Contact us",
     "sliderLabel": "Destination photos",
@@ -67,8 +67,8 @@
     "customIntro": "Tell us the destination, dates and budget, and our team will get in touch to build a trip that suits you.",
     "customWhatsapp": "Or message us directly on WhatsApp",
     "offerCta": "Discover the offer",
-    "whyEyebrow": "WHY NEURA",
-    "whyTitle": "Why travel with Neura",
+    "whyEyebrow": "WHY NIURA",
+    "whyTitle": "Why travel with Niura",
     "storiesEyebrow": "TRAVEL STORIES",
     "storiesTitle": "Stories that began with a trip",
     "storiesIntro": "Travellers from Mosul, Erbil and Baghdad share their journeys with us.",
@@ -153,10 +153,10 @@
     "galleryEyebrow": "GALLERY",
     "gallery": "Around the destination",
     "related": "You may also like",
-    "waMessage": "Hello Neura, I’d like to ask about the {title} package",
-    "waMessageDate": "Hello Neura, I’d like to ask about the {title} package — departure {date}",
+    "waMessage": "Hello Niura, I’d like to ask about the {title} package",
+    "waMessageDate": "Hello Niura, I’d like to ask about the {title} package — departure {date}",
     "bookShort": "Book",
-    "waMessageFull": "Hello Neura, I’d like to ask about the {title} package — date: {date} — travellers: {travellers}",
+    "waMessageFull": "Hello Niura, I’d like to ask about the {title} package — date: {date} — travellers: {travellers}",
     "status": {
       "available": "Available",
       "limited": "Limited seats",
@@ -218,7 +218,7 @@
   },
   "contact": {
     "metaTitle": "Travel agency in Al-Shurta, Mosul",
-    "metaDescription": "Visit Neura Travel & Tourism in Al-Shurta on Mosul’s Left Bank, or reach us by phone or WhatsApp to book flights, hotels, holiday packages and visas.",
+    "metaDescription": "Visit Niura Travel & Tourism in Al-Shurta on Mosul’s Left Bank, or reach us by phone or WhatsApp to book flights, hotels, holiday packages and visas.",
     "eyebrow": "CONTACT",
     "title": "Contact us",
     "intro": "Our travel consultants are ready to answer your questions and help you plan your trip.",
@@ -307,8 +307,8 @@
       "I’d like a tailor-made trip",
       "Talk to a consultant"
     ],
-    "greeting": "Hello Neura, ",
-    "planTrip": "Hello Neura, I’d like to plan a trip",
+    "greeting": "Hello Niura, ",
+    "planTrip": "Hello Niura, I’d like to plan a trip",
     "openNow": "Our team is online · replies within minutes",
     "closedNow": "Outside office hours · we reply on the next working day",
     "callback": "Request a call back",
@@ -361,7 +361,7 @@
     "lastVerified": "Last checked: {date}",
     "disclaimer": "Visa rules change often. This information is a guide only; we confirm the current requirements before you apply or book.",
     "helpCta": "Let us handle your visa",
-    "helpMessage": "Hello Neura, I need help with a visa for {country}",
+    "helpMessage": "Hello Niura, I need help with a visa for {country}",
     "jump": "Jump to",
     "packagesFor": "{name} packages"
   },
