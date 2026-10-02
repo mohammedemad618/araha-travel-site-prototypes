@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { alexandria, manrope, plexArabic } from './fonts';
 
 export const metadata: Metadata = {
-  title: 'الصفحة غير موجودة · Page not found | أريحا Ariha',
+  title: 'الصفحة غير موجودة · Page not found | نيورا Neura',
 };
 
 /**
@@ -20,7 +20,7 @@ export default function NotFound() {
           <div className="max-w-[720px]">
             <div className="mb-10 flex items-center justify-center gap-3">
               <span className="h-[9px] w-[9px] rotate-45 bg-gold" aria-hidden="true" />
-              <span className="font-display text-3xl font-medium">أريحا</span>
+              <span className="font-display text-3xl font-medium">نيورا</span>
             </div>
             <div dir="ltr" className="mb-6 font-latin text-[11px] font-semibold tracking-[0.34em] text-gold">
               404 · PAGE NOT FOUND

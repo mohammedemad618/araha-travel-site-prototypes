@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'أريحا للسياحة والسفر · Ariha Travel & Tourism',
+  title: 'نيورا للسياحة والسفر · Neura Travel & Tourism',
   robots: { index: false, follow: true },
   alternates: { canonical: '/ar/' },
 };
@@ -19,7 +19,7 @@ export default function RootPage() {
       </head>
       <body>
         <p>
-          <Link href="/ar/">أريحا للسياحة والسفر</Link> · <Link href="/en/">Ariha Travel &amp; Tourism</Link>
+          <Link href="/ar/">نيورا للسياحة والسفر</Link> · <Link href="/en/">Neura Travel &amp; Tourism</Link>
         </p>
       </body>
     </html>

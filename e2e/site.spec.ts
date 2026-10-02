@@ -20,7 +20,7 @@ test('Arabic home page renders right-to-left without errors', async ({ page }) =
   await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('بعض الرحلات');
-  await expect(page).toHaveTitle(/أريحا/);
+  await expect(page).toHaveTitle(/نيورا/);
   for (const id of ['styles', 'packages', 'destinations', 'services', 'custom', 'offer', 'why', 'contact']) {
     await expect(page.locator(`#${id}`)).toBeAttached();
   }
