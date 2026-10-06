@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
-import { getCtx } from '@/lib/session';
+import { repo } from '@/lib/repo';
+import { actionTenant } from '@/lib/session';
 import { can, type Permission } from '@/lib/rbac';
 import { getStaff } from '@/lib/queries';
 import { fromMinor } from '@/lib/money';
@@ -9,7 +9,6 @@ import { audit } from '@/lib/audit';
 import { makeT } from '@/lib/i18n/translate';
 import { ar } from '@/lib/i18n/ar';
 import { en } from '@/lib/i18n/en';
-import type { Booking, Customer, Lead, Payment } from '@/lib/types';
 
 const PERM: Record<string, Permission> = {
   leads: 'leads.read',
@@ -30,7 +29,8 @@ function csv(rows: (string | number | undefined | null)[][]): string {
 }
 
 export async function GET(req: Request, { params }: { params: Promise<{ entity: string }> }) {
-  const ctx = await getCtx();
+  const auth = await actionTenant();
+  const ctx = auth.ok ? auth.ctx : null;
   const { entity } = await params;
   const perm = PERM[entity];
   if (!ctx?.tenant || !perm || !can(ctx.role, perm) || !can(ctx.role, 'data.export'))
@@ -38,19 +38,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ entity: 
   const tenantId = ctx.tenant._id;
   const lang = req.headers.get('cookie')?.includes('lang=en') ? 'en' : 'ar';
   const t = makeT(lang === 'en' ? en : ar);
-  const db = await getDb();
+  const r = await repo(ctx);
   const staff = await getStaff(tenantId);
   const who = (id: unknown) => staff.find((s) => s.id === String(id))?.name ?? '';
   const LIMIT = 20000;
   let rows: (string | number | undefined | null)[][] = [];
 
   if (entity === 'leads') {
-    const list = await db
-      .collection<Lead>('leads')
-      .find({ tenantId })
-      .sort({ createdAt: -1 })
-      .limit(LIMIT)
-      .toArray();
+    const list = await r.leads.find().sort({ createdAt: -1 }).limit(LIMIT).toArray();
     rows = [
       [
         t('common.createdAt'),
@@ -84,12 +79,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ entity: 
       ]),
     ];
   } else if (entity === 'customers') {
-    const list = await db
-      .collection<Customer>('customers')
-      .find({ tenantId })
-      .sort({ createdAt: -1 })
-      .limit(LIMIT)
-      .toArray();
+    const list = await r.customers.find().sort({ createdAt: -1 }).limit(LIMIT).toArray();
     rows = [
       [
         t('common.name'),
@@ -113,16 +103,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ entity: 
       ]),
     ];
   } else if (entity === 'bookings') {
-    const list = await db
-      .collection<Booking>('bookings')
-      .find({ tenantId })
-      .sort({ createdAt: -1 })
-      .limit(LIMIT)
-      .toArray();
-    const customers = await db
-      .collection<Customer>('customers')
-      .find({ tenantId }, { projection: { name: 1, phone: 1 } })
-      .toArray();
+    const list = await r.bookings.find().sort({ createdAt: -1 }).limit(LIMIT).toArray();
+    const customers = await r.customers.find({}, { projection: { name: 1, phone: 1 } }).toArray();
     const cust = new Map(customers.map((c) => [String(c._id), c]));
     const finance = can(ctx.role, 'finance.read');
     rows = [
@@ -165,7 +147,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ entity: 
     ];
   } else if (entity === 'payments') {
     const sp = new URL(req.url).searchParams;
-    const filter: Record<string, unknown> = { tenantId };
+    const filter: Record<string, unknown> = {};
     const from = sp.get('from');
     const to = sp.get('to');
     if ((from && isISODate(from)) || (to && isISODate(to)))
@@ -175,19 +157,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ entity: 
       };
     if (sp.get('method')) filter.method = sp.get('method');
     if (sp.get('kind')) filter.kind = sp.get('kind');
-    const list = await db
-      .collection<Payment>('payments')
-      .find(filter)
-      .sort({ date: -1 })
-      .limit(LIMIT)
+    const list = await r.payments.find(filter).sort({ date: -1 }).limit(LIMIT).toArray();
+    const bookings = await r.all.bookings
+      .find({ _id: { $in: list.map((p) => p.bookingId) } }, { projection: { number: 1 } })
       .toArray();
-    const bookings = await db
-      .collection<Booking>('bookings')
-      .find({ tenantId, _id: { $in: list.map((p) => p.bookingId) } }, { projection: { number: 1 } })
-      .toArray();
-    const customers = await db
-      .collection<Customer>('customers')
-      .find({ tenantId, _id: { $in: list.map((p) => p.customerId) } }, { projection: { name: 1 } })
+    const customers = await r.customers
+      .find({ _id: { $in: list.map((p) => p.customerId) } }, { projection: { name: 1 } })
       .toArray();
     rows = [
       [

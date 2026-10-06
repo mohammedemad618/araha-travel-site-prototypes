@@ -4,7 +4,7 @@ import { Plus, Stamp } from 'lucide-react';
 import type { Filter } from 'mongodb';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { getStaff, pageParams, PAGE_SIZE, searchRegex } from '@/lib/queries';
 import { formatDate, todayISO } from '@/lib/dates';
@@ -23,8 +23,8 @@ export default async function VisasPage({
   const ctx = await requireTenant('visas.read');
   const { t, lang } = await getI18n();
   const sp = await searchParams;
-  const db = await getDb();
-  const filter: Filter<VisaApplication> = { tenantId: ctx.tenantId };
+  const r = await repo(ctx);
+  const filter: Filter<VisaApplication> = {};
   if (sp.status && (visaStatuses as readonly string[]).includes(sp.status))
     filter.status = sp.status as VisaApplication['status'];
   else filter.status = { $nin: ['issued', 'rejected', 'cancelled'] };
@@ -35,14 +35,8 @@ export default async function VisasPage({
   }
   const { page, skip } = pageParams(sp.page);
   const [items, total, staff] = await Promise.all([
-    db
-      .collection<VisaApplication>('visas')
-      .find(filter)
-      .sort({ expectedAt: 1, updatedAt: -1 })
-      .skip(skip)
-      .limit(PAGE_SIZE)
-      .toArray(),
-    db.collection<VisaApplication>('visas').countDocuments(filter),
+    r.visas.find(filter).sort({ expectedAt: 1, updatedAt: -1 }).skip(skip).limit(PAGE_SIZE).toArray(),
+    r.visas.countDocuments(filter),
     getStaff(ctx.tenantId),
   ]);
   const today = todayISO();

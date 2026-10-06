@@ -19,6 +19,12 @@ export async function SettingsTabs({ ctx, active }: { ctx: TenantCtx; active: st
       show: can(ctx.role, 'users.manage'),
     },
     {
+      key: 'branches',
+      label: t('settings.branches'),
+      href: '/settings/branches',
+      show: can(ctx.role, 'settings.manage'),
+    },
+    {
       key: 'website',
       label: t('settings.website'),
       href: '/settings/website',

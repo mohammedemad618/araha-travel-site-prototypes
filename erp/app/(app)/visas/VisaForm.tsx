@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ActionForm, SelectField, SubmitButton, TextArea, TextField } from '@/components/form';
+import { ActionForm, SelectField, SubmitButton, TextArea, TextField, BranchField } from '@/components/form';
 import { CustomerPicker } from '@/components/CustomerPicker';
 import { saveVisa } from '@/lib/actions/visas';
 import { useI18n } from '@/lib/i18n/client';
@@ -21,6 +21,7 @@ export type VisaValues = {
   reference?: string;
   notes?: string;
   assignedTo?: string;
+  branchId?: string;
 };
 
 type Related = { travellers: { id: string; name: string }[]; bookings: { id: string; label: string }[] };
@@ -28,10 +29,12 @@ type Related = { travellers: { id: string; name: string }[]; bookings: { id: str
 export function VisaForm({
   values = {},
   staff,
+  branches,
   me,
 }: {
   values?: VisaValues;
   staff: { id: string; name: string }[];
+  branches?: { id: string; name: string }[];
   me: string;
 }) {
   const { t } = useI18n();
@@ -113,6 +116,7 @@ export function VisaForm({
         placeholder={t('common.unassigned')}
         options={staff.map((s) => ({ value: s.id, label: s.name }))}
       />
+      <BranchField branches={branches} value={values.branchId} />
       <TextArea
         label={t('common.notes')}
         name="notes"

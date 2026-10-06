@@ -31,7 +31,8 @@ const pick = (arr, i) => arr[i % arr.length];
 const old = await db.collection('tenants').findOne({ slug });
 if (old) {
   for (const c of [
-    'users',
+    'memberships',
+    'branches',
     'leads',
     'customers',
     'packages',
@@ -76,18 +77,60 @@ const staff = [
   { name: 'سارة محمود', email: `sales@${slug}.niura.iq`, role: 'sales' },
   { name: 'حسين كريم', email: `accounts@${slug}.niura.iq`, role: 'accountant' },
   { name: 'زينب عادل', email: `ops@${slug}.niura.iq`, role: 'operations' },
-].map((s) => ({
-  _id: new ObjectId(),
-  tenantId,
-  ...s,
-  passwordHash: hash(password),
-  mustChangePassword: false,
-  active: true,
-  createdAt: ago(110),
-}));
+].map((s) => ({ _id: new ObjectId(), ...s }));
 await db.collection('users').deleteMany({ email: { $in: staff.map((s) => s.email) } });
-await db.collection('users').insertMany(staff);
+await db.collection('users').insertMany(
+  staff.map((s) => ({
+    _id: s._id,
+    name: s.name,
+    email: s.email,
+    passwordHash: hash(password),
+    mustChangePassword: false,
+    active: true,
+    createdAt: ago(110),
+  })),
+);
 const [owner, sales, accounts, ops] = staff;
+
+// Two branches: the main office and a second one, so branch reports have data.
+const mainBranch = new ObjectId();
+const secondBranch = new ObjectId();
+await db.collection('branches').insertMany([
+  {
+    _id: mainBranch,
+    tenantId,
+    name: 'الموصل — الجانب الأيسر',
+    code: 'MSL',
+    phone: '+964 770 000 0000',
+    address: 'الموصل، الجانب الأيسر',
+    isMain: true,
+    active: true,
+    createdAt: ago(120),
+  },
+  {
+    _id: secondBranch,
+    tenantId,
+    name: 'بغداد — الكرادة',
+    code: 'BGD',
+    phone: '+964 780 000 0000',
+    address: 'بغداد، الكرادة',
+    isMain: false,
+    active: true,
+    createdAt: ago(60),
+  },
+]);
+await db.collection('memberships').insertMany(
+  staff.map((s) => ({
+    userId: s._id,
+    tenantId,
+    role: s.role,
+    // The sales person works in the main branch only.
+    scope: s.role === 'sales' ? 'branch' : 'all',
+    branchIds: s.role === 'sales' ? [mainBranch] : [],
+    active: true,
+    createdAt: ago(110),
+  })),
+);
 
 const packages = [
   {
@@ -326,20 +369,18 @@ await db
 await db
   .collection('counters')
   .updateOne({ _id: `${tenantId}:receipt:${year}` }, { $set: { seq: rc } }, { upsert: true });
-await db
-  .collection('supplierPayments')
-  .insertOne({
-    _id: new ObjectId(),
-    tenantId,
-    supplierId: suppliers[1]._id,
-    amount: 2500000,
-    currency: 'IQD',
-    date: day(-20),
-    method: 'bank_transfer',
-    reference: 'TRX-88213',
-    createdBy: accounts._id,
-    createdAt: ago(20),
-  });
+await db.collection('supplierPayments').insertOne({
+  _id: new ObjectId(),
+  tenantId,
+  supplierId: suppliers[1]._id,
+  amount: 2500000,
+  currency: 'IQD',
+  date: day(-20),
+  method: 'bank_transfer',
+  reference: 'TRX-88213',
+  createdBy: accounts._id,
+  createdAt: ago(20),
+});
 
 // Leads in every stage.
 const leadNames = [
@@ -378,31 +419,29 @@ const leads = leadNames.map((name, i) => ({
   updatedAt: ago(i),
 }));
 await db.collection('leads').insertMany(leads);
-await db
-  .collection('activities')
-  .insertMany(
-    leads.flatMap((l) => [
-      {
-        tenantId,
-        entity: { type: 'lead', id: l._id },
-        kind: 'system',
-        text: l.source === 'website' ? 'website' : 'created',
-        createdAt: l.createdAt,
-      },
-      ...(l.stage !== 'new'
-        ? [
-            {
-              tenantId,
-              entity: { type: 'lead', id: l._id },
-              kind: 'call',
-              text: 'تم الاتصال وإرسال تفاصيل الباقة على واتساب',
-              userId: sales._id,
-              createdAt: new Date(l.createdAt.getTime() + 3600_000),
-            },
-          ]
-        : []),
-    ]),
-  );
+await db.collection('activities').insertMany(
+  leads.flatMap((l) => [
+    {
+      tenantId,
+      entity: { type: 'lead', id: l._id },
+      kind: 'system',
+      text: l.source === 'website' ? 'website' : 'created',
+      createdAt: l.createdAt,
+    },
+    ...(l.stage !== 'new'
+      ? [
+          {
+            tenantId,
+            entity: { type: 'lead', id: l._id },
+            kind: 'call',
+            text: 'تم الاتصال وإرسال تفاصيل الباقة على واتساب',
+            userId: sales._id,
+            createdAt: new Date(l.createdAt.getTime() + 3600_000),
+          },
+        ]
+      : []),
+  ]),
+);
 
 await db.collection('visas').insertMany(
   customers.slice(0, 5).map((c, i) => ({
@@ -461,6 +500,19 @@ await db.collection('tasks').insertMany([
     createdAt: ago(1),
   },
 ]);
+
+// Every scoped record belongs to a branch; about a third of the work is in the second one.
+for (const c of ['leads', 'bookings', 'visas'])
+  await db.collection(c).updateMany({ tenantId }, { $set: { branchId: mainBranch } });
+const moved = bookings.filter((_, i) => i % 3 === 2).map((b) => b._id);
+await db.collection('bookings').updateMany({ _id: { $in: moved } }, { $set: { branchId: secondBranch } });
+await db.collection('payments').updateMany({ tenantId }, { $set: { branchId: mainBranch } });
+await db
+  .collection('payments')
+  .updateMany({ tenantId, bookingId: { $in: moved } }, { $set: { branchId: secondBranch } });
+await db
+  .collection('visas')
+  .updateMany({ tenantId, bookingId: { $in: moved } }, { $set: { branchId: secondBranch } });
 
 console.log(`Demo company "${slug}" ready.`);
 console.log(`Sign in as ${owner.email} / ${password}`);

@@ -1,8 +1,8 @@
 import type { ObjectId } from 'mongodb';
-import { getDb } from '@/lib/db';
+import { tenantRepo } from '@/lib/repo';
 import { getI18n } from '@/lib/i18n/server';
 import { getStaff } from '@/lib/queries';
-import type { EntityType, Task } from '@/lib/types';
+import type { EntityType } from '@/lib/types';
 import { Card } from '../ui';
 import { TaskForm } from './TaskForm';
 import { TaskRows } from './TaskRows';
@@ -21,13 +21,9 @@ export async function RelatedTasks({
   path: string;
 }) {
   const { t } = await getI18n();
-  const db = await getDb();
+  const r = await tenantRepo(tenantId);
   const [tasks, staff] = await Promise.all([
-    db
-      .collection<Task>('tasks')
-      .find({ tenantId, 'related.type': type, 'related.id': id })
-      .sort({ done: 1, dueDate: 1 })
-      .toArray(),
+    r.tasks.find({ 'related.type': type, 'related.id': id }).sort({ done: 1, dueDate: 1 }).toArray(),
     getStaff(tenantId),
   ]);
   const active = staff.filter((s) => s.active);

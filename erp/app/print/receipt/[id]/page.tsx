@@ -2,12 +2,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { requireTenant, toObjectId } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { getStaff } from '@/lib/queries';
 import { formatDate } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
-import type { Booking, Customer, Payment } from '@/lib/types';
-import { PrintHeader } from '../../PrintHeader';
+import { PrintHeader, printBranch } from '../../PrintHeader';
 
 export const metadata: Metadata = { title: 'Receipt' };
 
@@ -16,14 +15,16 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const { t, lang } = await getI18n();
   const id = toObjectId((await params).id);
   if (!id) notFound();
-  const db = await getDb();
-  const p = await db.collection<Payment>('payments').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  // A receipt can be printed by anyone who can see its booking.
+  const p = await r.all.payments.findOne({ _id: id });
   if (!p) notFound();
   const [b, customer, staff] = await Promise.all([
-    db.collection<Booking>('bookings').findOne({ _id: p.bookingId, tenantId: ctx.tenantId }),
-    db.collection<Customer>('customers').findOne({ _id: p.customerId, tenantId: ctx.tenantId }),
+    r.bookings.findOne({ _id: p.bookingId }),
+    r.customers.findOne({ _id: p.customerId }),
     getStaff(ctx.tenantId),
   ]);
+  if (!b) notFound();
   const lines: [string, string][] = [
     [t('payments.receivedFrom'), customer?.name ?? '—'],
     [t('payments.forBooking'), b ? `${b.number} — ${b.title}` : '—'],
@@ -36,6 +37,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
     <article className="text-[14px]">
       <PrintHeader
         tenant={ctx.tenant}
+        branch={printBranch(ctx, p.branchId)}
         title={t('payments.receiptTitle')}
         number={p.number}
         date={formatDate(p.date, lang)}

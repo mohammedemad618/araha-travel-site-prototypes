@@ -2,14 +2,16 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { getDb } from '../db';
-import { actionTenant, toObjectId } from '../session';
+import { actionTenant, toObjectId, type TenantCtx } from '../session';
+import { repo } from '../repo';
 import { logActivity } from '../audit';
 import { can, type Permission } from '../rbac';
 import { fieldErrors, optDate, text, toUpdate, type ActionResult } from '../forms';
 import { activityKinds, entityTypes, type EntityType } from '../types';
 
-const ENTITY: Record<EntityType, { collection: string; perm: Permission; path: string }> = {
+type EntityCollection = 'leads' | 'customers' | 'bookings' | 'visas' | 'suppliers';
+
+const ENTITY: Record<EntityType, { collection: EntityCollection; perm: Permission; path: string }> = {
   lead: { collection: 'leads', perm: 'leads.read', path: '/leads' },
   customer: { collection: 'customers', perm: 'customers.read', path: '/customers' },
   booking: { collection: 'bookings', perm: 'bookings.read', path: '/bookings' },
@@ -17,20 +19,15 @@ const ENTITY: Record<EntityType, { collection: string; perm: Permission; path: s
   supplier: { collection: 'suppliers', perm: 'suppliers.read', path: '/suppliers' },
 };
 
-/** Resolves an entity reference from a form and checks it belongs to the company. */
-async function resolveEntity(
-  tenantId: import('mongodb').ObjectId,
-  role: Parameters<typeof can>[0],
-  type: unknown,
-  id: unknown,
-) {
+/** Resolves an entity reference from a form and checks the member can see it. */
+async function resolveEntity(ctx: TenantCtx, type: unknown, id: unknown) {
   const t = z.enum(entityTypes).safeParse(type);
   const oid = toObjectId(String(id ?? ''));
   if (!t.success || !oid) return null;
   const meta = ENTITY[t.data];
-  if (!can(role, meta.perm)) return null;
-  const db = await getDb();
-  const exists = await db.collection(meta.collection).countDocuments({ _id: oid, tenantId }, { limit: 1 });
+  if (!can(ctx.role, meta.perm)) return null;
+  const r = await repo(ctx);
+  const exists = await r[meta.collection].exists({ _id: oid });
   return exists ? { type: t.data, id: oid, path: `${meta.path}/${oid}` } : null;
 }
 
@@ -38,7 +35,7 @@ export async function addActivity(_: ActionResult | null, fd: FormData): Promise
   const auth = await actionTenant();
   if (!auth.ok) return auth;
   const { ctx } = auth;
-  const entity = await resolveEntity(ctx.tenantId, ctx.role, fd.get('entityType'), fd.get('entityId'));
+  const entity = await resolveEntity(ctx, fd.get('entityType'), fd.get('entityId'));
   if (!entity) return { ok: false, error: 'notFound' };
   const parsed = z
     .object({ kind: z.enum(activityKinds), text: text(3000) })
@@ -53,13 +50,11 @@ export async function addActivity(_: ActionResult | null, fd: FormData): Promise
   );
   if (entity.type === 'lead' && parsed.data.kind !== 'note') {
     // Contacting a new lead moves it forward automatically.
-    const db = await getDb();
-    await db
-      .collection('leads')
-      .updateOne(
-        { _id: entity.id, tenantId: ctx.tenantId, stage: 'new' },
-        { $set: { stage: 'contacted', updatedAt: new Date() } },
-      );
+    const r = await repo(ctx);
+    await r.leads.updateOne(
+      { _id: entity.id, stage: 'new' },
+      { $set: { stage: 'contacted', updatedAt: new Date() } },
+    );
   }
   revalidatePath(entity.path);
   return { ok: true };
@@ -78,14 +73,13 @@ export async function createTask(_: ActionResult | null, fd: FormData): Promise<
   const parsed = taskSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
   const related = fd.get('entityType')
-    ? await resolveEntity(ctx.tenantId, ctx.role, fd.get('entityType'), fd.get('entityId'))
+    ? await resolveEntity(ctx, fd.get('entityType'), fd.get('entityId'))
     : null;
-  const db = await getDb();
+  const r = await repo(ctx);
   const assignee = toObjectId(parsed.data.assignedTo);
-  if (assignee && !(await db.collection('users').countDocuments({ _id: assignee, tenantId: ctx.tenantId })))
+  if (assignee && !(await r.memberships.exists({ userId: assignee })))
     return { ok: false, error: 'notFound' };
-  await db.collection('tasks').insertOne({
-    tenantId: ctx.tenantId,
+  await r.tasks.insertOne({
     title: parsed.data.title,
     dueDate: parsed.data.dueDate,
     done: false,
@@ -107,13 +101,8 @@ export async function toggleTask(_: ActionResult | null, fd: FormData): Promise<
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
   const done = fd.get('done') === '1';
-  const db = await getDb();
-  const res = await db
-    .collection('tasks')
-    .updateOne(
-      { _id: id, tenantId: ctx.tenantId },
-      toUpdate({ done, doneAt: done ? new Date() : undefined }),
-    );
+  const r = await repo(ctx);
+  const res = await r.tasks.updateOne({ _id: id }, toUpdate({ done, doneAt: done ? new Date() : undefined }));
   if (!res.matchedCount) return { ok: false, error: 'notFound' };
   revalidatePath('/tasks');
   revalidatePath('/');
@@ -128,12 +117,13 @@ export async function deleteTask(_: ActionResult | null, fd: FormData): Promise<
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
+  const r = await repo(ctx);
   // Staff may delete their own tasks; managers may delete any.
-  const filter: Record<string, unknown> = { _id: id, tenantId: ctx.tenantId };
-  if (!can(ctx.role, 'settings.manage'))
-    filter.$or = [{ createdBy: ctx.user._id }, { assignedTo: ctx.user._id }];
-  const res = await db.collection('tasks').deleteOne(filter);
+  const res = await r.tasks.deleteOne(
+    can(ctx.role, 'settings.manage')
+      ? { _id: id }
+      : { _id: id, $or: [{ createdBy: ctx.user._id }, { assignedTo: ctx.user._id }] },
+  );
   if (!res.deletedCount) return { ok: false, error: 'forbidden' };
   revalidatePath('/tasks');
   return { ok: true };

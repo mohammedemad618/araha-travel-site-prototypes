@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import {
   AlertTriangle,
   CalendarClock,
@@ -13,7 +12,7 @@ import {
   Briefcase,
   type LucideIcon,
 } from 'lucide-react';
-import { requireCtx } from '@/lib/session';
+import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
 import { can } from '@/lib/rbac';
 import { dashboardData } from '@/lib/dashboard';
@@ -29,10 +28,9 @@ import { TaskRows } from '@/components/crm/TaskRows';
 export const metadata: Metadata = { title: 'Dashboard' };
 
 export default async function DashboardPage() {
-  const ctx = await requireCtx();
-  if (!ctx.tenant) redirect('/platform');
+  const ctx = await requireTenant();
   const { t, lang } = await getI18n();
-  const d = await dashboardData(ctx.tenant, ctx.user._id);
+  const d = await dashboardData(ctx);
   const staff = await getStaff(ctx.tenant._id);
   const money = (v: number) => formatMoney(v, d.currency, lang);
   const seeFinance = can(ctx.role, 'finance.read');

@@ -4,21 +4,14 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
-import { getDb } from '../db';
-import { actionTenant, toObjectId } from '../session';
+import { actionTenant, pickBranch, toObjectId, type TenantCtx } from '../session';
+import { repo } from '../repo';
 import { audit, logActivity } from '../audit';
 import { fieldErrors, optDate, optEmail, optText, text, toUpdate, type ActionResult } from '../forms';
 import { isValidPhone, normalizePhone } from '../phone';
 import { parseMoney } from '../money';
 import { newBookingNumber } from '../bookings';
-import {
-  leadSources,
-  leadStages,
-  type Booking,
-  type Customer,
-  type Lead,
-  type TravelPackage,
-} from '../types';
+import { leadSources, leadStages, type Booking, type Customer } from '../types';
 
 const leadSchema = z.object({
   name: text(120),
@@ -39,12 +32,13 @@ const leadSchema = z.object({
   value: z.string().optional(),
   assignedTo: z.string().optional(),
   nextFollowUp: optDate,
+  branchId: z.string().optional(),
 });
 
-async function packageTitle(tenantId: ObjectId, slug?: string) {
+async function packageTitle(ctx: TenantCtx, slug?: string) {
   if (!slug) return undefined;
-  const db = await getDb();
-  const pkg = await db.collection<TravelPackage>('packages').findOne({ tenantId, slug });
+  const r = await repo(ctx);
+  const pkg = await r.packages.findOne({ slug });
   return pkg?.title;
 }
 
@@ -69,27 +63,30 @@ export async function createLead(_: ActionResult | null, fd: FormData): Promise<
   const parsed = leadSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
   const d = parsed.data;
+  const branchId = pickBranch(ctx, d.branchId);
+  if (!branchId) return { ok: false, error: 'required', fields: { branchId: 'branchNotAllowed' } };
   const now = new Date();
-  const db = await getDb();
-  const res = await db.collection<Omit<Lead, '_id'>>('leads').insertOne({
-    tenantId: ctx.tenantId,
+  const r = await repo(ctx);
+  const insertedId = await r.leads.insertOne({
+    branchId,
     ...leadFields(d, ctx.tenant.settings.currency),
     stage: 'new',
     interest: {
       destination: d.destination,
       packageSlug: d.packageSlug,
-      packageTitle: await packageTitle(ctx.tenantId, d.packageSlug),
+      packageTitle: await packageTitle(ctx, d.packageSlug),
       departure: d.departure,
       travellers: d.travellers,
       budget: d.budget,
       when: d.when,
     },
+    createdBy: ctx.user._id,
     createdAt: now,
     updatedAt: now,
   });
-  await logActivity(ctx.tenantId, { type: 'lead', id: res.insertedId }, 'system', 'created', ctx.user._id);
+  await logActivity(ctx.tenantId, { type: 'lead', id: insertedId }, 'system', 'created', ctx.user._id);
   revalidatePath('/leads');
-  redirect(`/leads/${res.insertedId}`);
+  redirect(`/leads/${insertedId}`);
 }
 
 export async function updateLead(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -101,15 +98,20 @@ export async function updateLead(_: ActionResult | null, fd: FormData): Promise<
   const parsed = leadSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
   const d = parsed.data;
-  const db = await getDb();
-  const res = await db.collection('leads').updateOne(
-    { _id: id, tenantId: ctx.tenantId },
+  const r = await repo(ctx);
+  const existing = await r.leads.findOne({ _id: id }, { projection: { branchId: 1 } });
+  if (!existing) return { ok: false, error: 'notFound' };
+  const branchId = pickBranch(ctx, d.branchId, existing.branchId);
+  if (!branchId) return { ok: false, error: 'required', fields: { branchId: 'branchNotAllowed' } };
+  const res = await r.leads.updateOne(
+    { _id: id },
     toUpdate({
       ...leadFields(d, ctx.tenant.settings.currency),
+      branchId,
       interest: {
         destination: d.destination,
         packageSlug: d.packageSlug,
-        packageTitle: await packageTitle(ctx.tenantId, d.packageSlug),
+        packageTitle: await packageTitle(ctx, d.packageSlug),
         departure: d.departure,
         travellers: d.travellers,
         budget: d.budget,
@@ -135,9 +137,9 @@ export async function setLeadStage(_: ActionResult | null, fd: FormData): Promis
     String(fd.get('lostReason') ?? '')
       .trim()
       .slice(0, 300) || undefined;
-  const db = await getDb();
-  const res = await db.collection('leads').updateOne(
-    { _id: id, tenantId: ctx.tenantId },
+  const r = await repo(ctx);
+  const res = await r.leads.updateOne(
+    { _id: id },
     toUpdate({
       stage: stage.data,
       lostReason: stage.data === 'lost' ? lostReason : undefined,
@@ -158,18 +160,15 @@ export async function convertLead(_: ActionResult | null, fd: FormData): Promise
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  const lead = await db.collection<Lead>('leads').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const lead = await r.leads.findOne({ _id: id });
   if (!lead) return { ok: false, error: 'notFound' };
   if (lead.bookingId) redirect(`/bookings/${lead.bookingId}`);
 
   const now = new Date();
-  let customer = await db
-    .collection<Customer>('customers')
-    .findOne({ tenantId: ctx.tenantId, phone: lead.phone });
+  let customer = await r.customers.findOne({ phone: lead.phone });
   if (!customer) {
-    const doc: Omit<Customer, '_id'> = {
-      tenantId: ctx.tenantId,
+    const doc: Omit<Customer, '_id' | 'tenantId'> = {
       name: lead.name,
       phone: lead.phone,
       email: lead.email,
@@ -179,8 +178,7 @@ export async function convertLead(_: ActionResult | null, fd: FormData): Promise
       createdAt: now,
       updatedAt: now,
     };
-    const res = await db.collection<Omit<Customer, '_id'>>('customers').insertOne(doc);
-    customer = { ...doc, _id: res.insertedId };
+    customer = { ...doc, tenantId: ctx.tenantId, _id: await r.customers.insertOne(doc) };
     await logActivity(
       ctx.tenantId,
       { type: 'customer', id: customer._id },
@@ -191,15 +189,14 @@ export async function convertLead(_: ActionResult | null, fd: FormData): Promise
   }
 
   const pkg = lead.interest.packageSlug
-    ? await db
-        .collection<TravelPackage>('packages')
-        .findOne({ tenantId: ctx.tenantId, slug: lead.interest.packageSlug })
+    ? await r.packages.findOne({ slug: lead.interest.packageSlug })
     : null;
   const title = [lead.interest.packageTitle || lead.interest.destination, customer.name]
     .filter(Boolean)
     .join(' — ');
-  const booking: Omit<Booking, '_id'> = {
-    tenantId: ctx.tenantId,
+  const booking: Omit<Booking, '_id' | 'tenantId'> = {
+    // The booking stays in the branch that handled the enquiry.
+    branchId: lead.branchId,
     number: await newBookingNumber(ctx.tenant),
     customerId: customer._id,
     leadId: lead._id,
@@ -223,13 +220,11 @@ export async function convertLead(_: ActionResult | null, fd: FormData): Promise
     createdAt: now,
     updatedAt: now,
   };
-  const res = await db.collection<Omit<Booking, '_id'>>('bookings').insertOne(booking);
-  await db
-    .collection('leads')
-    .updateOne(
-      { _id: lead._id },
-      { $set: { customerId: customer._id, bookingId: res.insertedId, stage: 'won', updatedAt: now } },
-    );
+  const bookingId = await r.all.bookings.insertOne(booking);
+  await r.leads.updateOne(
+    { _id: lead._id },
+    { $set: { customerId: customer._id, bookingId, stage: 'won', updatedAt: now } },
+  );
   await logActivity(
     ctx.tenantId,
     { type: 'lead', id: lead._id },
@@ -237,17 +232,17 @@ export async function convertLead(_: ActionResult | null, fd: FormData): Promise
     `converted:${booking.number}`,
     ctx.user._id,
   );
-  await logActivity(ctx.tenantId, { type: 'booking', id: res.insertedId }, 'system', 'created', ctx.user._id);
+  await logActivity(ctx.tenantId, { type: 'booking', id: bookingId }, 'system', 'created', ctx.user._id);
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
     action: 'lead.convert',
     entity: 'booking',
-    entityId: res.insertedId,
+    entityId: bookingId,
     summary: booking.number,
   });
   revalidatePath('/leads');
-  redirect(`/bookings/${res.insertedId}`);
+  redirect(`/bookings/${bookingId}`);
 }
 
 export async function deleteLead(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -256,12 +251,10 @@ export async function deleteLead(_: ActionResult | null, fd: FormData): Promise<
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  const lead = await db.collection<Lead>('leads').findOneAndDelete({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const lead = await r.leads.findOneAndDelete({ _id: id });
   if (!lead) return { ok: false, error: 'notFound' };
-  await db
-    .collection('activities')
-    .deleteMany({ tenantId: ctx.tenantId, 'entity.type': 'lead', 'entity.id': id });
+  await r.activities.deleteMany({ 'entity.type': 'lead', 'entity.id': id });
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,

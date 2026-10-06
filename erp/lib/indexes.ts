@@ -8,7 +8,17 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection('tenants').createIndex({ 'website.apiKey': 1 }, { unique: true, sparse: true }),
 
     db.collection('users').createIndex({ email: 1 }, { unique: true }),
-    db.collection('users').createIndex({ tenantId: 1, role: 1 }),
+
+    db.collection('memberships').createIndex({ userId: 1, tenantId: 1 }, { unique: true }),
+    db.collection('memberships').createIndex({ tenantId: 1, role: 1 }),
+
+    db.collection('branches').createIndex({ tenantId: 1, code: 1 }, { unique: true }),
+    db
+      .collection('branches')
+      .createIndex(
+        { tenantId: 1 },
+        { unique: true, partialFilterExpression: { isMain: true }, name: 'one_main_branch' },
+      ),
 
     db.collection('sessions').createIndex({ tokenHash: 1 }, { unique: true }),
     db.collection('sessions').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
@@ -19,6 +29,7 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection('leads').createIndex({ tenantId: 1, stage: 1, createdAt: -1 }),
     db.collection('leads').createIndex({ tenantId: 1, phone: 1 }),
     db.collection('leads').createIndex({ tenantId: 1, assignedTo: 1 }),
+    db.collection('leads').createIndex({ tenantId: 1, branchId: 1, stage: 1 }),
 
     db.collection('customers').createIndex({ tenantId: 1, phone: 1 }),
     db.collection('customers').createIndex({ tenantId: 1, createdAt: -1 }),
@@ -33,16 +44,19 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection('bookings').createIndex({ tenantId: 1, departureId: 1, status: 1 }),
     db.collection('bookings').createIndex({ tenantId: 1, createdAt: -1 }),
     db.collection('bookings').createIndex({ tenantId: 1, 'costs.supplierId': 1 }),
+    db.collection('bookings').createIndex({ tenantId: 1, branchId: 1, createdAt: -1 }),
 
     db.collection('payments').createIndex({ tenantId: 1, number: 1 }, { unique: true }),
     db.collection('payments').createIndex({ tenantId: 1, bookingId: 1 }),
     db.collection('payments').createIndex({ tenantId: 1, date: -1 }),
+    db.collection('payments').createIndex({ tenantId: 1, branchId: 1, date: -1 }),
 
     db.collection('suppliers').createIndex({ tenantId: 1, name: 1 }),
     db.collection('supplierPayments').createIndex({ tenantId: 1, supplierId: 1, date: -1 }),
 
     db.collection('visas').createIndex({ tenantId: 1, status: 1, updatedAt: -1 }),
     db.collection('visas').createIndex({ tenantId: 1, customerId: 1 }),
+    db.collection('visas').createIndex({ tenantId: 1, branchId: 1, status: 1 }),
 
     db.collection('tasks').createIndex({ tenantId: 1, done: 1, dueDate: 1 }),
     db.collection('tasks').createIndex({ tenantId: 1, assignedTo: 1, done: 1 }),

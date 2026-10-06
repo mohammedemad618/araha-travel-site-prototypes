@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 // One story, in order: the platform is set up, two travel companies join, the
 // first one sells a trip end to end, and the second one must never see it.
@@ -9,11 +9,12 @@ const ADMIN = { email: 'admin@niura.test', password: 'Platform-Pass-2026' };
 const OWNER_A = { email: 'owner@alpha.test', password: '' };
 const OWNER_B = { email: 'owner@beta.test', password: '' };
 const SALES = { email: 'sales@alpha.test', password: '' };
+const BRANCH_SALES = { email: 'baghdad@alpha.test', password: '' };
 const NEW_PASS = 'Owner-Strong-Pass-1';
 const state: { apiKey?: string; leadId?: string; bookingUrl?: string; customerId?: string } = {};
 
 /** Label match that ignores the required "*" marker. */
-const label = (page: Page, text: string) => page.getByLabel(new RegExp(`^${text}\\s*\\*?$`));
+const label = (page: Page | Locator, text: string) => page.getByLabel(new RegExp(`^${text}\\s*\\*?$`));
 
 async function login(page: Page, email: string, password: string, expectSuccess = true) {
   await page.goto('/login');
@@ -288,8 +289,93 @@ test('roles limit what staff can open', async ({ page }) => {
     expect((await page.request.get(`/api/export/${list}`)).status()).toBe(404);
 });
 
-test('the interface switches to English', async ({ page }) => {
+test('branches: staff limited to one branch see only its records', async ({ page }) => {
   await login(page, OWNER_A.email, OWNER_A.password);
+  await page.goto('/settings/branches');
+  const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'فرع جديد' }) });
+  await label(form, 'اسم الفرع').fill('فرع بغداد');
+  await label(form, 'رمز الفرع').fill('BGD');
+  await form.getByRole('button', { name: 'فرع جديد' }).click();
+  await expect(page.locator('main').getByText('فرع بغداد', { exact: true })).toBeVisible();
+
+  // A lead recorded in the new branch.
+  await page.goto('/leads/new');
+  const main = page.locator('main');
+  await label(main, 'الاسم').fill('زبون فرع بغداد');
+  await label(main, 'الهاتف').fill('07801234567');
+  await label(main, 'الفرع').selectOption({ label: 'فرع بغداد' });
+  await page.getByRole('button', { name: 'طلب جديد' }).click();
+  await expect(page).toHaveURL(/\/leads\/[a-f0-9]{24}$/);
+
+  // A sales person who works only in that branch.
+  await page.goto('/settings/users');
+  await label(page, 'الاسم').fill('مبيعات بغداد');
+  await label(page, 'البريد الإلكتروني').fill(BRANCH_SALES.email);
+  await label(page, 'الصلاحية').selectOption('sales');
+  await label(page, 'نطاق الرؤية').selectOption('branch');
+  await page.getByRole('checkbox', { name: 'فرع بغداد' }).check();
+  await page.getByRole('button', { name: 'مستخدم جديد' }).click();
+  BRANCH_SALES.password = await readTempPassword(page, BRANCH_SALES.email);
+
+  // The owner can narrow every list to one branch from the header.
+  await page.goto('/leads?view=list');
+  await expect(page.getByRole('link', { name: 'زبون من الموقع' })).toBeVisible();
+  await page.locator('header').getByLabel('الفرع').selectOption({ label: 'فرع بغداد' });
+  await expect(page.getByRole('link', { name: 'زبون من الموقع' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'زبون فرع بغداد' })).toBeVisible();
+  await page.locator('header').getByLabel('الفرع').selectOption({ label: 'كل الفروع' });
+  await expect(page.getByRole('link', { name: 'زبون من الموقع' })).toBeVisible();
+
+  await page.context().clearCookies();
+  await login(page, BRANCH_SALES.email, BRANCH_SALES.password);
+  await label(page, 'كلمة المرور الحالية').fill(BRANCH_SALES.password);
+  await label(page, 'كلمة المرور الجديدة').fill(NEW_PASS);
+  await label(page, 'تأكيد كلمة المرور').fill(NEW_PASS);
+  await page.getByRole('button', { name: 'تغيير كلمة المرور' }).click();
+  await expect(page.getByRole('heading', { name: /مرحباً/ })).toBeVisible();
+  await page.goto('/leads?view=list');
+  await expect(page.getByRole('link', { name: 'زبون فرع بغداد' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'زبون من الموقع' })).toHaveCount(0);
+  // Records of the main branch are out of reach, even by address.
+  await page.goto(`/leads/${state.leadId}`);
+  await expect(page.getByText('الصفحة غير موجودة')).toBeVisible();
+  await page.goto(state.bookingUrl!);
+  await expect(page.getByText('الصفحة غير موجودة')).toBeVisible();
+});
+
+test('one person can work in two companies and switch between them', async ({ page }) => {
+  await login(page, OWNER_B.email, NEW_PASS);
+  await page.goto('/settings/users');
+  await label(page, 'الاسم').fill('موظف مشترك');
+  await label(page, 'البريد الإلكتروني').fill(SALES.email);
+  await label(page, 'الصلاحية').selectOption('manager');
+  await page.getByRole('button', { name: 'مستخدم جديد' }).click();
+  // The existing account keeps its own password: none is shown.
+  await expect(page.getByRole('status').filter({ hasText: SALES.email })).toContainText('بنفس كلمة مروره');
+  // Another company cannot reset that person's password.
+  const row = page.getByRole('row').filter({ hasText: SALES.email });
+  await row.getByRole('button', { name: 'إعادة تعيين كلمة المرور' }).click();
+  await expect(row.locator('p[role="alert"]')).toContainText('شركة أخرى');
+
+  await page.context().clearCookies();
+  await login(page, SALES.email, NEW_PASS);
+  const switcher = page.locator('header').getByLabel('تبديل الشركة');
+  await expect(switcher).toBeVisible();
+  await switcher.selectOption({ label: 'شركة بيتا للسفر' });
+  await expect(page.getByText('شركة بيتا للسفر').first()).toBeVisible();
+  await page.goto('/leads?view=list');
+  await expect(page.getByRole('link', { name: 'زبون من الموقع' })).toHaveCount(0);
+  // As a manager here, reports are open; in the first company (sales) they are not.
+  await page.goto('/reports');
+  await expect(page.getByText('الصفحة غير موجودة')).toHaveCount(0);
+  await page.locator('header').getByLabel('تبديل الشركة').selectOption({ label: 'شركة ألفا للسياحة' });
+  await page.goto('/reports');
+  await expect(page.getByText('الصفحة غير موجودة')).toBeVisible();
+});
+
+test('the interface switches to English', async ({ page }) => {
+  // Another account: the owner has used up its sign-in attempts for this window.
+  await login(page, BRANCH_SALES.email, NEW_PASS);
   await page.getByRole('button', { name: 'English' }).first().click();
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
   await expect(page.getByRole('heading', { name: /Hello/ })).toBeVisible();

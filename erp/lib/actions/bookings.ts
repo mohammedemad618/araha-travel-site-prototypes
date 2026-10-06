@@ -4,8 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
-import { getDb } from '../db';
-import { actionTenant, toObjectId, type TenantCtx } from '../session';
+import { actionTenant, pickBranch, toObjectId, type TenantCtx } from '../session';
+import { repo } from '../repo';
 import { audit, logActivity } from '../audit';
 import { fieldErrors, intField, optDate, optText, text, toUpdate, type ActionResult } from '../forms';
 import { convert, parseMoney } from '../money';
@@ -18,7 +18,6 @@ import {
   bookingTypes,
   type Booking,
   type BookingStatus,
-  type Customer,
   type Departure,
   type TravelPackage,
 } from '../types';
@@ -36,6 +35,7 @@ const bookingSchema = z.object({
   currency: z.enum(['IQD', 'USD']),
   assignedTo: z.string().optional(),
   notes: optText(3000),
+  branchId: z.string().optional(),
 });
 
 type Resolved = {
@@ -49,19 +49,13 @@ async function resolvePackage(
   d: z.infer<typeof bookingSchema>,
   bookingId?: ObjectId,
 ): Promise<{ ok: true; value: Resolved } | { ok: false; result: ActionResult }> {
-  const db = await getDb();
+  const r = await repo(ctx);
   const packageId = d.type === 'package' ? toObjectId(d.packageId) : null;
   const departureId = packageId ? toObjectId(d.departureId) : null;
-  const pkg = packageId
-    ? await db.collection<TravelPackage>('packages').findOne({ _id: packageId, tenantId: ctx.tenantId })
-    : null;
+  const pkg = packageId ? await r.packages.findOne({ _id: packageId }) : null;
   if (packageId && !pkg)
     return { ok: false, result: { ok: false, error: 'notFound', fields: { packageId: 'required' } } };
-  const dep = departureId
-    ? await db
-        .collection<Departure>('departures')
-        .findOne({ _id: departureId, tenantId: ctx.tenantId, packageId: packageId! })
-    : null;
+  const dep = departureId ? await r.departures.findOne({ _id: departureId, packageId: packageId! }) : null;
   if (departureId && !dep)
     return { ok: false, result: { ok: false, error: 'notFound', fields: { departureId: 'required' } } };
   if (dep) {
@@ -82,11 +76,11 @@ export async function createBooking(_: ActionResult | null, fd: FormData): Promi
   const parsed = bookingSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
   const d = parsed.data;
-  const db = await getDb();
+  const branchId = pickBranch(ctx, d.branchId);
+  if (!branchId) return { ok: false, error: 'required', fields: { branchId: 'branchNotAllowed' } };
+  const r = await repo(ctx);
   const customerId = toObjectId(d.customerId);
-  const customer = customerId
-    ? await db.collection<Customer>('customers').findOne({ _id: customerId, tenantId: ctx.tenantId })
-    : null;
+  const customer = customerId ? await r.customers.findOne({ _id: customerId }) : null;
   if (!customer) return { ok: false, error: 'required', fields: { customerId: 'required' } };
   const resolved = await resolvePackage(ctx, d);
   if (!resolved.ok) return resolved.result;
@@ -102,8 +96,8 @@ export async function createBooking(_: ActionResult | null, fd: FormData): Promi
       })
     : [];
   const travelDate = dep?.date ?? d.travelDate;
-  const booking: Omit<Booking, '_id'> = {
-    tenantId: ctx.tenantId,
+  const booking: Omit<Booking, '_id' | 'tenantId'> = {
+    branchId,
     number: await newBookingNumber(ctx.tenant),
     customerId: customer._id,
     type: d.type,
@@ -129,19 +123,19 @@ export async function createBooking(_: ActionResult | null, fd: FormData): Promi
     createdAt: now,
     updatedAt: now,
   };
-  const res = await db.collection<Omit<Booking, '_id'>>('bookings').insertOne(booking);
-  await recalcBooking(ctx.tenantId, res.insertedId);
-  await logActivity(ctx.tenantId, { type: 'booking', id: res.insertedId }, 'system', 'created', ctx.user._id);
+  const bookingId = await r.bookings.insertOne(booking);
+  await recalcBooking(ctx.tenantId, bookingId);
+  await logActivity(ctx.tenantId, { type: 'booking', id: bookingId }, 'system', 'created', ctx.user._id);
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
     action: 'booking.create',
     entity: 'booking',
-    entityId: res.insertedId,
+    entityId: bookingId,
     summary: booking.number,
   });
   revalidatePath('/bookings');
-  redirect(`/bookings/${res.insertedId}${items.length ? '?auto=1' : ''}`);
+  redirect(`/bookings/${bookingId}${items.length ? '?auto=1' : ''}`);
 }
 
 export async function updateBooking(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -153,18 +147,21 @@ export async function updateBooking(_: ActionResult | null, fd: FormData): Promi
   const parsed = bookingSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
   const d = parsed.data;
-  const db = await getDb();
-  const existing = await db.collection<Booking>('bookings').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const existing = await r.bookings.findOne({ _id: id });
   if (!existing) return { ok: false, error: 'notFound' };
+  const branchId = pickBranch(ctx, d.branchId, existing.branchId);
+  if (!branchId) return { ok: false, error: 'required', fields: { branchId: 'branchNotAllowed' } };
   const resolved = await resolvePackage(ctx, d, id);
   if (!resolved.ok) return resolved.result;
   const { pkg, dep } = resolved.value;
   // The currency is fixed once money has moved, so balances stay consistent.
   const currency =
     existing.paid !== 0 || existing.costs.length ? existing.currency : (pkg?.currency ?? d.currency);
-  await db.collection('bookings').updateOne(
-    { _id: id, tenantId: ctx.tenantId },
+  await r.bookings.updateOne(
+    { _id: id },
     toUpdate({
+      branchId,
       type: d.type,
       title: d.title,
       packageId: pkg?._id,
@@ -179,6 +176,9 @@ export async function updateBooking(_: ActionResult | null, fd: FormData): Promi
       updatedAt: new Date(),
     }),
   );
+  // Receipts follow their booking to its branch.
+  if (String(existing.branchId) !== String(branchId))
+    await r.all.payments.updateMany({ bookingId: id }, { $set: { branchId } });
   revalidatePath(`/bookings/${id}`);
   return { ok: true };
 }
@@ -197,21 +197,17 @@ export async function setBookingStatus(_: ActionResult | null, fd: FormData): Pr
   const id = toObjectId(String(fd.get('id') ?? ''));
   const status = z.enum(bookingStatuses).safeParse(fd.get('status'));
   if (!id || !status.success) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  const b = await db.collection<Booking>('bookings').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const b = await r.bookings.findOne({ _id: id });
   if (!b) return { ok: false, error: 'notFound' };
   if (!TRANSITIONS[b.status].includes(status.data)) return { ok: false, error: 'forbidden' };
   // Reopening a cancelled booking needs its seats back.
   if (b.status === 'cancelled' && b.departureId) {
-    const dep = await db
-      .collection<Departure>('departures')
-      .findOne({ _id: b.departureId, tenantId: ctx.tenantId });
+    const dep = await r.departures.findOne({ _id: b.departureId });
     if (dep && (await seatsBooked(ctx.tenantId, dep._id, id)) + b.adults + b.children > dep.capacity)
       return { ok: false, error: 'seatsExceeded' };
   }
-  await db
-    .collection('bookings')
-    .updateOne({ _id: id }, { $set: { status: status.data, updatedAt: new Date() } });
+  await r.bookings.updateOne({ _id: id }, { $set: { status: status.data, updatedAt: new Date() } });
   await logActivity(ctx.tenantId, { type: 'booking', id }, 'system', `status:${status.data}`, ctx.user._id);
   await audit({
     tenantId: ctx.tenantId,
@@ -229,8 +225,8 @@ export async function setBookingStatus(_: ActionResult | null, fd: FormData): Pr
 async function loadEditable(ctx: TenantCtx, fd: FormData) {
   const id = toObjectId(String(fd.get('bookingId') ?? fd.get('id') ?? ''));
   if (!id) return null;
-  const db = await getDb();
-  return db.collection<Booking>('bookings').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  return r.bookings.findOne({ _id: id });
 }
 
 const itemSchema = z.object({ description: text(300), qty: intField(1, 10000), unitPrice: z.string() });
@@ -246,10 +242,10 @@ export async function saveItem(_: ActionResult | null, fd: FormData): Promise<Ac
   const unitPrice = parseMoney(parsed.data.unitPrice, b.currency);
   if (unitPrice === null || unitPrice < 0)
     return { ok: false, error: 'invalidAmount', fields: { unitPrice: 'invalidAmount' } };
-  const db = await getDb();
+  const r = await repo(ctx);
   const itemId = toObjectId(String(fd.get('itemId') ?? ''));
   if (itemId) {
-    await db.collection('bookings').updateOne(
+    await r.bookings.updateOne(
       { _id: b._id, 'items._id': itemId },
       {
         $set: {
@@ -260,7 +256,7 @@ export async function saveItem(_: ActionResult | null, fd: FormData): Promise<Ac
       },
     );
   } else {
-    await db.collection<Booking>('bookings').updateOne(
+    await r.bookings.updateOne(
       { _id: b._id },
       {
         $push: {
@@ -286,8 +282,8 @@ export async function deleteItem(_: ActionResult | null, fd: FormData): Promise<
   const b = await loadEditable(ctx, fd);
   const itemId = toObjectId(String(fd.get('itemId') ?? ''));
   if (!b || !itemId) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  await db.collection<Booking>('bookings').updateOne({ _id: b._id }, { $pull: { items: { _id: itemId } } });
+  const r = await repo(ctx);
+  await r.bookings.updateOne({ _id: b._id }, { $pull: { items: { _id: itemId } } });
   await recalcBooking(ctx.tenantId, b._id);
   revalidatePath(`/bookings/${b._id}`);
   return { ok: true };
@@ -303,8 +299,8 @@ export async function setDiscount(_: ActionResult | null, fd: FormData): Promise
   const discount = raw ? parseMoney(raw, b.currency) : 0;
   if (discount === null || discount < 0)
     return { ok: false, error: 'invalidAmount', fields: { discount: 'invalidAmount' } };
-  const db = await getDb();
-  await db.collection('bookings').updateOne({ _id: b._id }, { $set: { discount } });
+  const r = await repo(ctx);
+  await r.bookings.updateOne({ _id: b._id }, { $set: { discount } });
   await recalcBooking(ctx.tenantId, b._id);
   revalidatePath(`/bookings/${b._id}`);
   return { ok: true };
@@ -334,14 +330,10 @@ export async function saveCost(_: ActionResult | null, fd: FormData): Promise<Ac
   const amount = parseMoney(parsed.data.amount, parsed.data.currency);
   if (amount === null || amount <= 0)
     return { ok: false, error: 'invalidAmount', fields: { amount: 'invalidAmount' } };
-  const db = await getDb();
+  const r = await repo(ctx);
   const supplierId = toObjectId(parsed.data.supplierId);
-  if (
-    supplierId &&
-    !(await db.collection('suppliers').countDocuments({ _id: supplierId, tenantId: ctx.tenantId }))
-  )
-    return { ok: false, error: 'notFound' };
-  await db.collection<Booking>('bookings').updateOne(
+  if (supplierId && !(await r.suppliers.exists({ _id: supplierId }))) return { ok: false, error: 'notFound' };
+  await r.bookings.updateOne(
     { _id: b._id },
     {
       $push: {
@@ -370,8 +362,8 @@ export async function deleteCost(_: ActionResult | null, fd: FormData): Promise<
   const b = await loadEditable(ctx, fd);
   const costId = toObjectId(String(fd.get('costId') ?? ''));
   if (!b || !costId) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  await db.collection<Booking>('bookings').updateOne({ _id: b._id }, { $pull: { costs: { _id: costId } } });
+  const r = await repo(ctx);
+  await r.bookings.updateOne({ _id: b._id }, { $pull: { costs: { _id: costId } } });
   await recalcBooking(ctx.tenantId, b._id);
   revalidatePath(`/bookings/${b._id}`);
   return { ok: true };
@@ -383,10 +375,8 @@ export async function setTravellers(_: ActionResult | null, fd: FormData): Promi
   const { ctx } = auth;
   const b = await loadEditable(ctx, fd);
   if (!b) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  const customer = await db
-    .collection<Customer>('customers')
-    .findOne({ _id: b.customerId, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const customer = await r.customers.findOne({ _id: b.customerId });
   if (!customer) return { ok: false, error: 'notFound' };
   const allowed = new Set(customer.travellers.map((t) => String(t._id)));
   const ids = fd
@@ -394,9 +384,7 @@ export async function setTravellers(_: ActionResult | null, fd: FormData): Promi
     .map(String)
     .filter((id) => allowed.has(id))
     .map((id) => new ObjectId(id));
-  await db
-    .collection('bookings')
-    .updateOne({ _id: b._id }, { $set: { travellerIds: ids, updatedAt: new Date() } });
+  await r.bookings.updateOne({ _id: b._id }, { $set: { travellerIds: ids, updatedAt: new Date() } });
   revalidatePath(`/bookings/${b._id}`);
   return { ok: true };
 }
@@ -407,25 +395,16 @@ export async function deleteBooking(_: ActionResult | null, fd: FormData): Promi
   const { ctx } = auth;
   const b = await loadEditable(ctx, fd);
   if (!b) return { ok: false, error: 'notFound' };
-  const db = await getDb();
+  const r = await repo(ctx);
   // Only drafts without any payment can be deleted; anything else is cancelled instead.
-  if (
-    b.status !== 'draft' ||
-    (await db
-      .collection('payments')
-      .countDocuments({ tenantId: ctx.tenantId, bookingId: b._id }, { limit: 1 }))
-  )
+  if (b.status !== 'draft' || (await r.all.payments.exists({ bookingId: b._id })))
     return { ok: false, error: 'hasRecords' };
-  await db.collection('bookings').deleteOne({ _id: b._id });
-  await db
-    .collection('leads')
-    .updateMany(
-      { tenantId: ctx.tenantId, bookingId: b._id },
-      { $unset: { bookingId: '' }, $set: { stage: 'quoted' } },
-    );
-  await db
-    .collection('activities')
-    .deleteMany({ tenantId: ctx.tenantId, 'entity.type': 'booking', 'entity.id': b._id });
+  await r.bookings.deleteOne({ _id: b._id });
+  await r.all.leads.updateMany(
+    { bookingId: b._id },
+    { $unset: { bookingId: '' }, $set: { stage: 'quoted' } },
+  );
+  await r.activities.deleteMany({ 'entity.type': 'booking', 'entity.id': b._id });
   await audit({ tenantId: ctx.tenantId, userId: ctx.user._id, action: 'booking.delete', summary: b.number });
   revalidatePath('/bookings');
   redirect('/bookings');

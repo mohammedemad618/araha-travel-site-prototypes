@@ -4,14 +4,14 @@ import { Briefcase, Plus } from 'lucide-react';
 import type { Filter } from 'mongodb';
 import { requireTenant, toObjectId } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { getStaff, pageParams, PAGE_SIZE, searchRegex } from '@/lib/queries';
 import { formatDate } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { paymentState } from '@/lib/bookings';
 import { BOOKING_TONE, PAY_TONE } from '@/lib/ui-tones';
-import { bookingStatuses, bookingTypes, type Booking, type Customer } from '@/lib/types';
+import { bookingStatuses, bookingTypes, type Booking } from '@/lib/types';
 import { Badge, Card, EmptyState, LinkButton, PageHeader, Table, buttonClass } from '@/components/ui';
 import { FilterBar, Pagination } from '@/components/ListControls';
 
@@ -23,8 +23,8 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
   const ctx = await requireTenant('bookings.read');
   const { t, lang } = await getI18n();
   const sp = await searchParams;
-  const db = await getDb();
-  const filter: Filter<Booking> = { tenantId: ctx.tenantId };
+  const r = await repo(ctx);
+  const filter: Filter<Booking> = {};
   if (sp.status && (bookingStatuses as readonly string[]).includes(sp.status))
     filter.status = sp.status as Booking['status'];
   if (sp.type && (bookingTypes as readonly string[]).includes(sp.type))
@@ -39,11 +39,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
     // Search by booking number, title or customer name/phone.
     const re = searchRegex(sp.q.trim());
     const digits = sp.q.replace(/\D/g, '').replace(/^0/, '');
-    const customers = await db
-      .collection<Customer>('customers')
+    const customers = await r.customers
       .find(
         {
-          tenantId: ctx.tenantId,
           $or: [{ name: re }, ...(digits.length >= 3 ? [{ phone: new RegExp(digits) }] : [])],
         },
         { projection: { _id: 1 } },
@@ -54,20 +52,16 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
   }
   const { page, skip } = pageParams(sp.page);
   const [items, total, staff] = await Promise.all([
-    db
-      .collection<Booking>('bookings')
-      .find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(PAGE_SIZE)
-      .toArray(),
-    db.collection<Booking>('bookings').countDocuments(filter),
+    r.bookings.find(filter).sort({ createdAt: -1 }).skip(skip).limit(PAGE_SIZE).toArray(),
+    r.bookings.countDocuments(filter),
     getStaff(ctx.tenantId),
   ]);
-  const customers = await db
-    .collection<Customer>('customers')
+  const customers = await r.customers
     .find({ _id: { $in: items.map((b) => b.customerId) } }, { projection: { name: 1 } })
     .toArray();
+  // A branch column only helps when the member sees more than one branch.
+  const multiBranch = (ctx.visibility.branchIds?.length ?? ctx.allBranches.length) > 1;
+  const branchOf = (id: unknown) => ctx.allBranches.find((x) => String(x._id) === String(id));
   const customerName = (id: unknown) => customers.find((c) => String(c._id) === String(id))?.name ?? '—';
 
   return (
@@ -124,6 +118,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
                 <th>{t('bookings.number')}</th>
                 <th>{t('bookings.titleField')}</th>
                 <th>{t('bookings.customer')}</th>
+                {multiBranch && <th>{t('workspace.branch')}</th>}
                 <th>{t('bookings.travelDate')}</th>
                 <th>{t('common.status')}</th>
                 <th>{t('bookings.total')}</th>
@@ -148,6 +143,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
                       {customerName(b.customerId)}
                     </Link>
                   </td>
+                  {multiBranch && (
+                    <td className="font-latin text-muted" title={branchOf(b.branchId)?.name}>
+                      {branchOf(b.branchId)?.code ?? '—'}
+                    </td>
+                  )}
                   <td className="whitespace-nowrap">{b.travelDate ? formatDate(b.travelDate, lang) : '—'}</td>
                   <td>
                     <Badge tone={BOOKING_TONE[b.status]}>{t(`bookings.statuses.${b.status}`)}</Badge>

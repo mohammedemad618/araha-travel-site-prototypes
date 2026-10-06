@@ -4,7 +4,7 @@ import { Building2 } from 'lucide-react';
 import type { Filter } from 'mongodb';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { searchRegex } from '@/lib/queries';
 import { supplierBalances } from '@/lib/suppliers';
@@ -24,17 +24,12 @@ export default async function SuppliersPage({
   const ctx = await requireTenant('suppliers.read');
   const { t, lang } = await getI18n();
   const sp = await searchParams;
-  const db = await getDb();
-  const filter: Filter<Supplier> = { tenantId: ctx.tenantId };
+  const r = await repo(ctx);
+  const filter: Filter<Supplier> = {};
   if (sp.q?.trim()) filter.name = searchRegex(sp.q.trim());
   if (sp.type && (supplierTypes as readonly string[]).includes(sp.type))
     filter.type = sp.type as Supplier['type'];
-  const suppliers = await db
-    .collection<Supplier>('suppliers')
-    .find(filter)
-    .sort({ name: 1 })
-    .limit(500)
-    .toArray();
+  const suppliers = await r.suppliers.find(filter).sort({ name: 1 }).limit(500).toArray();
   const balances = await supplierBalances(
     ctx.tenantId,
     suppliers.map((s) => s._id),

@@ -1,8 +1,8 @@
 import 'server-only';
 import { ObjectId } from 'mongodb';
-import { getDb } from './db';
+import { tenantRepo } from './repo';
 import { nextNumber } from './counters';
-import type { Booking, BookingStatus, Currency, Departure, Payment, Tenant, TravelPackage } from './types';
+import type { Booking, BookingStatus, Currency, Departure, Tenant, TravelPackage } from './types';
 
 /** Bookings that hold seats on a departure. */
 export const SEAT_HOLDING: BookingStatus[] = ['draft', 'confirmed', 'completed'];
@@ -16,21 +16,19 @@ export function bookingTotals(b: Pick<Booking, 'items' | 'discount' | 'costs'>) 
 
 /** Recomputes the stored totals and paid amount of a booking from its parts. */
 export async function recalcBooking(tenantId: ObjectId, bookingId: ObjectId): Promise<void> {
-  const db = await getDb();
-  const booking = await db.collection<Booking>('bookings').findOne({ _id: bookingId, tenantId });
+  // Company-wide on purpose: totals include every payment, whoever recorded it.
+  const r = await tenantRepo(tenantId);
+  const booking = await r.bookings.findOne({ _id: bookingId });
   if (!booking) return;
   const { total, costTotal } = bookingTotals(booking);
-  const payments = await db
-    .collection<Payment>('payments')
-    .find({ tenantId, bookingId, voided: false }, { projection: { kind: 1, amountInBooking: 1 } })
+  const payments = await r.payments
+    .find({ bookingId, voided: false }, { projection: { kind: 1, amountInBooking: 1 } })
     .toArray();
   const paid = payments.reduce(
     (s, p) => s + (p.kind === 'refund' ? -p.amountInBooking : p.amountInBooking),
     0,
   );
-  await db
-    .collection('bookings')
-    .updateOne({ _id: bookingId, tenantId }, { $set: { total, costTotal, paid, updatedAt: new Date() } });
+  await r.bookings.updateOne({ _id: bookingId }, { $set: { total, costTotal, paid, updatedAt: new Date() } });
 }
 
 export async function seatsBooked(
@@ -38,11 +36,11 @@ export async function seatsBooked(
   departureId: ObjectId,
   excludeBooking?: ObjectId,
 ): Promise<number> {
-  const db = await getDb();
-  const match: Record<string, unknown> = { tenantId, departureId, status: { $in: SEAT_HOLDING } };
+  // Seats are shared by every branch, so all bookings count.
+  const r = await tenantRepo(tenantId);
+  const match: Record<string, unknown> = { departureId, status: { $in: SEAT_HOLDING } };
   if (excludeBooking) match._id = { $ne: excludeBooking };
-  const [row] = await db
-    .collection('bookings')
+  const [row] = await r.bookings
     .aggregate<{ n: number }>([
       { $match: match },
       { $group: { _id: null, n: { $sum: { $add: ['$adults', '$children'] } } } },
@@ -57,11 +55,10 @@ export async function seatsByDeparture(
   departureIds: ObjectId[],
 ): Promise<Map<string, number>> {
   if (!departureIds.length) return new Map();
-  const db = await getDb();
-  const rows = await db
-    .collection('bookings')
+  const r = await tenantRepo(tenantId);
+  const rows = await r.bookings
     .aggregate<{ _id: ObjectId; n: number }>([
-      { $match: { tenantId, departureId: { $in: departureIds }, status: { $in: SEAT_HOLDING } } },
+      { $match: { departureId: { $in: departureIds }, status: { $in: SEAT_HOLDING } } },
       { $group: { _id: '$departureId', n: { $sum: { $add: ['$adults', '$children'] } } } },
     ])
     .toArray();

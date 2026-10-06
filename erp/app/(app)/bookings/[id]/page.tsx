@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Printer } from 'lucide-react';
-import { requireTenant, toObjectId } from '@/lib/session';
+import { requireTenant, toObjectId, branchOptions, branchName } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { getStaff } from '@/lib/queries';
 import { packageChoices } from '@/lib/package-choices';
@@ -12,7 +12,6 @@ import { addDays, formatDate, todayISO } from '@/lib/dates';
 import { formatMoney, moneyInput } from '@/lib/money';
 import { bookingTotals, paymentState } from '@/lib/bookings';
 import { BOOKING_TONE, PAY_TONE } from '@/lib/ui-tones';
-import type { Booking, Customer, Departure, Payment, Supplier, TravelPackage } from '@/lib/types';
 import { Badge, Card, DL, LinkButton, PageHeader, Stat, Table, buttonClass } from '@/components/ui';
 import { Timeline } from '@/components/crm/Timeline';
 import { RelatedTasks } from '@/components/crm/RelatedTasks';
@@ -43,27 +42,18 @@ export default async function BookingPage({
   const { t, lang } = await getI18n();
   const id = toObjectId((await params).id);
   if (!id) notFound();
-  const db = await getDb();
-  const b = await db.collection<Booking>('bookings').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const b = await r.bookings.findOne({ _id: id });
   if (!b) notFound();
 
   const seeFinance = can(ctx.role, 'finance.read');
   const [customer, pkg, dep, payments, suppliers, staff, packages] = await Promise.all([
-    db.collection<Customer>('customers').findOne({ _id: b.customerId, tenantId: ctx.tenantId }),
-    b.packageId
-      ? db.collection<TravelPackage>('packages').findOne({ _id: b.packageId, tenantId: ctx.tenantId })
-      : null,
-    b.departureId
-      ? db.collection<Departure>('departures').findOne({ _id: b.departureId, tenantId: ctx.tenantId })
-      : null,
-    db
-      .collection<Payment>('payments')
-      .find({ tenantId: ctx.tenantId, bookingId: id })
-      .sort({ date: -1, createdAt: -1 })
-      .toArray(),
-    seeFinance
-      ? db.collection<Supplier>('suppliers').find({ tenantId: ctx.tenantId }).sort({ name: 1 }).toArray()
-      : [],
+    r.customers.findOne({ _id: b.customerId }),
+    b.packageId ? r.packages.findOne({ _id: b.packageId }) : null,
+    b.departureId ? r.departures.findOne({ _id: b.departureId }) : null,
+    // Every receipt of a visible booking is shown, whoever recorded it.
+    r.all.payments.find({ bookingId: id }).sort({ date: -1, createdAt: -1 }).toArray(),
+    seeFinance ? r.suppliers.find({}).sort({ name: 1 }).toArray() : [],
     getStaff(ctx.tenantId),
     packageChoices(ctx.tenantId, lang, b.packageId),
   ]);
@@ -179,6 +169,9 @@ export default async function BookingPage({
               cols={3}
               items={[
                 [t('bookings.type'), t(`bookings.types.${b.type}`)],
+                ...(ctx.allBranches.length > 1
+                  ? [[t('workspace.branch'), branchName(ctx, b.branchId) ?? '—'] as [string, string]]
+                  : []),
                 [
                   t('bookings.package'),
                   pkg ? (
@@ -206,10 +199,12 @@ export default async function BookingPage({
                   <BookingForm
                     packages={packages}
                     staff={staff.filter((s) => s.active)}
+                    branches={branchOptions(ctx, b.branchId)}
                     me={String(ctx.user._id)}
                     defaultCurrency={cur}
                     values={{
                       id: String(b._id),
+                      branchId: String(b.branchId),
                       customer: customer
                         ? { id: String(customer._id), name: customer.name, phone: customer.phone }
                         : undefined,

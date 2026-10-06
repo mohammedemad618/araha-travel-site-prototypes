@@ -1,7 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { ActionForm, SelectField, SubmitButton, TextArea, TextField } from '@/components/form';
+import {
+  ActionButton,
+  ActionForm,
+  SelectField,
+  SubmitButton,
+  TextArea,
+  TextField,
+  useFieldError,
+} from '@/components/form';
+import { buttonClass } from '@/components/ui';
+import { saveBranch, toggleBranch } from '@/lib/actions/branches';
+import { memberScopes } from '@/lib/types';
 import { CopyButton } from '@/components/CopyButton';
 import {
   createUser,
@@ -107,29 +118,103 @@ function Credentials({ creds }: { creds: { email: string; password: string } | n
   );
 }
 
-export function NewUserForm() {
+export type BranchOption = { id: string; name: string };
+type Access = { role: string; scope: string; branchIds: string[] };
+
+/** Role, visibility scope and branches of a member. */
+function AccessFields({
+  branches,
+  initial,
+  person,
+}: {
+  branches: BranchOption[];
+  initial: Access;
+  person?: string;
+}) {
   const { t } = useI18n();
-  const [creds, setCreds] = useState<{ email: string; password: string } | null>(null);
+  const [role, setRole] = useState(initial.role);
+  const [scope, setScope] = useState(initial.scope);
+  const branchError = useFieldError('branchIds');
+  const suffix = person ? ` — ${person}` : '';
+  const owner = role === 'owner';
   return (
     <>
+      <SelectField
+        label={t('settings.role') + suffix}
+        name="role"
+        defaultValue={initial.role}
+        onChange={(e) => setRole(e.target.value)}
+        options={tenantRoles.map((r) => ({ value: r, label: t(`roles.${r}`) }))}
+      />
+      {owner ? (
+        <input type="hidden" name="scope" value="all" />
+      ) : (
+        <SelectField
+          label={t('settings.scope') + suffix}
+          name="scope"
+          defaultValue={initial.scope}
+          onChange={(e) => setScope(e.target.value)}
+          options={memberScopes.map((s) => ({ value: s, label: t(`settings.scopes.${s}`) }))}
+        />
+      )}
+      {!owner && scope !== 'all' && branches.length === 1 && (
+        <input type="hidden" name="branchIds" value={branches[0]!.id} />
+      )}
+      {!owner && scope !== 'all' && branches.length > 1 && (
+        <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0 md:col-span-full">
+          <legend className="mb-1.5 text-[13px] font-medium text-ink-3">
+            {t('settings.memberBranches') + suffix}
+          </legend>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {branches.map((b) => (
+              <label key={b.id} className="flex items-center gap-2 text-[13.5px]">
+                <input
+                  type="checkbox"
+                  name="branchIds"
+                  value={b.id}
+                  defaultChecked={initial.branchIds.includes(b.id)}
+                />
+                {b.name}
+              </label>
+            ))}
+          </div>
+          {branchError && <p className="m-0 text-[12.5px] text-danger">{t(`errors.${branchError}`)}</p>}
+        </fieldset>
+      )}
+    </>
+  );
+}
+
+export function NewUserForm({ branches }: { branches: BranchOption[] }) {
+  const { t } = useI18n();
+  const [result, setResult] = useState<{ email: string; password?: string } | null>(null);
+  return (
+    <>
+      <p className="m-0 mb-4 text-[13px] text-muted">{t('settings.scopeHint')}</p>
       <ActionForm
         action={createUser}
         resetOnSuccess
         successMessage={false}
-        onSuccess={(r) => setCreds(r.data as { email: string; password: string })}
-        className="grid grid-cols-1 items-end gap-3 md:grid-cols-[1fr_1.2fr_1fr_auto]"
+        onSuccess={(r) => setResult(r.data as { email: string; password?: string })}
+        className="grid grid-cols-1 items-end gap-3 md:grid-cols-4"
       >
         <TextField label={t('common.name')} name="name" required />
         <TextField label={t('common.email')} name="email" type="email" required dir="ltr" />
-        <SelectField
-          label={t('settings.role')}
-          name="role"
-          defaultValue="sales"
-          options={tenantRoles.map((r) => ({ value: r, label: t(`roles.${r}`) }))}
-        />
-        <SubmitButton>{t('settings.newUser')}</SubmitButton>
+        <AccessFields branches={branches} initial={{ role: 'sales', scope: 'all', branchIds: [] }} />
+        <div className="md:col-span-full">
+          <SubmitButton>{t('settings.newUser')}</SubmitButton>
+        </div>
       </ActionForm>
-      <Credentials creds={creds} />
+      {result?.password ? (
+        <Credentials creds={{ email: result.email, password: result.password }} />
+      ) : result ? (
+        <p role="status" className="m-0 mt-4 rounded-xl border border-line bg-sand p-4">
+          {t('settings.memberAdded')}{' '}
+          <span className="font-latin" dir="ltr">
+            {result.email}
+          </span>
+        </p>
+      ) : null}
     </>
   );
 }
@@ -137,13 +222,15 @@ export function NewUserForm() {
 export function UserRow({
   id,
   name,
-  role,
+  access,
+  branches,
   active,
   self,
 }: {
   id: string;
   name: string;
-  role: string;
+  access: Access;
+  branches: BranchOption[];
   active: boolean;
   self: boolean;
 }) {
@@ -152,28 +239,21 @@ export function UserRow({
   return (
     <div className="flex flex-col items-end gap-2">
       <div className="flex flex-wrap items-center justify-end gap-2">
-        <ActionForm action={updateUser} successMessage={false} className="flex items-center gap-1">
-          <input type="hidden" name="id" value={id} />
-          <input type="hidden" name="op" value="role" />
-          <label className="sr-only" htmlFor={`role-${id}`}>
-            {t('settings.role')} — {name}
-          </label>
-          <select
-            id={`role-${id}`}
-            name="role"
-            defaultValue={role}
-            className="h-8 rounded-md border border-line-2 bg-surface px-2 text-[13px]"
-          >
-            {tenantRoles.map((r) => (
-              <option key={r} value={r}>
-                {t(`roles.${r}`)}
-              </option>
-            ))}
-          </select>
-          <SubmitButton size="sm" variant="secondary">
-            {t('common.save')}
-          </SubmitButton>
-        </ActionForm>
+        <details className="group">
+          <summary className={buttonClass('secondary', 'sm', 'cursor-pointer list-none')}>
+            {t('settings.editAccess')}
+          </summary>
+          <div className="mt-2 w-[min(560px,80vw)] rounded-xl border border-line bg-surface p-4 text-start shadow-sm">
+            <ActionForm action={updateUser} className="grid grid-cols-1 items-end gap-3 md:grid-cols-2">
+              <input type="hidden" name="id" value={id} />
+              <input type="hidden" name="op" value="access" />
+              <AccessFields branches={branches} initial={access} person={name} />
+              <div className="md:col-span-full">
+                <SubmitButton size="sm">{t('common.save')}</SubmitButton>
+              </div>
+            </ActionForm>
+          </div>
+        </details>
         <ActionForm
           action={updateUser}
           successMessage={false}
@@ -198,6 +278,46 @@ export function UserRow({
       </div>
       <Credentials creds={creds} />
     </div>
+  );
+}
+
+export function BranchForm({
+  branch,
+}: {
+  branch?: { id: string; name: string; code: string; phone?: string; address?: string };
+}) {
+  const { t } = useI18n();
+  return (
+    <ActionForm
+      action={saveBranch}
+      resetOnSuccess={!branch}
+      className="grid grid-cols-1 items-end gap-3 md:grid-cols-[1.2fr_0.7fr_1fr_1.5fr_auto]"
+    >
+      {branch && <input type="hidden" name="id" value={branch.id} />}
+      <TextField label={t('settings.branchName')} name="name" required defaultValue={branch?.name} />
+      <TextField
+        label={t('settings.branchCode')}
+        name="code"
+        required
+        dir="ltr"
+        defaultValue={branch?.code}
+        hint={branch ? undefined : t('settings.branchCodeHint')}
+      />
+      <TextField label={t('common.phone')} name="phone" dir="ltr" defaultValue={branch?.phone} />
+      <TextField label={t('settings.address')} name="address" defaultValue={branch?.address} />
+      <SubmitButton size={branch ? 'sm' : 'md'}>
+        {branch ? t('common.save') : t('settings.newBranch')}
+      </SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function ToggleBranchButton({ id, active }: { id: string; active: boolean }) {
+  const { t } = useI18n();
+  return (
+    <ActionButton action={toggleBranch} fields={{ id }} variant={active ? 'danger' : 'secondary'}>
+      {active ? t('settings.closeBranch') : t('settings.openBranch')}
+    </ActionButton>
   );
 }
 

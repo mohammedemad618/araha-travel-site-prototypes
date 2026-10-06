@@ -4,8 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
-import { getDb } from '../db';
 import { actionTenant, toObjectId } from '../session';
+import { repo } from '../repo';
 import { audit, logActivity } from '../audit';
 import { fieldErrors, optDate, optEmail, optText, text, toUpdate, type ActionResult } from '../forms';
 import { isValidPhone, normalizePhone } from '../phone';
@@ -55,24 +55,17 @@ export async function createCustomer(_: ActionResult | null, fd: FormData): Prom
   const parsed = customerSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
   const now = new Date();
-  const db = await getDb();
-  const res = await db.collection<Omit<Customer, '_id'>>('customers').insertOne({
-    tenantId: ctx.tenantId,
+  const r = await repo(ctx);
+  const customerId = await r.customers.insertOne({
     ...parsed.data,
     // The customer usually travels too; their own traveller record is created up front.
     travellers: [{ _id: new ObjectId(), name: parsed.data.name }],
     createdAt: now,
     updatedAt: now,
   });
-  await logActivity(
-    ctx.tenantId,
-    { type: 'customer', id: res.insertedId },
-    'system',
-    'created',
-    ctx.user._id,
-  );
+  await logActivity(ctx.tenantId, { type: 'customer', id: customerId }, 'system', 'created', ctx.user._id);
   revalidatePath('/customers');
-  redirect(`/customers/${res.insertedId}`);
+  redirect(`/customers/${customerId}`);
 }
 
 export async function updateCustomer(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -83,10 +76,8 @@ export async function updateCustomer(_: ActionResult | null, fd: FormData): Prom
   if (!id) return { ok: false, error: 'notFound' };
   const parsed = customerSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
-  const db = await getDb();
-  const res = await db
-    .collection('customers')
-    .updateOne({ _id: id, tenantId: ctx.tenantId }, toUpdate({ ...parsed.data, updatedAt: new Date() }));
+  const r = await repo(ctx);
+  const res = await r.customers.updateOne({ _id: id }, toUpdate({ ...parsed.data, updatedAt: new Date() }));
   if (!res.matchedCount) return { ok: false, error: 'notFound' };
   revalidatePath(`/customers/${id}`);
   return { ok: true };
@@ -98,19 +89,13 @@ export async function deleteCustomer(_: ActionResult | null, fd: FormData): Prom
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  // Customers with bookings, payments or visas are kept for the financial record.
-  const linked =
-    (await db
-      .collection('bookings')
-      .countDocuments({ tenantId: ctx.tenantId, customerId: id }, { limit: 1 })) +
-    (await db.collection('visas').countDocuments({ tenantId: ctx.tenantId, customerId: id }, { limit: 1 }));
-  if (linked) return { ok: false, error: 'hasRecords' };
-  const c = await db.collection<Customer>('customers').findOneAndDelete({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  // Customers with bookings, payments or visas (in any branch) are kept for the financial record.
+  if ((await r.all.bookings.exists({ customerId: id })) || (await r.all.visas.exists({ customerId: id })))
+    return { ok: false, error: 'hasRecords' };
+  const c = await r.customers.findOneAndDelete({ _id: id });
   if (!c) return { ok: false, error: 'notFound' };
-  await db
-    .collection('activities')
-    .deleteMany({ tenantId: ctx.tenantId, 'entity.type': 'customer', 'entity.id': id });
+  await r.activities.deleteMany({ 'entity.type': 'customer', 'entity.id': id });
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
@@ -149,21 +134,17 @@ export async function saveTraveller(_: ActionResult | null, fd: FormData): Promi
   if (!customerId) return { ok: false, error: 'notFound' };
   const parsed = travellerSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
-  const db = await getDb();
+  const r = await repo(ctx);
   const travellerId = toObjectId(String(fd.get('travellerId') ?? ''));
-  const coll = db.collection<Customer>('customers');
   let res;
   if (travellerId) {
     const update = toUpdate(parsed.data, 'travellers.$.');
     update.$set.updatedAt = new Date();
-    res = await coll.updateOne(
-      { _id: customerId, tenantId: ctx.tenantId, 'travellers._id': travellerId },
-      update,
-    );
+    res = await r.customers.updateOne({ _id: customerId, 'travellers._id': travellerId }, update);
   } else {
     const traveller: Traveller = { _id: new ObjectId(), ...parsed.data };
-    res = await coll.updateOne(
-      { _id: customerId, tenantId: ctx.tenantId },
+    res = await r.customers.updateOne(
+      { _id: customerId },
       { $push: { travellers: traveller }, $set: { updatedAt: new Date() } },
     );
   }
@@ -179,14 +160,9 @@ export async function deleteTraveller(_: ActionResult | null, fd: FormData): Pro
   const customerId = toObjectId(String(fd.get('customerId') ?? ''));
   const travellerId = toObjectId(String(fd.get('travellerId') ?? ''));
   if (!customerId || !travellerId) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  const used = await db
-    .collection('bookings')
-    .countDocuments({ tenantId: ctx.tenantId, travellerIds: travellerId }, { limit: 1 });
-  if (used) return { ok: false, error: 'hasRecords' };
-  await db
-    .collection<Customer>('customers')
-    .updateOne({ _id: customerId, tenantId: ctx.tenantId }, { $pull: { travellers: { _id: travellerId } } });
+  const r = await repo(ctx);
+  if (await r.all.bookings.exists({ travellerIds: travellerId })) return { ok: false, error: 'hasRecords' };
+  await r.customers.updateOne({ _id: customerId }, { $pull: { travellers: { _id: travellerId } } });
   revalidatePath(`/customers/${customerId}`);
   return { ok: true };
 }

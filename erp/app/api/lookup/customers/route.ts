@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
-import { getCtx } from '@/lib/session';
+import { repo } from '@/lib/repo';
+import { actionTenant } from '@/lib/session';
 import { can } from '@/lib/rbac';
 import { nameOrPhone } from '@/lib/queries';
-import type { Customer } from '@/lib/types';
 
 /** Type-ahead search for the customer picker (same company only). */
 export async function GET(req: Request) {
-  const ctx = await getCtx();
+  const auth = await actionTenant();
+  const ctx = auth.ok ? auth.ctx : null;
   if (!ctx?.tenant || !can(ctx.role, 'customers.read')) return NextResponse.json([], { status: 401 });
   const q = new URL(req.url).searchParams.get('q') ?? '';
-  const db = await getDb();
-  const rows = await db
-    .collection<Customer>('customers')
-    .find({ tenantId: ctx.tenant._id, ...nameOrPhone(q) }, { projection: { name: 1, phone: 1 } })
+  const r = await repo(ctx);
+  const rows = await r.customers
+    .find({ ...nameOrPhone(q) }, { projection: { name: 1, phone: 1 } })
     .sort({ updatedAt: -1 })
     .limit(12)
     .toArray();

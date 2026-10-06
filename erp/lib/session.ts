@@ -6,23 +6,41 @@ import { ObjectId } from 'mongodb';
 import { getDb } from './db';
 import { randomToken, sha256 } from './crypto';
 import { can, type Permission, type Role } from './rbac';
-import type { Session, Tenant, User } from './types';
+import { visibilityFor, type Visibility } from './scope';
+import type { Branch, Membership, Session, Tenant, User } from './types';
 
 export const SESSION_COOKIE = 'nerp_session';
 const SESSION_DAYS = 14;
 
 export type Ctx = {
   user: User;
+  /** The role in the current company, or "platform" for Niura staff. */
   role: Role;
   session: Session;
   /** The company being worked on (null for a platform admin outside any company). */
   tenant: Tenant | null;
+  /** The user's membership in that company (null for platform admins). */
+  membership: Membership | null;
+  /** Every company the user belongs to, for the company switcher. */
+  memberships: Membership[];
 };
 
 /** A context that is guaranteed to be inside a company. */
-export type TenantCtx = Ctx & { tenant: Tenant; tenantId: ObjectId };
+export type TenantCtx = Ctx & {
+  tenant: Tenant;
+  tenantId: ObjectId;
+  /** Every branch of the company (including closed ones), for names. */
+  allBranches: Branch[];
+  /** Open branches this member may work in, main branch first. */
+  branches: Branch[];
+  /** The branch new records go to unless another is chosen. */
+  defaultBranchId: ObjectId;
+  /** The branch the lists are narrowed to, if any. */
+  branchFilter: ObjectId | null;
+  visibility: Visibility;
+};
 
-export async function createSession(userId: ObjectId): Promise<void> {
+export async function createSession(userId: ObjectId, activeTenantId?: ObjectId): Promise<void> {
   const db = await getDb();
   const token = randomToken();
   const now = new Date();
@@ -30,6 +48,7 @@ export async function createSession(userId: ObjectId): Promise<void> {
   await db.collection<Omit<Session, '_id'>>('sessions').insertOne({
     tokenHash: sha256(token),
     userId,
+    activeTenantId,
     createdAt: now,
     expiresAt,
   });
@@ -64,10 +83,66 @@ export const getCtx = cache(async (): Promise<Ctx | null> => {
   const user = await db.collection<User>('users').findOne({ _id: session.userId });
   if (!user || !user.active) return null;
 
-  const tenantId = user.role === 'platform' ? session.activeTenantId : user.tenantId;
-  const tenant = tenantId ? await db.collection<Tenant>('tenants').findOne({ _id: tenantId }) : null;
-  return { user, role: user.role, session, tenant };
+  if (user.platformAdmin) {
+    const tenant = session.activeTenantId
+      ? await db.collection<Tenant>('tenants').findOne({ _id: session.activeTenantId })
+      : null;
+    return { user, role: 'platform', session, tenant, membership: null, memberships: [] };
+  }
+  const memberships = await db
+    .collection<Membership>('memberships')
+    .find({ userId: user._id, active: true })
+    .sort({ createdAt: 1 })
+    .toArray();
+  const membership =
+    memberships.find(
+      (m) => session.activeTenantId && String(m.tenantId) === String(session.activeTenantId),
+    ) ?? memberships[0];
+  // A user who belongs to no company any more is treated as signed out.
+  if (!membership) return null;
+  const tenant = await db.collection<Tenant>('tenants').findOne({ _id: membership.tenantId });
+  return { user, role: membership.role, session, tenant, membership, memberships };
 });
+
+const loadBranches = cache(async (tenantId: string): Promise<Branch[]> => {
+  const db = await getDb();
+  return db
+    .collection<Branch>('branches')
+    .find({ tenantId: new ObjectId(tenantId) })
+    .sort({ isMain: -1, name: 1 })
+    .toArray();
+});
+
+/** Adds the company's branches and the member's visibility to a context. */
+async function withBranches(ctx: Ctx & { tenant: Tenant }): Promise<TenantCtx> {
+  const allBranches = await loadBranches(String(ctx.tenant._id));
+  const open = allBranches.filter((b) => b.active);
+  const m = ctx.membership;
+  const limited = m && m.branchIds.length > 0 && m.scope !== 'all';
+  const branches = limited
+    ? open.filter((b) => m.branchIds.some((id) => String(id) === String(b._id)))
+    : open;
+  const chosen = ctx.session.branchFilter
+    ? allBranches.find((b) => String(b._id) === String(ctx.session.branchFilter))
+    : undefined;
+  const branchFilter = chosen ? chosen._id : null;
+  const visibility = visibilityFor(
+    m ? { scope: m.scope, branchIds: m.branchIds, userId: ctx.user._id } : null,
+    branchFilter,
+  );
+  const defaultBranch =
+    branches.find((b) => branchFilter && String(b._id) === String(branchFilter)) ?? branches[0] ?? open[0];
+  return {
+    ...ctx,
+    tenantId: ctx.tenant._id,
+    allBranches,
+    branches,
+    // Every company has a main branch (created with the company or by migration).
+    defaultBranchId: (defaultBranch ?? allBranches[0])?._id as ObjectId,
+    branchFilter,
+    visibility,
+  };
+}
 
 /** Requires a signed-in user (any kind). */
 export async function requireCtx(): Promise<Ctx> {
@@ -90,7 +165,7 @@ export async function requireTenant(permission?: Permission): Promise<TenantCtx>
   if (!ctx.tenant) redirect(ctx.role === 'platform' ? '/platform' : '/login');
   if (ctx.tenant.status !== 'active' && ctx.role !== 'platform') redirect('/suspended');
   if (permission && !can(ctx.role, permission)) notFound();
-  return { ...ctx, tenant: ctx.tenant, tenantId: ctx.tenant._id };
+  return withBranches({ ...ctx, tenant: ctx.tenant });
 }
 
 /** Same checks for server actions: returns an error instead of redirecting. */
@@ -102,13 +177,45 @@ export async function actionTenant(
   if (!ctx.tenant || (ctx.tenant.status !== 'active' && ctx.role !== 'platform'))
     return { ok: false, error: 'auth' };
   if (permission && !can(ctx.role, permission)) return { ok: false, error: 'forbidden' };
-  return { ok: true, ctx: { ...ctx, tenant: ctx.tenant, tenantId: ctx.tenant._id } };
+  return { ok: true, ctx: await withBranches({ ...ctx, tenant: ctx.tenant }) };
 }
 
 export async function requirePlatform(): Promise<Ctx> {
   const ctx = await requireCtx();
   if (ctx.role !== 'platform') notFound();
   return ctx;
+}
+
+/**
+ * The branch a new or edited record belongs to: the one chosen in the form if
+ * the member may use it, otherwise their default. Returns null for a branch
+ * they may not use.
+ */
+export function pickBranch(
+  ctx: TenantCtx,
+  raw: FormDataEntryValue | string | null | undefined,
+  /** The record's current branch, which may be kept even if it has since closed. */
+  current?: ObjectId,
+): ObjectId | null {
+  const id = toObjectId(typeof raw === 'string' ? raw : null);
+  if (!id) return current ?? ctx.defaultBranchId;
+  if (current && String(current) === String(id)) return current;
+  return ctx.branches.some((b) => String(b._id) === String(id)) ? id : null;
+}
+
+/** Branch choices for a form: the member's open branches plus the record's current one. */
+export function branchOptions(ctx: TenantCtx, current?: ObjectId | null): { id: string; name: string }[] {
+  const list = [...ctx.branches];
+  if (current && !list.some((b) => String(b._id) === String(current))) {
+    const b = ctx.allBranches.find((x) => String(x._id) === String(current));
+    if (b) list.push(b);
+  }
+  return list.map((b) => ({ id: String(b._id), name: b.name }));
+}
+
+export function branchName(ctx: TenantCtx, id: ObjectId | null | undefined): string | undefined {
+  if (!id) return undefined;
+  return ctx.allBranches.find((b) => String(b._id) === String(id))?.name;
 }
 
 export function toObjectId(id: string | undefined | null): ObjectId | null {

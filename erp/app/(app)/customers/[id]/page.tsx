@@ -4,14 +4,13 @@ import { notFound } from 'next/navigation';
 import { MessageCircle, Phone, Plus } from 'lucide-react';
 import { requireTenant, toObjectId } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { addDays, formatDate, todayISO } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { waLink } from '@/lib/phone';
 import { paymentState } from '@/lib/bookings';
 import { BOOKING_TONE, PAY_TONE, VISA_TONE } from '@/lib/ui-tones';
-import type { Booking, Customer, VisaApplication } from '@/lib/types';
 import { Badge, Card, DL, LinkButton, PageHeader, Table, buttonClass } from '@/components/ui';
 import { Timeline } from '@/components/crm/Timeline';
 import { RelatedTasks } from '@/components/crm/RelatedTasks';
@@ -26,24 +25,14 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
   const { t, lang } = await getI18n();
   const id = toObjectId((await params).id);
   if (!id) notFound();
-  const db = await getDb();
-  const c = await db.collection<Customer>('customers').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const c = await r.customers.findOne({ _id: id });
   if (!c) notFound();
   const [bookings, visas] = await Promise.all([
     can(ctx.role, 'bookings.read')
-      ? db
-          .collection<Booking>('bookings')
-          .find({ tenantId: ctx.tenantId, customerId: id })
-          .sort({ createdAt: -1 })
-          .toArray()
+      ? r.bookings.find({ customerId: id }).sort({ createdAt: -1 }).toArray()
       : [],
-    can(ctx.role, 'visas.read')
-      ? db
-          .collection<VisaApplication>('visas')
-          .find({ tenantId: ctx.tenantId, customerId: id })
-          .sort({ createdAt: -1 })
-          .toArray()
-      : [],
+    can(ctx.role, 'visas.read') ? r.visas.find({ customerId: id }).sort({ createdAt: -1 }).toArray() : [],
   ]);
   const canWrite = can(ctx.role, 'customers.write');
   const today = todayISO();

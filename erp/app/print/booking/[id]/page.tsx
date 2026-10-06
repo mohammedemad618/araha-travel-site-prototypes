@@ -2,12 +2,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { requireTenant, toObjectId } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { formatDate, todayISO } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { bookingTotals } from '@/lib/bookings';
-import type { Booking, Customer, Payment } from '@/lib/types';
-import { PrintHeader } from '../../PrintHeader';
+import { PrintHeader, printBranch } from '../../PrintHeader';
 
 export const metadata: Metadata = { title: 'Invoice' };
 
@@ -16,16 +15,12 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const { t, lang } = await getI18n();
   const id = toObjectId((await params).id);
   if (!id) notFound();
-  const db = await getDb();
-  const b = await db.collection<Booking>('bookings').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const b = await r.bookings.findOne({ _id: id });
   if (!b) notFound();
   const [customer, payments] = await Promise.all([
-    db.collection<Customer>('customers').findOne({ _id: b.customerId, tenantId: ctx.tenantId }),
-    db
-      .collection<Payment>('payments')
-      .find({ tenantId: ctx.tenantId, bookingId: id, voided: false })
-      .sort({ date: 1 })
-      .toArray(),
+    r.customers.findOne({ _id: b.customerId }),
+    r.all.payments.find({ bookingId: id, voided: false }).sort({ date: 1 }).toArray(),
   ]);
   const travellers =
     customer?.travellers.filter((tr) => b.travellerIds.some((x) => String(x) === String(tr._id))) ?? [];
@@ -36,6 +31,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     <article className="text-[14px]">
       <PrintHeader
         tenant={ctx.tenant}
+        branch={printBranch(ctx, b.branchId)}
         title={t('bookings.invoiceTitle')}
         number={b.number}
         date={formatDate(todayISO(), lang)}

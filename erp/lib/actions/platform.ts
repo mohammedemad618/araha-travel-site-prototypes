@@ -8,7 +8,8 @@ import { hashPassword, tempPassword } from '../crypto';
 import { audit } from '../audit';
 import { defaultSettings, defaultWebsite } from '../tenants';
 import { fieldErrors, type ActionResult } from '../forms';
-import type { Tenant, User } from '../types';
+import { ensureMainBranch } from '../migrations';
+import type { Membership, Tenant, User } from '../types';
 
 const tenantSchema = z.object({
   name: z.string().trim().min(1, 'required').max(120, 'tooLong'),
@@ -31,7 +32,9 @@ export async function createTenant(_: ActionResult | null, fd: FormData): Promis
   const db = await getDb();
   if (await db.collection('tenants').findOne({ slug }))
     return { ok: false, error: 'duplicateSlug', fields: { slug: 'duplicateSlug' } };
-  if (await db.collection('users').findOne({ email: ownerEmail }))
+  // An existing account (e.g. someone who already runs another company) becomes the owner as is.
+  const existing = await db.collection<User>('users').findOne({ email: ownerEmail });
+  if (existing?.platformAdmin)
     return { ok: false, error: 'duplicateEmail', fields: { ownerEmail: 'duplicateEmail' } };
 
   const now = new Date();
@@ -44,14 +47,28 @@ export async function createTenant(_: ActionResult | null, fd: FormData): Promis
     website: defaultWebsite(),
     createdAt: now,
   });
-  const password = tempPassword();
-  await db.collection<Omit<User, '_id'>>('users').insertOne({
+  await ensureMainBranch(db, { _id: tenant.insertedId });
+  let password: string | undefined;
+  let ownerId = existing?._id;
+  if (!ownerId) {
+    password = tempPassword();
+    ownerId = (
+      await db.collection<Omit<User, '_id'>>('users').insertOne({
+        email: ownerEmail,
+        name: ownerName,
+        passwordHash: await hashPassword(password),
+        mustChangePassword: true,
+        active: true,
+        createdAt: now,
+      })
+    ).insertedId;
+  }
+  await db.collection<Omit<Membership, '_id'>>('memberships').insertOne({
+    userId: ownerId,
     tenantId: tenant.insertedId,
-    email: ownerEmail,
-    name: ownerName,
     role: 'owner',
-    passwordHash: await hashPassword(password),
-    mustChangePassword: true,
+    scope: 'all',
+    branchIds: [],
     active: true,
     createdAt: now,
   });
@@ -62,7 +79,9 @@ export async function createTenant(_: ActionResult | null, fd: FormData): Promis
     summary: `${name} (${slug})`,
   });
   revalidatePath('/platform');
-  return { ok: true, message: 'platform.created', data: { email: ownerEmail, password } };
+  return password
+    ? { ok: true, message: 'platform.created', data: { email: ownerEmail, password } }
+    : { ok: true, message: 'platform.createdExisting', data: { email: ownerEmail } };
 }
 
 export async function setTenantStatus(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -75,11 +94,7 @@ export async function setTenantStatus(_: ActionResult | null, fd: FormData): Pro
   await db.collection('tenants').updateOne({ _id: id }, { $set: { status } });
   if (status === 'suspended') {
     // Sign out the company's staff immediately.
-    const users = await db
-      .collection('users')
-      .find({ tenantId: id }, { projection: { _id: 1 } })
-      .toArray();
-    await db.collection('sessions').deleteMany({ userId: { $in: users.map((u) => u._id) } });
+    await db.collection('sessions').deleteMany({ activeTenantId: id });
   }
   await audit({ tenantId: id, userId: ctx.user._id, action: `tenant.${status}`, summary: status });
   revalidatePath('/platform');

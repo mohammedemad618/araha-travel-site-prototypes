@@ -1,22 +1,19 @@
 import 'server-only';
 import type { ObjectId } from 'mongodb';
-import { getDb } from './db';
+import { tenantRepo } from './repo';
 import { seatsByDeparture } from './bookings';
 import { formatDate, todayISO } from './dates';
-import type { Departure, TravelPackage } from './types';
 
 /** Active packages with their upcoming departures and seats left, for booking forms. */
 export async function packageChoices(tenantId: ObjectId, lang: 'ar' | 'en', include?: ObjectId) {
-  const db = await getDb();
+  const r = await tenantRepo(tenantId);
   const [packages, departures] = await Promise.all([
-    db
-      .collection<TravelPackage>('packages')
-      .find({ tenantId, $or: [{ active: true }, ...(include ? [{ _id: include }] : [])] })
+    r.packages
+      .find({ $or: [{ active: true }, ...(include ? [{ _id: include }] : [])] })
       .sort({ title: 1 })
       .toArray(),
-    db
-      .collection<Departure>('departures')
-      .find({ tenantId, date: { $gte: todayISO() } })
+    r.departures
+      .find({ date: { $gte: todayISO() } })
       .sort({ date: 1 })
       .toArray(),
   ]);

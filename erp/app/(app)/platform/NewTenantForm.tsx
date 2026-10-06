@@ -8,13 +8,13 @@ import { CopyButton } from '@/components/CopyButton';
 
 export function NewTenantForm() {
   const { t } = useI18n();
-  const [creds, setCreds] = useState<{ email: string; password: string } | null>(null);
+  const [creds, setCreds] = useState<{ email: string; password?: string } | null>(null);
   return (
     <>
       <ActionForm
         action={createTenant}
         resetOnSuccess
-        onSuccess={(r) => setCreds(r.data as { email: string; password: string })}
+        onSuccess={(r) => setCreds(r.data as { email: string; password?: string })}
         className="grid grid-cols-1 gap-4 md:grid-cols-2"
       >
         <TextField label={t('settings.companyName')} name="name" required />
@@ -41,7 +41,15 @@ export function NewTenantForm() {
           <SubmitButton>{t('platform.newTenant')}</SubmitButton>
         </div>
       </ActionForm>
-      {creds && (
+      {creds && !creds.password && (
+        <p role="status" className="mt-5 rounded-xl border border-line bg-sand p-4">
+          {t('platform.createdExisting')}{' '}
+          <span className="font-latin" dir="ltr">
+            {creds.email}
+          </span>
+        </p>
+      )}
+      {creds?.password && (
         <div role="status" className="mt-5 rounded-xl border border-gold/40 bg-sand p-4">
           <p className="m-0 mb-2 font-medium">{t('auth.tempPassword')}</p>
           <p className="m-0 flex flex-wrap items-center gap-3 font-latin" dir="ltr">

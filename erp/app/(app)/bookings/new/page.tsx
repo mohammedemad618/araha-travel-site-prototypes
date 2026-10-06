@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import { requireTenant, toObjectId } from '@/lib/session';
+import { branchOptions, requireTenant, toObjectId } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { getStaff } from '@/lib/queries';
 import { packageChoices } from '@/lib/package-choices';
-import type { Customer } from '@/lib/types';
 import { Card, PageHeader } from '@/components/ui';
 import { BookingForm } from '../BookingForm';
 
@@ -18,11 +17,9 @@ export default async function NewBookingPage({
   const ctx = await requireTenant('bookings.write');
   const { t, lang } = await getI18n();
   const customerId = toObjectId((await searchParams).customer);
-  const db = await getDb();
+  const r = await repo(ctx);
   const [customer, packages, staff] = await Promise.all([
-    customerId
-      ? db.collection<Customer>('customers').findOne({ _id: customerId, tenantId: ctx.tenantId })
-      : null,
+    customerId ? r.customers.findOne({ _id: customerId }) : null,
     packageChoices(ctx.tenantId, lang),
     getStaff(ctx.tenantId),
   ]);
@@ -33,6 +30,7 @@ export default async function NewBookingPage({
         <BookingForm
           packages={packages}
           staff={staff.filter((s) => s.active)}
+          branches={branchOptions(ctx)}
           me={String(ctx.user._id)}
           defaultCurrency={ctx.tenant.settings.currency}
           values={

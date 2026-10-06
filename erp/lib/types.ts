@@ -1,5 +1,5 @@
 import type { ObjectId } from 'mongodb';
-import type { Role } from './rbac';
+import type { TenantRole } from './rbac';
 
 // Business dates (travel, payment, due) are stored as YYYY-MM-DD strings so they
 // never shift with time zones; timestamps (createdAt, …) are real Dates.
@@ -39,12 +39,13 @@ export type Tenant = {
   createdAt: Date;
 };
 
+/** A login. What the person may do in each company is held by their memberships. */
 export type User = {
   _id: ObjectId;
-  tenantId: ObjectId | null;
   email: string;
   name: string;
-  role: Role;
+  /** Niura staff who manage the platform (and can enter any company for support). */
+  platformAdmin?: boolean;
   passwordHash: string;
   mustChangePassword: boolean;
   active: boolean;
@@ -52,12 +53,47 @@ export type User = {
   createdAt: Date;
 };
 
+/**
+ * Which records a member sees: the whole company, only their branches, or only
+ * records assigned to (or created by) them.
+ */
+export const memberScopes = ['all', 'branch', 'own'] as const;
+export type MemberScope = (typeof memberScopes)[number];
+
+/** A user's place in one company. One user can belong to several companies. */
+export type Membership = {
+  _id: ObjectId;
+  userId: ObjectId;
+  tenantId: ObjectId;
+  role: TenantRole;
+  scope: MemberScope;
+  /** Branches the member works in. Empty means every branch (scope "all" or "own"). */
+  branchIds: ObjectId[];
+  active: boolean;
+  createdAt: Date;
+};
+
+export type Branch = {
+  _id: ObjectId;
+  tenantId: ObjectId;
+  name: string;
+  /** Short code shown in lists, e.g. MSL. */
+  code: string;
+  phone?: string;
+  address?: string;
+  isMain: boolean;
+  active: boolean;
+  createdAt: Date;
+};
+
 export type Session = {
   _id: ObjectId;
   tokenHash: string;
   userId: ObjectId;
-  /** For platform admins working inside a tenant. */
+  /** The company the user is working in (members of several companies switch between them). */
   activeTenantId?: ObjectId;
+  /** Optional branch the lists are narrowed to. */
+  branchFilter?: ObjectId;
   createdAt: Date;
   expiresAt: Date;
 };
@@ -78,6 +114,7 @@ export type LeadStage = (typeof leadStages)[number];
 export type Lead = {
   _id: ObjectId;
   tenantId: ObjectId;
+  branchId: ObjectId;
   name: string;
   phone: string;
   email?: string;
@@ -100,6 +137,7 @@ export type Lead = {
   customerId?: ObjectId;
   bookingId?: ObjectId;
   nextFollowUp?: ISODate;
+  createdBy?: ObjectId;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -181,6 +219,7 @@ export type BookingCost = {
 export type Booking = {
   _id: ObjectId;
   tenantId: ObjectId;
+  branchId: ObjectId;
   number: string;
   customerId: ObjectId;
   leadId?: ObjectId;
@@ -214,6 +253,7 @@ export type PaymentMethod = (typeof paymentMethods)[number];
 export type Payment = {
   _id: ObjectId;
   tenantId: ObjectId;
+  branchId: ObjectId;
   number: string;
   bookingId: ObjectId;
   customerId: ObjectId;
@@ -273,6 +313,7 @@ export type VisaStatus = (typeof visaStatuses)[number];
 export type VisaApplication = {
   _id: ObjectId;
   tenantId: ObjectId;
+  branchId: ObjectId;
   customerId: ObjectId;
   travellerId?: ObjectId;
   travellerName: string;
@@ -286,6 +327,7 @@ export type VisaApplication = {
   reference?: string;
   notes?: string;
   assignedTo?: ObjectId;
+  createdBy?: ObjectId;
   createdAt: Date;
   updatedAt: Date;
 };

@@ -3,23 +3,14 @@ import Link from 'next/link';
 import { ObjectId } from 'mongodb';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { getStaff } from '@/lib/queries';
 import { formatDate, isISODate, todayISO } from '@/lib/dates';
 import { convert, formatMoney } from '@/lib/money';
 import { formatMulti } from '@/lib/money-multi';
 import { supplierBalances } from '@/lib/suppliers';
-import {
-  leadSources,
-  type Booking,
-  type Currency,
-  type Customer,
-  type Lead,
-  type Payment,
-  type Supplier,
-  type TravelPackage,
-} from '@/lib/types';
+import { leadSources, type Currency } from '@/lib/types';
 import { Card, PageHeader, Table, buttonClass } from '@/components/ui';
 import { BarChart } from '@/components/BarChart';
 
@@ -36,7 +27,7 @@ export default async function ReportsPage({
   const today = todayISO();
   const from = sp.from && isISODate(sp.from) ? sp.from : `${today.slice(0, 4)}-01-01`;
   const to = sp.to && isISODate(sp.to) ? sp.to : today;
-  const db = await getDb();
+  const r = await repo(ctx);
   const tenantId = ctx.tenantId;
   const cur = ctx.tenant.settings.currency;
   const rate = ctx.tenant.settings.usdRate;
@@ -45,10 +36,9 @@ export default async function ReportsPage({
   const range = { $gte: new Date(`${from}T00:00:00Z`), $lte: new Date(`${to}T23:59:59Z`) };
 
   const [bookings, payments, leads, staff, packages] = await Promise.all([
-    db
-      .collection<Booking>('bookings')
+    r.bookings
       .find(
-        { tenantId, status: { $ne: 'cancelled' }, createdAt: range },
+        { status: { $ne: 'cancelled' }, createdAt: range },
         {
           projection: {
             total: 1,
@@ -59,26 +49,20 @@ export default async function ReportsPage({
             adults: 1,
             children: 1,
             assignedTo: 1,
+            branchId: 1,
           },
         },
       )
       .toArray(),
-    db
-      .collection<Payment>('payments')
+    r.payments
       .find(
-        { tenantId, voided: false, date: { $gte: from, $lte: to } },
-        { projection: { amount: 1, currency: 1, kind: 1, date: 1, receivedBy: 1 } },
+        { voided: false, date: { $gte: from, $lte: to } },
+        { projection: { amount: 1, currency: 1, kind: 1, date: 1, receivedBy: 1, branchId: 1 } },
       )
       .toArray(),
-    db
-      .collection<Lead>('leads')
-      .find({ tenantId, createdAt: range }, { projection: { source: 1, stage: 1 } })
-      .toArray(),
+    r.leads.find({ createdAt: range }, { projection: { source: 1, stage: 1 } }).toArray(),
     getStaff(tenantId),
-    db
-      .collection<TravelPackage>('packages')
-      .find({ tenantId }, { projection: { title: 1 } })
-      .toArray(),
+    r.packages.find({}, { projection: { title: 1 } }).toArray(),
   ]);
 
   // Monthly sales vs collections.
@@ -114,6 +98,23 @@ export default async function ReportsPage({
       year: '2-digit',
       timeZone: 'UTC',
     }).format(new Date(`${m}-01T00:00:00Z`));
+
+  // By branch (only when the company has more than one).
+  const branchRows =
+    ctx.allBranches.length > 1
+      ? ctx.allBranches
+          .map((br) => {
+            const id = String(br._id);
+            const bs = bookings.filter((b) => String(b.branchId) === id);
+            const sales = bs.reduce((s, b) => s + conv(b.total, b.currency), 0);
+            const profit = bs.reduce((s, b) => s + conv(b.total - b.costTotal, b.currency), 0);
+            const collected = payments
+              .filter((p) => String(p.branchId) === id)
+              .reduce((s, p) => s + (p.kind === 'refund' ? -1 : 1) * conv(p.amount, p.currency), 0);
+            return { id, name: br.name, count: bs.length, sales, profit, collected };
+          })
+          .filter((r) => r.count || r.collected)
+      : [];
 
   // By package.
   const byPackage = new Map<
@@ -161,28 +162,22 @@ export default async function ReportsPage({
     .sort((a, b) => b.sales - a.sales);
 
   // Open balances (all time, not limited to the period).
-  const receivables = await db
-    .collection<Booking>('bookings')
+  const receivables = await r.bookings
     .find(
-      { tenantId, status: { $in: ['draft', 'confirmed', 'completed'] }, $expr: { $gt: ['$total', '$paid'] } },
+      { status: { $in: ['draft', 'confirmed', 'completed'] }, $expr: { $gt: ['$total', '$paid'] } },
       { projection: { number: 1, title: 1, total: 1, paid: 1, currency: 1, customerId: 1, travelDate: 1 } },
     )
     .sort({ travelDate: 1 })
     .limit(30)
     .toArray();
-  const custs = await db
-    .collection<Customer>('customers')
+  const custs = await r.customers
     .find({ _id: { $in: receivables.map((b) => b.customerId) } }, { projection: { name: 1 } })
     .toArray();
   const supplierRows: { id: ObjectId; name: string; owed: Partial<Record<Currency, number>> }[] = [];
   if (can(ctx.role, 'suppliers.read')) {
     const balances = await supplierBalances(tenantId);
-    const suppliers = await db
-      .collection<Supplier>('suppliers')
-      .find(
-        { tenantId, _id: { $in: [...balances.keys()].map((k) => new ObjectId(k)) } },
-        { projection: { name: 1 } },
-      )
+    const suppliers = await r.suppliers
+      .find({ _id: { $in: [...balances.keys()].map((k) => new ObjectId(k)) } }, { projection: { name: 1 } })
       .toArray();
     for (const s of suppliers) {
       const b = balances.get(String(s._id))!;
@@ -261,6 +256,33 @@ export default async function ReportsPage({
             </tfoot>
           </Table>
         </Card>
+
+        {branchRows.length > 0 && (
+          <Card title={t('reports.byBranch')} padded={false}>
+            <Table>
+              <thead>
+                <tr>
+                  <th>{t('workspace.branch')}</th>
+                  <th>{t('reports.bookings')}</th>
+                  <th>{t('reports.sales')}</th>
+                  <th>{t('reports.profit')}</th>
+                  <th>{t('reports.collected')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {branchRows.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.name}</td>
+                    <td className="num">{r.count}</td>
+                    <td className="num">{money(r.sales)}</td>
+                    <td className={`num ${r.profit < 0 ? 'text-danger' : ''}`}>{money(r.profit)}</td>
+                    <td className="num">{money(r.collected)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           <Card title={t('reports.byPackage')} padded={false}>

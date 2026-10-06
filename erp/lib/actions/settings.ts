@@ -3,13 +3,15 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getDb } from '../db';
-import { actionTenant, toObjectId } from '../session';
+import type { ObjectId } from 'mongodb';
+import { actionTenant, toObjectId, type TenantCtx } from '../session';
 import { audit } from '../audit';
 import { hashPassword, tempPassword } from '../crypto';
-import { fieldErrors, optText, text, toUpdate, type ActionResult } from '../forms';
+import { fieldErrors, formObject, optText, text, toUpdate, type ActionResult } from '../forms';
 import { newApiKey } from '../tenants';
+import { repo } from '../repo';
 import { tenantRoles, type TenantRole } from '../rbac';
-import type { User } from '../types';
+import { memberScopes, type User } from '../types';
 
 const companySchema = z.object({
   name: text(120),
@@ -131,45 +133,96 @@ export async function regenerateApiKey(): Promise<ActionResult> {
   return { ok: true };
 }
 
+const accessSchema = z
+  .object({
+    role: z.enum(tenantRoles),
+    scope: z.enum(memberScopes),
+    branchIds: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .transform((v) => (Array.isArray(v) ? v : v ? [v] : [])),
+  })
+  .refine((v) => v.scope !== 'branch' || v.branchIds.length > 0, {
+    message: 'branchRequired',
+    path: ['branchIds'],
+  });
+
+/** Keeps only branches of this company; "all" scope ignores branches. */
+function memberAccess(ctx: TenantCtx, d: z.infer<typeof accessSchema>) {
+  const ids = d.scope === 'all' ? [] : d.branchIds.map((id) => toObjectId(id)).filter(Boolean);
+  const branchIds = ctx.allBranches
+    .filter((b) => ids.some((id) => String(id) === String(b._id)))
+    .map((b) => b._id);
+  return { role: d.role as TenantRole, scope: d.scope, branchIds };
+}
+
 const userSchema = z.object({
   name: text(100),
   email: z.string().trim().toLowerCase().email('invalidEmail'),
-  role: z.enum(tenantRoles),
 });
 
+/**
+ * Adds a member. A new email gets an account with a temporary password; an
+ * email that already has an account (in another company) is simply given
+ * access here and keeps its own password.
+ */
 export async function createUser(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
   const auth = await actionTenant('users.manage');
   if (!auth.ok) return auth;
   const { ctx } = auth;
-  const parsed = userSchema.safeParse(Object.fromEntries(fd));
-  if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
+  const form = formObject(fd);
+  const parsed = userSchema.safeParse(form);
+  const access = accessSchema.safeParse(form);
+  if (!parsed.success || !access.success)
+    return {
+      ok: false,
+      error: 'required',
+      fields: {
+        ...(parsed.success ? {} : fieldErrors(parsed.error)),
+        ...(access.success ? {} : fieldErrors(access.error)),
+      },
+    };
+  const a = memberAccess(ctx, access.data);
+  if (a.scope === 'branch' && !a.branchIds.length)
+    return { ok: false, error: 'required', fields: { branchIds: 'branchRequired' } };
   const db = await getDb();
-  if (await db.collection('users').findOne({ email: parsed.data.email }))
+  const r = await repo(ctx);
+  const existing = await db.collection<User>('users').findOne({ email: parsed.data.email });
+  if (existing?.platformAdmin)
     return { ok: false, error: 'duplicateEmail', fields: { email: 'duplicateEmail' } };
-  const password = tempPassword();
-  await db.collection<Omit<User, '_id'>>('users').insertOne({
-    tenantId: ctx.tenantId,
-    ...parsed.data,
-    passwordHash: await hashPassword(password),
-    mustChangePassword: true,
-    active: true,
-    createdAt: new Date(),
-  });
+  if (existing && (await r.memberships.exists({ userId: existing._id })))
+    return { ok: false, error: 'alreadyMember', fields: { email: 'alreadyMember' } };
+
+  let userId = existing?._id;
+  let password: string | undefined;
+  if (!userId) {
+    password = tempPassword();
+    userId = (
+      await db.collection<Omit<User, '_id'>>('users').insertOne({
+        ...parsed.data,
+        passwordHash: await hashPassword(password),
+        mustChangePassword: true,
+        active: true,
+        createdAt: new Date(),
+      })
+    ).insertedId;
+  }
+  await r.memberships.insertOne({ userId, ...a, active: true, createdAt: new Date() });
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
-    action: 'user.create',
-    summary: `${parsed.data.email} (${parsed.data.role})`,
+    action: existing ? 'user.add' : 'user.create',
+    summary: `${parsed.data.email} (${a.role}, ${a.scope})`,
   });
   revalidatePath('/settings/users');
-  return { ok: true, data: { email: parsed.data.email, password } };
+  return password
+    ? { ok: true, data: { email: parsed.data.email, password } }
+    : { ok: true, message: 'settings.memberAdded', data: { email: parsed.data.email } };
 }
 
-async function ownersLeft(tenantId: import('mongodb').ObjectId, excluding: import('mongodb').ObjectId) {
-  const db = await getDb();
-  return db
-    .collection('users')
-    .countDocuments({ tenantId, role: 'owner', active: true, _id: { $ne: excluding } });
+async function ownersLeft(ctx: TenantCtx, excluding: ObjectId) {
+  const r = await repo(ctx);
+  return r.memberships.countDocuments({ role: 'owner', active: true, userId: { $ne: excluding } });
 }
 
 export async function updateUser(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -179,35 +232,54 @@ export async function updateUser(_: ActionResult | null, fd: FormData): Promise<
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
   const db = await getDb();
-  const user = await db.collection<User>('users').findOne({ _id: id, tenantId: ctx.tenantId });
-  if (!user) return { ok: false, error: 'notFound' };
+  const r = await repo(ctx);
+  const member = await r.memberships.findOne({ userId: id });
+  const user = member ? await db.collection<User>('users').findOne({ _id: id }) : null;
+  if (!member || !user) return { ok: false, error: 'notFound' };
+  const self = String(id) === String(ctx.user._id);
 
   const action = String(fd.get('op') ?? '');
-  if (action === 'role') {
-    const role = z.enum(tenantRoles).safeParse(fd.get('role'));
-    if (!role.success) return { ok: false, error: 'required' };
-    if (user.role === 'owner' && role.data !== 'owner' && !(await ownersLeft(ctx.tenantId, id)))
+  if (action === 'access') {
+    const access = accessSchema.safeParse(formObject(fd));
+    if (!access.success) return { ok: false, error: 'required', fields: fieldErrors(access.error) };
+    const a = memberAccess(ctx, access.data);
+    if (a.scope === 'branch' && !a.branchIds.length)
+      return { ok: false, error: 'required', fields: { branchIds: 'branchRequired' } };
+    if (member.role === 'owner' && a.role !== 'owner' && !(await ownersLeft(ctx, id)))
       return { ok: false, error: 'lastOwner' };
-    await db.collection('users').updateOne({ _id: id }, { $set: { role: role.data as TenantRole } });
+    // Owners manage everything, so they are never limited.
+    if (a.role === 'owner') Object.assign(a, { scope: 'all', branchIds: [] });
+    await r.memberships.updateOne({ _id: member._id }, { $set: a });
     await audit({
       tenantId: ctx.tenantId,
       userId: ctx.user._id,
       action: 'user.role',
-      summary: `${user.email} → ${role.data}`,
+      summary: `${user.email} → ${a.role}, ${a.scope}`,
     });
   } else if (action === 'toggle') {
-    if (String(id) === String(ctx.user._id)) return { ok: false, error: 'forbidden' };
-    if (user.active && user.role === 'owner' && !(await ownersLeft(ctx.tenantId, id)))
+    if (self) return { ok: false, error: 'forbidden' };
+    if (member.active && member.role === 'owner' && !(await ownersLeft(ctx, id)))
       return { ok: false, error: 'lastOwner' };
-    await db.collection('users').updateOne({ _id: id }, { $set: { active: !user.active } });
-    if (user.active) await db.collection('sessions').deleteMany({ userId: id });
+    await r.memberships.updateOne({ _id: member._id }, { $set: { active: !member.active } });
+    // Sign out sessions working in this company; access to other companies is untouched.
+    if (member.active)
+      await db.collection('sessions').deleteMany({
+        userId: id,
+        $or: [{ activeTenantId: ctx.tenantId }, { activeTenantId: { $exists: false } }],
+      });
     await audit({
       tenantId: ctx.tenantId,
       userId: ctx.user._id,
-      action: user.active ? 'user.disable' : 'user.enable',
+      action: member.active ? 'user.disable' : 'user.enable',
       summary: user.email,
     });
   } else if (action === 'reset') {
+    // A password belongs to the person, not the company: it can only be reset
+    // here when this company is the only one the account belongs to.
+    const elsewhere = await db
+      .collection('memberships')
+      .countDocuments({ userId: id, tenantId: { $ne: ctx.tenantId } }, { limit: 1 });
+    if (elsewhere || user.platformAdmin) return { ok: false, error: 'sharedAccount' };
     const password = tempPassword();
     await db
       .collection('users')

@@ -3,6 +3,8 @@ import { convert, formatMoney, parseMoney, toMinor } from '../lib/money';
 import { normalizePhone, isValidPhone } from '../lib/phone';
 import { can } from '../lib/rbac';
 import { addDays, isISODate } from '../lib/dates';
+import { scopedFilter, visibilityFilter, visibilityFor } from '../lib/scope';
+import { ObjectId } from 'mongodb';
 
 test('money parsing and conversion stay exact', () => {
   expect(parseMoney('1,250,000', 'IQD')).toBe(1250000);
@@ -39,4 +41,38 @@ test('business dates reject impossible days', () => {
   expect(isISODate('2026-02-30')).toBe(false);
   expect(isISODate('2026-12-31')).toBe(true);
   expect(addDays('2026-12-30', 3)).toBe('2027-01-02');
+});
+
+test('visibility: scope and branch filter combine into the right query', () => {
+  const user = new ObjectId();
+  const b1 = new ObjectId();
+  const b2 = new ObjectId();
+  const tenant = new ObjectId();
+
+  // Whole company, no branch chosen: no restriction.
+  expect(visibilityFor({ scope: 'all', branchIds: [], userId: user }, null)).toEqual({
+    branchIds: null,
+    ownerId: null,
+  });
+  // Whole company, one branch chosen: that branch.
+  expect(visibilityFor({ scope: 'all', branchIds: [], userId: user }, b2).branchIds).toEqual([b2]);
+  // Branch-limited member: their branches; a chosen branch outside them is ignored.
+  expect(visibilityFor({ scope: 'branch', branchIds: [b1], userId: user }, b2).branchIds).toEqual([b1]);
+  expect(visibilityFor({ scope: 'branch', branchIds: [b1, b2], userId: user }, b2).branchIds).toEqual([b2]);
+  // Own records only.
+  const own = visibilityFor({ scope: 'own', branchIds: [], userId: user }, null);
+  expect(own.ownerId).toEqual(user);
+  expect(visibilityFilter(own, ['assignedTo', 'createdBy'])).toEqual({
+    $or: [{ assignedTo: user }, { createdBy: user }],
+  });
+
+  // The company id always wins, and caller $or clauses survive alongside the scope.
+  const q = scopedFilter(
+    tenant,
+    { $or: [{ name: 'x' }], tenantId: new ObjectId() },
+    visibilityFilter({ branchIds: [b1], ownerId: null }, ['assignedTo']),
+  );
+  expect(q.tenantId).toEqual(tenant);
+  expect(q.$and).toHaveLength(2);
+  expect(scopedFilter(tenant, undefined, {})).toEqual({ tenantId: tenant });
 });

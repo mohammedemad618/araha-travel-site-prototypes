@@ -106,6 +106,13 @@ export const ar = {
     noSite: 'أضف رابط الموقع من إعدادات ربط الموقع أولاً.',
     importFailed: 'تعذّر قراءة الباقات من الموقع. تأكد من الرابط ومن نشر آخر نسخة.',
     noHook: 'أضف رابط Build hook من إعدادات ربط الموقع أولاً.',
+    duplicateCode: 'هذا الرمز مستخدم لفرع آخر',
+    mainBranch: 'لا يمكن إغلاق الفرع الرئيسي',
+    alreadyMember: 'هذا الشخص عضو في الشركة مسبقاً',
+    sharedAccount:
+      'هذا الحساب يعمل في شركة أخرى أيضاً، لذا لا يمكن تغيير كلمة مروره من هنا. يغيّرها صاحبها بنفسه.',
+    branchRequired: 'اختر فرعاً واحداً على الأقل',
+    branchNotAllowed: 'لا يمكنك العمل في هذا الفرع',
     pageNotFound: 'الصفحة غير موجودة',
     pageNotFoundBody: 'ربما حُذف السجل أو ليست لديك صلاحية للوصول إليه.',
   },
@@ -126,6 +133,13 @@ export const ar = {
     settings: 'الإعدادات',
     platform: 'إدارة المنصة',
     account: 'حسابي',
+  },
+  workspace: {
+    company: 'الشركة',
+    switchCompany: 'تبديل الشركة',
+    branch: 'الفرع',
+    allBranches: 'كل الفروع',
+    viewingBranch: 'تعرض بيانات فرع: {name}',
   },
   roles: {
     owner: 'مالك',
@@ -457,6 +471,7 @@ export const ar = {
     },
   },
   reports: {
+    byBranch: 'حسب الفرع',
     title: 'التقارير',
     intro: 'أداء المبيعات والتحصيل والأرباح.',
     period: 'الفترة',
@@ -521,6 +536,29 @@ export const ar = {
     auditUser: 'المستخدم',
     auditWhen: 'الوقت',
     setupSteps: 'خطوات الربط',
+    branches: 'الفروع',
+    newBranch: 'فرع جديد',
+    branchName: 'اسم الفرع',
+    branchCode: 'رمز الفرع',
+    branchCodeHint: 'من 2 إلى 8 أحرف إنجليزية أو أرقام، مثل MSL',
+    mainBranch: 'الرئيسي',
+    closed: 'مغلق',
+    closeBranch: 'إغلاق الفرع',
+    openBranch: 'إعادة فتح',
+    branchesIntro:
+      'كل طلب وحجز ودفعة وتأشيرة يتبع فرعاً. الفرع المغلق تبقى سجلاته، لكن لا تُضاف إليه سجلات جديدة.',
+    scope: 'نطاق الرؤية',
+    scopes: {
+      all: 'كل الشركة',
+      branch: 'فروع محددة',
+      own: 'سجلاته فقط',
+    },
+    scopeHint:
+      'نطاق «فروع محددة» يُظهر سجلات فروعه فقط، و«سجلاته فقط» يُظهر ما أُسند إليه أو أنشأه. العملاء والباقات والموردون مشتركة للشركة كلها.',
+    memberBranches: 'الفروع',
+    memberAdded: 'أُضيف الحساب الموجود إلى الشركة بنفس كلمة مروره.',
+    saveAccess: 'حفظ الصلاحية',
+    editAccess: 'تعديل الصلاحية',
   },
   platform: {
     title: 'إدارة المنصة',
@@ -542,6 +580,7 @@ export const ar = {
     bookings: 'الحجوزات',
     created: 'تمت إضافة الشركة',
     workingIn: 'تعمل داخل: {name}',
+    createdExisting: 'تمت إضافة الشركة. المالك لديه حساب مسبقاً ويدخل بكلمة مروره الحالية:',
   },
 } as const;
 

@@ -9,7 +9,7 @@ import { createSession, destroySession, getCtx } from '../session';
 import { rateLimit } from '../rate-limit';
 import { audit } from '../audit';
 import { fieldErrors, type ActionResult } from '../forms';
-import type { User } from '../types';
+import type { Membership, User } from '../types';
 
 async function clientIp(): Promise<string> {
   const h = await headers();
@@ -39,13 +39,25 @@ export async function login(_: ActionResult | null, fd: FormData): Promise<Actio
     ? await verifyPassword(password, user.passwordHash)
     : await verifyPassword(password, 'scrypt$16384$8$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAA');
   if (!user || !ok || !user.active) return { ok: false, error: 'wrongCredentials' };
+  // Staff need at least one company that still lets them in.
+  const membership = user.platformAdmin
+    ? null
+    : await db
+        .collection<Membership>('memberships')
+        .findOne({ userId: user._id, active: true }, { sort: { createdAt: 1 } });
+  if (!user.platformAdmin && !membership) return { ok: false, error: 'wrongCredentials' };
 
-  await createSession(user._id);
+  await createSession(user._id, membership?.tenantId);
   await db.collection('users').updateOne({ _id: user._id }, { $set: { lastLoginAt: new Date() } });
-  await audit({ tenantId: user.tenantId, userId: user._id, action: 'auth.login', summary: user.email });
+  await audit({
+    tenantId: membership?.tenantId ?? null,
+    userId: user._id,
+    action: 'auth.login',
+    summary: user.email,
+  });
   const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/';
   // Redirect on the server so the new session cookie and the navigation arrive together.
-  redirect(user.mustChangePassword ? '/account/password' : user.role === 'platform' ? '/platform' : safeNext);
+  redirect(user.mustChangePassword ? '/account/password' : user.platformAdmin ? '/platform' : safeNext);
 }
 
 export async function logout(): Promise<void> {
@@ -70,10 +82,9 @@ export async function setupPlatform(_: ActionResult | null, fd: FormData): Promi
   if ((await db.collection('users').estimatedDocumentCount()) > 0) return { ok: false, error: 'forbidden' };
   const now = new Date();
   const res = await db.collection<Omit<User, '_id'>>('users').insertOne({
-    tenantId: null,
     email: parsed.data.email,
     name: parsed.data.name,
-    role: 'platform',
+    platformAdmin: true,
     passwordHash: await hashPassword(parsed.data.password),
     mustChangePassword: false,
     active: true,
@@ -114,7 +125,7 @@ export async function changePassword(_: ActionResult | null, fd: FormData): Prom
   // Sign out every other device.
   await db.collection('sessions').deleteMany({ userId: ctx.user._id, _id: { $ne: ctx.session._id } });
   await audit({
-    tenantId: ctx.user.tenantId,
+    tenantId: ctx.tenant?._id ?? null,
     userId: ctx.user._id,
     action: 'auth.password',
     summary: ctx.user.email,

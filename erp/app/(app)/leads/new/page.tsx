@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { requireTenant } from '@/lib/session';
+import { branchOptions, requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
 import { getStaff } from '@/lib/queries';
 import { packageOptions } from '@/lib/lookups';
@@ -16,7 +16,12 @@ export default async function NewLeadPage() {
     <>
       <PageHeader title={t('leads.new')} back={{ href: '/leads', label: t('leads.title') }} />
       <Card>
-        <LeadForm staff={staff.filter((s) => s.active)} packages={packages} me={String(ctx.user._id)} />
+        <LeadForm
+          staff={staff.filter((s) => s.active)}
+          branches={branchOptions(ctx)}
+          packages={packages}
+          me={String(ctx.user._id)}
+        />
       </Card>
     </>
   );

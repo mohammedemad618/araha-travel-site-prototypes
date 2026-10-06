@@ -2,14 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { getDb } from '../db';
 import { actionTenant, toObjectId } from '../session';
+import { repo } from '../repo';
 import { audit, logActivity } from '../audit';
 import { fieldErrors, optText, reqDate, type ActionResult } from '../forms';
 import { convert, formatMoney, parseMoney } from '../money';
 import { nextNumber } from '../counters';
 import { recalcBooking } from '../bookings';
-import { paymentMethods, type Booking, type Payment, type Supplier, type SupplierPayment } from '../types';
+import { paymentMethods } from '../types';
 
 const paymentSchema = z.object({
   bookingId: z.string(),
@@ -32,17 +32,16 @@ export async function recordPayment(_: ActionResult | null, fd: FormData): Promi
   const amount = parseMoney(d.amount, d.currency);
   if (amount === null || amount <= 0)
     return { ok: false, error: 'invalidAmount', fields: { amount: 'invalidAmount' } };
-  const db = await getDb();
+  const r = await repo(ctx);
   const bookingId = toObjectId(d.bookingId);
-  const booking = bookingId
-    ? await db.collection<Booking>('bookings').findOne({ _id: bookingId, tenantId: ctx.tenantId })
-    : null;
+  const booking = bookingId ? await r.bookings.findOne({ _id: bookingId }) : null;
   if (!booking) return { ok: false, error: 'notFound' };
 
   const amountInBooking = convert(amount, d.currency, booking.currency, ctx.tenant.settings.usdRate);
   const number = await nextNumber(ctx.tenantId, ctx.tenant.settings.receiptPrefix || 'RC', 'receipt');
-  const res = await db.collection<Omit<Payment, '_id'>>('payments').insertOne({
-    tenantId: ctx.tenantId,
+  const paymentId = await r.payments.insertOne({
+    // A receipt belongs to the branch of its booking.
+    branchId: booking.branchId,
     number,
     bookingId: booking._id,
     customerId: booking.customerId,
@@ -61,7 +60,7 @@ export async function recordPayment(_: ActionResult | null, fd: FormData): Promi
   await recalcBooking(ctx.tenantId, booking._id);
   // A first payment on a draft confirms the booking.
   if (d.kind === 'payment' && booking.status === 'draft') {
-    await db.collection('bookings').updateOne({ _id: booking._id }, { $set: { status: 'confirmed' } });
+    await r.bookings.updateOne({ _id: booking._id }, { $set: { status: 'confirmed' } });
     await logActivity(
       ctx.tenantId,
       { type: 'booking', id: booking._id },
@@ -82,12 +81,12 @@ export async function recordPayment(_: ActionResult | null, fd: FormData): Promi
     userId: ctx.user._id,
     action: `payment.${d.kind}`,
     entity: 'payment',
-    entityId: res.insertedId,
+    entityId: paymentId,
     summary: `${number} ${booking.number}`,
   });
   revalidatePath(`/bookings/${booking._id}`);
   revalidatePath('/payments');
-  return { ok: true, data: { id: String(res.insertedId) } };
+  return { ok: true, data: { id: String(paymentId) } };
 }
 
 export async function voidPayment(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -96,10 +95,12 @@ export async function voidPayment(_: ActionResult | null, fd: FormData): Promise
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  const p = await db
-    .collection<Payment>('payments')
-    .findOneAndUpdate({ _id: id, tenantId: ctx.tenantId, voided: false }, { $set: { voided: true } });
+  const r = await repo(ctx);
+  // Any receipt of a booking the member can see may be voided.
+  const target = await r.all.payments.findOne({ _id: id, voided: false });
+  if (!target || !(await r.bookings.exists({ _id: target.bookingId })))
+    return { ok: false, error: 'notFound' };
+  const p = await r.all.payments.findOneAndUpdate({ _id: id, voided: false }, { $set: { voided: true } });
   if (!p) return { ok: false, error: 'notFound' };
   await recalcBooking(ctx.tenantId, p.bookingId);
   await logActivity(
@@ -142,14 +143,11 @@ export async function recordSupplierPayment(_: ActionResult | null, fd: FormData
   const amount = parseMoney(d.amount, d.currency);
   if (amount === null || amount <= 0)
     return { ok: false, error: 'invalidAmount', fields: { amount: 'invalidAmount' } };
-  const db = await getDb();
+  const r = await repo(ctx);
   const supplierId = toObjectId(d.supplierId);
-  const supplier = supplierId
-    ? await db.collection<Supplier>('suppliers').findOne({ _id: supplierId, tenantId: ctx.tenantId })
-    : null;
+  const supplier = supplierId ? await r.suppliers.findOne({ _id: supplierId }) : null;
   if (!supplier) return { ok: false, error: 'notFound' };
-  await db.collection<Omit<SupplierPayment, '_id'>>('supplierPayments').insertOne({
-    tenantId: ctx.tenantId,
+  await r.supplierPayments.insertOne({
     supplierId: supplier._id,
     amount,
     currency: d.currency,
@@ -179,10 +177,8 @@ export async function deleteSupplierPayment(_: ActionResult | null, fd: FormData
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  const p = await db
-    .collection<SupplierPayment>('supplierPayments')
-    .findOneAndDelete({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const p = await r.supplierPayments.findOneAndDelete({ _id: id });
   if (!p) return { ok: false, error: 'notFound' };
   await audit({
     tenantId: ctx.tenantId,

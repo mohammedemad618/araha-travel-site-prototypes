@@ -136,6 +136,11 @@ export function SubmitButton({
   );
 }
 
+/** The server's error for a field of the surrounding <ActionForm>, if any. */
+export function useFieldError(name: string): string | undefined {
+  return useContext(FieldErrors)[name];
+}
+
 /** Label + control + error/hint, wired for screen readers. */
 export function Field({
   label,
@@ -249,6 +254,29 @@ export function SelectField({
         </select>
       )}
     </Field>
+  );
+}
+
+/** Branch picker, shown only when there is more than one branch to choose from. */
+export function BranchField({
+  branches,
+  value,
+  fieldClassName,
+}: {
+  branches?: { id: string; name: string }[];
+  value?: string;
+  fieldClassName?: string;
+}) {
+  const { t } = useI18n();
+  if (!branches || branches.length < 2) return null;
+  return (
+    <SelectField
+      label={t('workspace.branch')}
+      name="branchId"
+      defaultValue={value ?? branches[0]!.id}
+      options={branches.map((b) => ({ value: b.id, label: b.name }))}
+      fieldClassName={fieldClassName}
+    />
   );
 }
 

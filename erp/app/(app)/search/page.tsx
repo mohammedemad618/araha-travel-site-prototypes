@@ -2,11 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { nameOrPhone, searchRegex } from '@/lib/queries';
 import { STAGE_TONE, BOOKING_TONE } from '@/lib/ui-tones';
-import type { Booking, Customer, Lead } from '@/lib/types';
 import { Badge, Card, PageHeader } from '@/components/ui';
 
 export const metadata: Metadata = { title: 'Search' };
@@ -16,29 +15,25 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const ctx = await requireTenant();
   const { t } = await getI18n();
   const q = ((await searchParams).q ?? '').trim();
-  const db = await getDb();
-  const tenantId = ctx.tenantId;
+  const r = await repo(ctx);
   const [customers, leads, bookings] = q
     ? await Promise.all([
         can(ctx.role, 'customers.read')
-          ? db
-              .collection<Customer>('customers')
-              .find({ tenantId, ...nameOrPhone(q) })
+          ? r.customers
+              .find({ ...nameOrPhone(q) })
               .limit(10)
               .toArray()
           : [],
         can(ctx.role, 'leads.read')
-          ? db
-              .collection<Lead>('leads')
-              .find({ tenantId, ...nameOrPhone(q) })
+          ? r.leads
+              .find({ ...nameOrPhone(q) })
               .sort({ createdAt: -1 })
               .limit(10)
               .toArray()
           : [],
         can(ctx.role, 'bookings.read')
-          ? db
-              .collection<Booking>('bookings')
-              .find({ tenantId, $or: [{ number: searchRegex(q) }, { title: searchRegex(q) }] })
+          ? r.bookings
+              .find({ $or: [{ number: searchRegex(q) }, { title: searchRegex(q) }] })
               .sort({ createdAt: -1 })
               .limit(10)
               .toArray()

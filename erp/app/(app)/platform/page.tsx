@@ -19,7 +19,7 @@ export default async function PlatformPage() {
   const tenants = await db.collection<Tenant>('tenants').find().sort({ createdAt: -1 }).toArray();
   const [userCounts, bookingCounts] = await Promise.all([
     db
-      .collection('users')
+      .collection('memberships')
       .aggregate<{ _id: unknown; n: number }>([{ $group: { _id: '$tenantId', n: { $sum: 1 } } }])
       .toArray(),
     db

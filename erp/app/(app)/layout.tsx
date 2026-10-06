@@ -1,13 +1,18 @@
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { KeyRound, LogOut, Search } from 'lucide-react';
-import { requireCtx } from '@/lib/session';
-import { getI18n } from '@/lib/i18n/server';
+import { actionTenant, requireCtx } from '@/lib/session';
 import { getDb } from '@/lib/db';
+import { getI18n } from '@/lib/i18n/server';
+import { repo } from '@/lib/repo';
 import { buildNav } from '@/lib/nav';
 import { can } from '@/lib/rbac';
 import { todayISO } from '@/lib/dates';
 import { logout } from '@/lib/actions/auth';
 import { leaveTenant } from '@/lib/actions/platform-switch';
+import { setBranchFilter, switchTenant } from '@/lib/actions/workspace';
+import { AutoSubmitSelect } from '@/components/WorkspaceSwitcher';
+import type { Tenant } from '@/lib/types';
 import { Sidebar } from '@/components/Sidebar';
 import { LanguageToggle } from '@/components/LanguageToggle';
 
@@ -19,14 +24,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // Sidebar counters: new website/WhatsApp leads and the user's overdue tasks.
   const badges: Record<string, number> = {};
-  if (ctx.tenant) {
-    const db = await getDb();
+  const auth = ctx.tenant ? await actionTenant() : null;
+  const tctx = auth?.ok ? auth.ctx : null;
+  if (tctx) {
+    const r = await repo(tctx);
     const [newLeads, overdue] = await Promise.all([
-      can(ctx.role, 'leads.read')
-        ? db.collection('leads').countDocuments({ tenantId: ctx.tenant._id, stage: 'new' })
-        : 0,
-      db.collection('tasks').countDocuments({
-        tenantId: ctx.tenant._id,
+      can(ctx.role, 'leads.read') ? r.leads.countDocuments({ stage: 'new' }) : 0,
+      r.tasks.countDocuments({
         done: false,
         assignedTo: ctx.user._id,
         dueDate: { $lt: todayISO() },
@@ -35,6 +39,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     badges.leads = newLeads;
     badges.tasks = overdue;
   }
+
+  // Members of several companies switch between them; branches narrow what is shown.
+  const companies =
+    ctx.memberships.length > 1
+      ? await (
+          await getDb()
+        )
+          .collection<Tenant>('tenants')
+          .find({ _id: { $in: ctx.memberships.map((m) => m.tenantId) } }, { projection: { name: 1 } })
+          .sort({ name: 1 })
+          .toArray()
+      : [];
+  const back = (await headers()).get('x-pathname') ?? '/';
+  const branchChoices = tctx && tctx.branches.length > 1 ? tctx.branches : [];
+  const activeBranch = tctx?.branchFilter
+    ? tctx.allBranches.find((b) => String(b._id) === String(tctx.branchFilter))
+    : undefined;
 
   const accent = ctx.tenant?.settings.accent || '#c99755';
   const brand = ctx.tenant?.name ?? t('app.name');
@@ -71,7 +92,31 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               />
             </form>
           )}
-          <div className="ms-auto flex items-center gap-1">
+          <div className="ms-auto flex items-center gap-1.5">
+            {companies.length > 1 && ctx.tenant && (
+              <AutoSubmitSelect
+                action={switchTenant}
+                name="tenantId"
+                icon="company"
+                label={t('workspace.switchCompany')}
+                value={String(ctx.tenant._id)}
+                options={companies.map((c) => ({ value: String(c._id), label: c.name }))}
+              />
+            )}
+            {branchChoices.length > 0 && (
+              <AutoSubmitSelect
+                action={setBranchFilter}
+                name="branchId"
+                icon="branch"
+                back={back}
+                label={t('workspace.branch')}
+                value={activeBranch ? String(activeBranch._id) : ''}
+                options={[
+                  { value: '', label: t('workspace.allBranches') },
+                  ...branchChoices.map((b) => ({ value: String(b._id), label: b.name })),
+                ]}
+              />
+            )}
             <LanguageToggle />
             <Link
               href="/account/password"

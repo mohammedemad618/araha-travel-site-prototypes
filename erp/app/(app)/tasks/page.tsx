@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { Filter } from 'mongodb';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { getStaff } from '@/lib/queries';
 import type { Task } from '@/lib/types';
 import { Card, PageHeader, Tabs } from '@/components/ui';
@@ -21,12 +21,11 @@ export default async function TasksPage({
   const sp = await searchParams;
   const who = sp.who === 'all' ? 'all' : 'mine';
   const state = sp.state === 'done' ? 'done' : 'open';
-  const db = await getDb();
-  const filter: Filter<Task> = { tenantId: ctx.tenantId, done: state === 'done' };
+  const r = await repo(ctx);
+  const filter: Filter<Task> = { done: state === 'done' };
   if (who === 'mine') filter.assignedTo = ctx.user._id;
   const [tasks, staff] = await Promise.all([
-    db
-      .collection<Task>('tasks')
+    r.tasks
       .find(filter)
       .sort(state === 'done' ? { doneAt: -1 } : { dueDate: 1, createdAt: 1 })
       .limit(200)

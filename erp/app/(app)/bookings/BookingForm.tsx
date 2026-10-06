@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ActionForm, SelectField, SubmitButton, TextArea, TextField } from '@/components/form';
+import { ActionForm, SelectField, SubmitButton, TextArea, TextField, BranchField } from '@/components/form';
 import { CustomerPicker } from '@/components/CustomerPicker';
 import { createBooking, updateBooking } from '@/lib/actions/bookings';
 import { useI18n } from '@/lib/i18n/client';
@@ -27,6 +27,7 @@ export type BookingValues = {
   children?: number;
   currency?: string;
   assignedTo?: string;
+  branchId?: string;
   notes?: string;
   currencyLocked?: boolean;
 };
@@ -35,12 +36,14 @@ export function BookingForm({
   values = {},
   packages,
   staff,
+  branches,
   me,
   defaultCurrency,
 }: {
   values?: BookingValues;
   packages: PackageChoice[];
   staff: { id: string; name: string }[];
+  branches?: { id: string; name: string }[];
   me: string;
   defaultCurrency: string;
 }) {
@@ -159,6 +162,7 @@ export function BookingForm({
         placeholder={t('common.unassigned')}
         options={staff.map((s) => ({ value: s.id, label: s.name }))}
       />
+      <BranchField branches={branches} value={values.branchId} />
       <TextArea
         label={t('common.notes')}
         name="notes"

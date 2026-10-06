@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import { getDb } from '@/lib/db';
+import { ensureMainBranch } from '@/lib/migrations';
 import { logActivity } from '@/lib/audit';
 import { rateLimit } from '@/lib/rate-limit';
 import { isValidPhone, normalizePhone } from '@/lib/phone';
@@ -106,6 +107,8 @@ export async function POST(req: Request) {
 
   const doc: Omit<Lead, '_id'> = {
     tenantId: tenant._id,
+    // Website enquiries arrive at the main branch; staff can move them.
+    branchId: await ensureMainBranch(db, tenant),
     name: name.slice(0, 120),
     phone,
     email: body.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email) ? body.email.toLowerCase() : undefined,

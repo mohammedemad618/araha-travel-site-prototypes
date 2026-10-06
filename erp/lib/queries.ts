@@ -2,25 +2,29 @@ import 'server-only';
 import { cache } from 'react';
 import type { Filter, ObjectId, Document } from 'mongodb';
 import { getDb } from './db';
-import type { User } from './types';
+import type { Membership, User } from './types';
 
 export const PAGE_SIZE = 25;
 
-/** Staff of a company, for "assigned to" pickers and name lookups. */
+/** Staff of a company (its members), for "assigned to" pickers and name lookups. */
 export const getStaff = cache(async (tenantId: ObjectId) => {
   const db = await getDb();
+  const members = await db.collection<Membership>('memberships').find({ tenantId }).toArray();
   const users = await db
     .collection<User>('users')
-    .find({ tenantId }, { projection: { name: 1, role: 1, active: 1, email: 1 } })
+    .find({ _id: { $in: members.map((m) => m.userId) } }, { projection: { name: 1, email: 1, active: 1 } })
     .sort({ name: 1 })
     .toArray();
-  return users.map((u) => ({
-    id: String(u._id),
-    name: u.name,
-    role: u.role,
-    active: u.active,
-    email: u.email,
-  }));
+  return users.map((u) => {
+    const m = members.find((x) => String(x.userId) === String(u._id))!;
+    return {
+      id: String(u._id),
+      name: u.name,
+      role: m.role,
+      active: u.active && m.active,
+      email: u.email,
+    };
+  });
 });
 
 export async function staffName(tenantId: ObjectId, id?: ObjectId | null): Promise<string | undefined> {

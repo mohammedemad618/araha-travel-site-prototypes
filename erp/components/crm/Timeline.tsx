@@ -1,10 +1,10 @@
 import type { ObjectId } from 'mongodb';
 import { MessageSquare, Phone, Users as UsersIcon, Cog, StickyNote } from 'lucide-react';
-import { getDb } from '@/lib/db';
+import { tenantRepo } from '@/lib/repo';
 import { getI18n } from '@/lib/i18n/server';
 import { formatDateTime } from '@/lib/dates';
 import { getStaff } from '@/lib/queries';
-import type { Activity, EntityType } from '@/lib/types';
+import type { EntityType } from '@/lib/types';
 import type { TFn } from '@/lib/i18n/translate';
 import { Card } from '../ui';
 import { ActivityForm } from './ActivityForm';
@@ -36,14 +36,9 @@ export async function Timeline({
   canWrite?: boolean;
 }) {
   const { t, lang } = await getI18n();
-  const db = await getDb();
+  const r = await tenantRepo(tenantId);
   const [items, staff] = await Promise.all([
-    db
-      .collection<Activity>('activities')
-      .find({ tenantId, 'entity.type': type, 'entity.id': id })
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .toArray(),
+    r.activities.find({ 'entity.type': type, 'entity.id': id }).sort({ createdAt: -1 }).limit(100).toArray(),
     getStaff(tenantId),
   ]);
   return (

@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { requireTenant, toObjectId } from '@/lib/session';
+import { requireTenant, toObjectId, branchOptions } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { getStaff } from '@/lib/queries';
 import { VISA_TONE } from '@/lib/ui-tones';
-import type { Booking, Customer, VisaApplication } from '@/lib/types';
 import { Badge, Card, PageHeader } from '@/components/ui';
 import { Timeline } from '@/components/crm/Timeline';
 import { RelatedTasks } from '@/components/crm/RelatedTasks';
@@ -22,14 +21,12 @@ export default async function VisaPage({ params }: { params: Promise<{ id: strin
   const { t } = await getI18n();
   const id = toObjectId((await params).id);
   if (!id) notFound();
-  const db = await getDb();
-  const v = await db.collection<VisaApplication>('visas').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const v = await r.visas.findOne({ _id: id });
   if (!v) notFound();
   const [customer, booking, staff] = await Promise.all([
-    db.collection<Customer>('customers').findOne({ _id: v.customerId, tenantId: ctx.tenantId }),
-    v.bookingId
-      ? db.collection<Booking>('bookings').findOne({ _id: v.bookingId, tenantId: ctx.tenantId })
-      : null,
+    r.customers.findOne({ _id: v.customerId }),
+    v.bookingId ? r.bookings.findOne({ _id: v.bookingId }) : null,
     getStaff(ctx.tenantId),
   ]);
   const canWrite = can(ctx.role, 'visas.write');
@@ -64,9 +61,11 @@ export default async function VisaPage({ params }: { params: Promise<{ id: strin
           {canWrite ? (
             <VisaForm
               staff={staff.filter((s) => s.active)}
+              branches={branchOptions(ctx, v.branchId)}
               me={String(ctx.user._id)}
               values={{
                 id: String(v._id),
+                branchId: String(v.branchId),
                 customer: customer
                   ? { id: String(customer._id), name: customer.name, phone: customer.phone }
                   : undefined,

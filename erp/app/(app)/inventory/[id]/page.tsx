@@ -3,12 +3,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireTenant, toObjectId } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { formatDate, todayISO } from '@/lib/dates';
 import { formatMoney, moneyInput } from '@/lib/money';
 import { seatsByDeparture } from '@/lib/bookings';
-import type { Departure, TravelPackage } from '@/lib/types';
 import { Badge, Card, PageHeader, Table, buttonClass } from '@/components/ui';
 import { DeleteDepartureButton, DeletePackageButton, DepartureForm, PackageForm } from '../InventoryForms';
 
@@ -19,14 +18,10 @@ export default async function PackagePage({ params }: { params: Promise<{ id: st
   const { t, lang } = await getI18n();
   const id = toObjectId((await params).id);
   if (!id) notFound();
-  const db = await getDb();
-  const pkg = await db.collection<TravelPackage>('packages').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const pkg = await r.packages.findOne({ _id: id });
   if (!pkg) notFound();
-  const departures = await db
-    .collection<Departure>('departures')
-    .find({ tenantId: ctx.tenantId, packageId: id })
-    .sort({ date: 1 })
-    .toArray();
+  const departures = await r.departures.find({ packageId: id }).sort({ date: 1 }).toArray();
   const seats = await seatsByDeparture(
     ctx.tenantId,
     departures.map((d) => d._id),

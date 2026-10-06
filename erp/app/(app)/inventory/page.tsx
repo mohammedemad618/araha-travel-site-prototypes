@@ -3,12 +3,11 @@ import Link from 'next/link';
 import { CalendarRange } from 'lucide-react';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { formatDate, formatDateTime, todayISO } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { seatsByDeparture } from '@/lib/bookings';
-import type { Departure, TravelPackage } from '@/lib/types';
 import { Badge, Card, EmptyState, PageHeader, Table } from '@/components/ui';
 import { ImportButton, PackageForm, PublishButton } from './InventoryForms';
 
@@ -17,17 +16,12 @@ export const metadata: Metadata = { title: 'Packages & dates' };
 export default async function InventoryPage() {
   const ctx = await requireTenant('bookings.read');
   const { t, lang } = await getI18n();
-  const db = await getDb();
+  const r = await repo(ctx);
   const today = todayISO();
   const [packages, departures] = await Promise.all([
-    db
-      .collection<TravelPackage>('packages')
-      .find({ tenantId: ctx.tenantId })
-      .sort({ active: -1, title: 1 })
-      .toArray(),
-    db
-      .collection<Departure>('departures')
-      .find({ tenantId: ctx.tenantId, date: { $gte: today } })
+    r.packages.find({}).sort({ active: -1, title: 1 }).toArray(),
+    r.departures
+      .find({ date: { $gte: today } })
       .sort({ date: 1 })
       .toArray(),
   ]);

@@ -5,13 +5,17 @@ import { Readable } from 'node:stream';
 import { z } from 'zod';
 import { getDb } from '../db';
 import { actionTenant, toObjectId } from '../session';
+import { repo } from '../repo';
 import { audit } from '../audit';
 import { can, type Permission } from '../rbac';
 import { ALLOWED_TYPES, MAX_FILE, bucket, sniffType } from '../files';
 import { entityTypes, type EntityType } from '../types';
 import type { ActionResult } from '../forms';
 
-const WRITE: Record<EntityType, { collection: string; perm: Permission; path: string }> = {
+const WRITE: Record<
+  EntityType,
+  { collection: 'leads' | 'customers' | 'bookings' | 'visas' | 'suppliers'; perm: Permission; path: string }
+> = {
   lead: { collection: 'leads', perm: 'leads.write', path: '/leads' },
   customer: { collection: 'customers', perm: 'customers.write', path: '/customers' },
   booking: { collection: 'bookings', perm: 'bookings.write', path: '/bookings' },
@@ -32,13 +36,8 @@ export async function uploadAttachment(_: ActionResult | null, fd: FormData): Pr
   if (!(file instanceof File) || file.size === 0)
     return { ok: false, error: 'required', fields: { file: 'required' } };
   if (file.size > MAX_FILE) return { ok: false, error: 'fileTooLarge', fields: { file: 'fileTooLarge' } };
-  const db = await getDb();
-  if (
-    !(await db
-      .collection(meta.collection)
-      .countDocuments({ _id: entityId, tenantId: ctx.tenantId }, { limit: 1 }))
-  )
-    return { ok: false, error: 'notFound' };
+  const r = await repo(ctx);
+  if (!(await r[meta.collection].exists({ _id: entityId }))) return { ok: false, error: 'notFound' };
 
   const buf = Buffer.from(await file.arrayBuffer());
   const contentType = sniffType(buf);
@@ -91,6 +90,9 @@ export async function deleteAttachment(_: ActionResult | null, fd: FormData): Pr
   if (!file) return { ok: false, error: 'notFound' };
   const meta = WRITE[file.metadata.entityType];
   if (!can(ctx.role, meta.perm)) return { ok: false, error: 'forbidden' };
+  const r = await repo(ctx);
+  if (!(await r[meta.collection].exists({ _id: file.metadata.entityId as import('mongodb').ObjectId })))
+    return { ok: false, error: 'notFound' };
   await (await bucket()).delete(id);
   await audit({
     tenantId: ctx.tenantId,

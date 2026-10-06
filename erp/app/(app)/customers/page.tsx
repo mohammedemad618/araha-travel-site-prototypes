@@ -4,7 +4,7 @@ import { Plus, Users } from 'lucide-react';
 import type { Filter } from 'mongodb';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { nameOrPhone, pageParams, PAGE_SIZE } from '@/lib/queries';
 import { formatDate } from '@/lib/dates';
@@ -23,29 +23,21 @@ export default async function CustomersPage({
   const ctx = await requireTenant('customers.read');
   const { t, lang } = await getI18n();
   const sp = await searchParams;
-  const db = await getDb();
-  const filter: Filter<Customer> = { tenantId: ctx.tenantId, ...(nameOrPhone(sp.q) as Filter<Customer>) };
+  const r = await repo(ctx);
+  const filter: Filter<Customer> = { ...(nameOrPhone(sp.q) as Filter<Customer>) };
   if (sp.tag) filter.tags = sp.tag;
   const { page, skip } = pageParams(sp.page);
   const [items, total, tags] = await Promise.all([
-    db
-      .collection<Customer>('customers')
-      .find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(PAGE_SIZE)
-      .toArray(),
-    db.collection<Customer>('customers').countDocuments(filter),
-    db.collection<Customer>('customers').distinct('tags', { tenantId: ctx.tenantId }),
+    r.customers.find(filter).sort({ createdAt: -1 }).skip(skip).limit(PAGE_SIZE).toArray(),
+    r.customers.countDocuments(filter),
+    r.customers.distinct('tags') as Promise<string[]>,
   ]);
   // Totals per customer in the company currency (bookings in the other currency are shown separately).
   const cur = ctx.tenant.settings.currency;
-  const sums = await db
-    .collection('bookings')
+  const sums = await r.bookings
     .aggregate<{ _id: { c: unknown; cur: string }; total: number; paid: number; n: number }>([
       {
         $match: {
-          tenantId: ctx.tenantId,
           customerId: { $in: items.map((c) => c._id) },
           status: { $ne: 'cancelled' },
         },

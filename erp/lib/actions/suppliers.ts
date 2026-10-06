@@ -3,11 +3,11 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { getDb } from '../db';
 import { actionTenant, toObjectId } from '../session';
+import { repo } from '../repo';
 import { audit } from '../audit';
 import { fieldErrors, optEmail, optText, text, toUpdate, type ActionResult } from '../forms';
-import { supplierTypes, type Supplier } from '../types';
+import { supplierTypes } from '../types';
 
 const supplierSchema = z.object({
   name: text(160),
@@ -25,29 +25,25 @@ export async function saveSupplier(_: ActionResult | null, fd: FormData): Promis
   const { ctx } = auth;
   const parsed = supplierSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
-  const db = await getDb();
+  const r = await repo(ctx);
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (id) {
-    const res = await db
-      .collection('suppliers')
-      .updateOne({ _id: id, tenantId: ctx.tenantId }, toUpdate(parsed.data));
+    const res = await r.suppliers.updateOne({ _id: id }, toUpdate(parsed.data));
     if (!res.matchedCount) return { ok: false, error: 'notFound' };
     revalidatePath(`/suppliers/${id}`);
     return { ok: true };
   }
-  const res = await db
-    .collection<Omit<Supplier, '_id'>>('suppliers')
-    .insertOne({ tenantId: ctx.tenantId, ...parsed.data, createdAt: new Date() });
+  const supplierId = await r.suppliers.insertOne({ ...parsed.data, createdAt: new Date() });
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
     action: 'supplier.create',
     entity: 'supplier',
-    entityId: res.insertedId,
+    entityId: supplierId,
     summary: parsed.data.name,
   });
   revalidatePath('/suppliers');
-  redirect(`/suppliers/${res.insertedId}`);
+  redirect(`/suppliers/${supplierId}`);
 }
 
 export async function deleteSupplier(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -56,16 +52,12 @@ export async function deleteSupplier(_: ActionResult | null, fd: FormData): Prom
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
+  const r = await repo(ctx);
   const used =
-    (await db
-      .collection('bookings')
-      .countDocuments({ tenantId: ctx.tenantId, 'costs.supplierId': id }, { limit: 1 })) +
-    (await db
-      .collection('supplierPayments')
-      .countDocuments({ tenantId: ctx.tenantId, supplierId: id }, { limit: 1 }));
+    (await r.all.bookings.exists({ 'costs.supplierId': id })) ||
+    (await r.supplierPayments.exists({ supplierId: id }));
   if (used) return { ok: false, error: 'hasRecords' };
-  const s = await db.collection<Supplier>('suppliers').findOneAndDelete({ _id: id, tenantId: ctx.tenantId });
+  const s = await r.suppliers.findOneAndDelete({ _id: id });
   if (!s) return { ok: false, error: 'notFound' };
   await audit({ tenantId: ctx.tenantId, userId: ctx.user._id, action: 'supplier.delete', summary: s.name });
   revalidatePath('/suppliers');

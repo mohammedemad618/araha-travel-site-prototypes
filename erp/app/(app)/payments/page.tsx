@@ -4,13 +4,13 @@ import { Wallet } from 'lucide-react';
 import type { Filter } from 'mongodb';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { getStaff, pageParams, PAGE_SIZE, searchRegex } from '@/lib/queries';
 import { formatDate, isISODate } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { formatMulti } from '@/lib/money-multi';
-import { paymentMethods, type Booking, type Customer, type Payment } from '@/lib/types';
+import { paymentMethods, type Payment } from '@/lib/types';
 import { Badge, Card, EmptyState, PageHeader, Stat, Table } from '@/components/ui';
 import { Pagination } from '@/components/ListControls';
 import { buttonClass } from '@/components/ui';
@@ -23,8 +23,8 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   const ctx = await requireTenant('finance.read');
   const { t, lang } = await getI18n();
   const sp = await searchParams;
-  const db = await getDb();
-  const filter: Filter<Payment> = { tenantId: ctx.tenantId };
+  const r = await repo(ctx);
+  const filter: Filter<Payment> = {};
   if (sp.method && (paymentMethods as readonly string[]).includes(sp.method))
     filter.method = sp.method as Payment['method'];
   if (sp.kind === 'payment' || sp.kind === 'refund') filter.kind = sp.kind;
@@ -36,16 +36,9 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
 
   const { page, skip } = pageParams(sp.page);
   const [items, total, sums, staff] = await Promise.all([
-    db
-      .collection<Payment>('payments')
-      .find(filter)
-      .sort({ date: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(PAGE_SIZE)
-      .toArray(),
-    db.collection<Payment>('payments').countDocuments(filter),
-    db
-      .collection<Payment>('payments')
+    r.payments.find(filter).sort({ date: -1, createdAt: -1 }).skip(skip).limit(PAGE_SIZE).toArray(),
+    r.payments.countDocuments(filter),
+    r.payments
       .aggregate<{ _id: { k: string; c: 'IQD' | 'USD' }; n: number }>([
         { $match: { ...filter, voided: false } },
         { $group: { _id: { k: '$kind', c: '$currency' }, n: { $sum: '$amount' } } },
@@ -61,14 +54,10 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   const outSum = sumOf('refund');
   const net = { IQD: (inSum.IQD ?? 0) - (outSum.IQD ?? 0), USD: (inSum.USD ?? 0) - (outSum.USD ?? 0) };
   const [bookings, customers] = await Promise.all([
-    db
-      .collection<Booking>('bookings')
+    r.all.bookings
       .find({ _id: { $in: items.map((p) => p.bookingId) } }, { projection: { number: 1 } })
       .toArray(),
-    db
-      .collection<Customer>('customers')
-      .find({ _id: { $in: items.map((p) => p.customerId) } }, { projection: { name: 1 } })
-      .toArray(),
+    r.customers.find({ _id: { $in: items.map((p) => p.customerId) } }, { projection: { name: 1 } }).toArray(),
   ]);
   const params = { q: sp.q, method: sp.method, kind: sp.kind, from: sp.from, to: sp.to };
   const exportQs = new URLSearchParams(

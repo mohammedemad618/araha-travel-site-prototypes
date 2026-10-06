@@ -3,11 +3,11 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { getDb } from '../db';
-import { actionTenant, toObjectId } from '../session';
+import { actionTenant, pickBranch, toObjectId } from '../session';
+import { repo } from '../repo';
 import { audit, logActivity } from '../audit';
 import { fieldErrors, optDate, optText, text, toUpdate, type ActionResult } from '../forms';
-import { visaStatuses, type Customer, type VisaApplication } from '../types';
+import { visaStatuses } from '../types';
 
 const visaSchema = z.object({
   customerId: z.string(),
@@ -22,6 +22,7 @@ const visaSchema = z.object({
   reference: optText(80),
   notes: optText(2000),
   assignedTo: z.string().optional(),
+  branchId: z.string().optional(),
 });
 
 export async function saveVisa(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -31,25 +32,25 @@ export async function saveVisa(_: ActionResult | null, fd: FormData): Promise<Ac
   const parsed = visaSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
   const d = parsed.data;
-  const db = await getDb();
+  const r = await repo(ctx);
   const customerId = toObjectId(d.customerId);
-  const customer = customerId
-    ? await db.collection<Customer>('customers').findOne({ _id: customerId, tenantId: ctx.tenantId })
-    : null;
+  const customer = customerId ? await r.customers.findOne({ _id: customerId }) : null;
   if (!customer) return { ok: false, error: 'required', fields: { customerId: 'required' } };
   const travellerId = toObjectId(d.travellerId);
   const traveller = travellerId
     ? customer.travellers.find((x) => String(x._id) === String(travellerId))
     : undefined;
   const bookingId = toObjectId(d.bookingId);
-  if (
-    bookingId &&
-    !(await db
-      .collection('bookings')
-      .countDocuments({ _id: bookingId, tenantId: ctx.tenantId, customerId: customer._id }))
-  )
-    return { ok: false, error: 'notFound' };
+  const booking = bookingId ? await r.bookings.findOne({ _id: bookingId, customerId: customer._id }) : null;
+  if (bookingId && !booking) return { ok: false, error: 'notFound' };
+  const id = toObjectId(String(fd.get('id') ?? ''));
+  const current = id ? await r.visas.findOne({ _id: id }, { projection: { branchId: 1 } }) : null;
+  if (id && !current) return { ok: false, error: 'notFound' };
+  // A visa for a booking is handled by the booking's branch.
+  const branchId = booking?.branchId ?? pickBranch(ctx, d.branchId, current?.branchId);
+  if (!branchId) return { ok: false, error: 'required', fields: { branchId: 'branchNotAllowed' } };
   const fields = {
+    branchId,
     customerId: customer._id,
     travellerId: traveller?._id,
     travellerName: traveller?.name ?? customer.name,
@@ -65,11 +66,8 @@ export async function saveVisa(_: ActionResult | null, fd: FormData): Promise<Ac
     assignedTo: toObjectId(d.assignedTo) ?? undefined,
     updatedAt: new Date(),
   };
-  const id = toObjectId(String(fd.get('id') ?? ''));
   if (id) {
-    const before = await db
-      .collection<VisaApplication>('visas')
-      .findOneAndUpdate({ _id: id, tenantId: ctx.tenantId }, toUpdate(fields));
+    const before = await r.visas.findOneAndUpdate({ _id: id }, toUpdate(fields));
     if (!before) return { ok: false, error: 'notFound' };
     if (before.status !== d.status)
       await logActivity(ctx.tenantId, { type: 'visa', id }, 'system', `visa:${d.status}`, ctx.user._id);
@@ -77,20 +75,18 @@ export async function saveVisa(_: ActionResult | null, fd: FormData): Promise<Ac
     revalidatePath('/visas');
     return { ok: true };
   }
-  const res = await db
-    .collection<Omit<VisaApplication, '_id'>>('visas')
-    .insertOne({ tenantId: ctx.tenantId, ...fields, createdAt: new Date() });
-  await logActivity(ctx.tenantId, { type: 'visa', id: res.insertedId }, 'system', 'created', ctx.user._id);
+  const visaId = await r.visas.insertOne({ ...fields, createdBy: ctx.user._id, createdAt: new Date() });
+  await logActivity(ctx.tenantId, { type: 'visa', id: visaId }, 'system', 'created', ctx.user._id);
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
     action: 'visa.create',
     entity: 'visa',
-    entityId: res.insertedId,
+    entityId: visaId,
     summary: `${fields.travellerName} · ${d.country}`,
   });
   revalidatePath('/visas');
-  redirect(`/visas/${res.insertedId}`);
+  redirect(`/visas/${visaId}`);
 }
 
 export async function deleteVisa(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -99,14 +95,10 @@ export async function deleteVisa(_: ActionResult | null, fd: FormData): Promise<
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  const v = await db
-    .collection<VisaApplication>('visas')
-    .findOneAndDelete({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const v = await r.visas.findOneAndDelete({ _id: id });
   if (!v) return { ok: false, error: 'notFound' };
-  await db
-    .collection('activities')
-    .deleteMany({ tenantId: ctx.tenantId, 'entity.type': 'visa', 'entity.id': id });
+  await r.activities.deleteMany({ 'entity.type': 'visa', 'entity.id': id });
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,

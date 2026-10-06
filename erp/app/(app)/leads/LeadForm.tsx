@@ -1,6 +1,6 @@
 'use client';
 
-import { ActionForm, SelectField, SubmitButton, TextArea, TextField } from '@/components/form';
+import { ActionForm, SelectField, SubmitButton, TextArea, TextField, BranchField } from '@/components/form';
 import { createLead, updateLead } from '@/lib/actions/leads';
 import { useI18n } from '@/lib/i18n/client';
 import { leadSources } from '@/lib/types';
@@ -20,17 +20,20 @@ export type LeadFormValues = {
   message?: string;
   value?: string;
   assignedTo?: string;
+  branchId?: string;
   nextFollowUp?: string;
 };
 
 export function LeadForm({
   values = {},
   staff,
+  branches,
   packages,
   me,
 }: {
   values?: LeadFormValues;
   staff: { id: string; name: string }[];
+  branches?: { id: string; name: string }[];
   packages: { slug: string; title: string }[];
   me: string;
 }) {
@@ -70,6 +73,7 @@ export function LeadForm({
           placeholder={t('common.unassigned')}
           options={staff.map((s) => ({ value: s.id, label: s.name }))}
         />
+        <BranchField branches={branches} value={values.branchId} />
         <TextField
           label={t('leads.nextFollowUp')}
           name="nextFollowUp"

@@ -109,6 +109,13 @@ export const en: Dict = {
     importFailed:
       'Could not read packages from the website. Check the URL and that the latest version is published.',
     noHook: 'Add a Build hook URL in website settings first.',
+    duplicateCode: 'Another branch already uses this code',
+    mainBranch: 'The main branch cannot be closed',
+    alreadyMember: 'This person is already a member of the company',
+    sharedAccount:
+      'This account also works in another company, so its password cannot be changed here. Its owner changes it.',
+    branchRequired: 'Choose at least one branch',
+    branchNotAllowed: 'You cannot work in this branch',
     pageNotFound: 'Page not found',
     pageNotFoundBody: 'The record may have been deleted, or you do not have access to it.',
   },
@@ -129,6 +136,13 @@ export const en: Dict = {
     settings: 'Settings',
     platform: 'Platform admin',
     account: 'My account',
+  },
+  workspace: {
+    company: 'Company',
+    switchCompany: 'Switch company',
+    branch: 'Branch',
+    allBranches: 'All branches',
+    viewingBranch: 'Showing branch: {name}',
   },
   roles: {
     owner: 'Owner',
@@ -462,6 +476,7 @@ export const en: Dict = {
     },
   },
   reports: {
+    byBranch: 'By branch',
     title: 'Reports',
     intro: 'Sales, collections and profit.',
     period: 'Period',
@@ -525,6 +540,29 @@ export const en: Dict = {
     auditUser: 'User',
     auditWhen: 'When',
     setupSteps: 'Connection steps',
+    branches: 'Branches',
+    newBranch: 'New branch',
+    branchName: 'Branch name',
+    branchCode: 'Branch code',
+    branchCodeHint: '2 to 8 letters or digits, e.g. MSL',
+    mainBranch: 'Main',
+    closed: 'Closed',
+    closeBranch: 'Close branch',
+    openBranch: 'Reopen',
+    branchesIntro:
+      'Every lead, booking, payment and visa belongs to a branch. A closed branch keeps its records but takes no new ones.',
+    scope: 'Visibility',
+    scopes: {
+      all: 'Whole company',
+      branch: 'Selected branches',
+      own: 'Own records only',
+    },
+    scopeHint:
+      '"Selected branches": sees only those branches\' records. "Own records only": sees what is assigned to or created by them. Customers, packages and suppliers are shared across the company.',
+    memberBranches: 'Branches',
+    memberAdded: 'The existing account was added to the company with its own password.',
+    saveAccess: 'Save access',
+    editAccess: 'Edit access',
   },
   platform: {
     title: 'Platform admin',
@@ -546,5 +584,7 @@ export const en: Dict = {
     bookings: 'Bookings',
     created: 'Company added',
     workingIn: 'Working in: {name}',
+    createdExisting:
+      'Company added. The owner already has an account and signs in with their current password:',
   },
 };

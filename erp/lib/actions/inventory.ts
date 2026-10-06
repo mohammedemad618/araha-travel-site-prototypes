@@ -5,11 +5,12 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getDb } from '../db';
 import { actionTenant, toObjectId } from '../session';
+import { repo } from '../repo';
 import { audit } from '../audit';
 import { fieldErrors, intField, optText, reqDate, text, toUpdate, type ActionResult } from '../forms';
 import { parseMoney } from '../money';
 import { seatsBooked } from '../bookings';
-import type { Departure, Tenant, TravelPackage } from '../types';
+import type { Tenant, TravelPackage } from '../types';
 
 const packageSchema = z.object({
   slug: z
@@ -59,34 +60,28 @@ export async function savePackage(_: ActionResult | null, fd: FormData): Promise
   const { ctx } = auth;
   const parsed = parsePackage(fd);
   if ('error' in parsed) return { ok: false, error: 'required', fields: parsed.error };
-  const db = await getDb();
+  const r = await repo(ctx);
   const id = toObjectId(String(fd.get('id') ?? ''));
-  const dup = await db
-    .collection('packages')
-    .findOne({ tenantId: ctx.tenantId, slug: parsed.data.slug, ...(id ? { _id: { $ne: id } } : {}) });
+  const dup = await r.packages.exists({ slug: parsed.data.slug, ...(id ? { _id: { $ne: id } } : {}) });
   if (dup) return { ok: false, error: 'duplicateSlug', fields: { slug: 'duplicateSlug' } };
   const now = new Date();
   if (id) {
-    const res = await db
-      .collection('packages')
-      .updateOne({ _id: id, tenantId: ctx.tenantId }, toUpdate({ ...parsed.data, updatedAt: now }));
+    const res = await r.packages.updateOne({ _id: id }, toUpdate({ ...parsed.data, updatedAt: now }));
     if (!res.matchedCount) return { ok: false, error: 'notFound' };
     revalidatePath(`/inventory/${id}`);
     revalidatePath('/inventory');
     return { ok: true };
   }
-  const res = await db
-    .collection<Omit<TravelPackage, '_id'>>('packages')
-    .insertOne({ tenantId: ctx.tenantId, ...parsed.data, createdAt: now, updatedAt: now });
+  const packageId = await r.packages.insertOne({ ...parsed.data, createdAt: now, updatedAt: now });
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
     action: 'package.create',
-    entityId: res.insertedId,
+    entityId: packageId,
     summary: parsed.data.title,
   });
   revalidatePath('/inventory');
-  redirect(`/inventory/${res.insertedId}`);
+  redirect(`/inventory/${packageId}`);
 }
 
 export async function deletePackage(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -95,14 +90,11 @@ export async function deletePackage(_: ActionResult | null, fd: FormData): Promi
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  if (await db.collection('bookings').countDocuments({ tenantId: ctx.tenantId, packageId: id }, { limit: 1 }))
-    return { ok: false, error: 'hasRecords' };
-  const pkg = await db
-    .collection<TravelPackage>('packages')
-    .findOneAndDelete({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  if (await r.all.bookings.exists({ packageId: id })) return { ok: false, error: 'hasRecords' };
+  const pkg = await r.packages.findOneAndDelete({ _id: id });
   if (!pkg) return { ok: false, error: 'notFound' };
-  await db.collection('departures').deleteMany({ tenantId: ctx.tenantId, packageId: id });
+  await r.departures.deleteMany({ packageId: id });
   await audit({ tenantId: ctx.tenantId, userId: ctx.user._id, action: 'package.delete', summary: pkg.title });
   revalidatePath('/inventory');
   redirect('/inventory');
@@ -124,10 +116,8 @@ export async function saveDeparture(_: ActionResult | null, fd: FormData): Promi
   if (!packageId) return { ok: false, error: 'notFound' };
   const parsed = departureSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
-  const db = await getDb();
-  const pkg = await db
-    .collection<TravelPackage>('packages')
-    .findOne({ _id: packageId, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const pkg = await r.packages.findOne({ _id: packageId });
   if (!pkg) return { ok: false, error: 'notFound' };
   const price = parsed.data.price ? parseMoney(parsed.data.price, pkg.currency) : undefined;
   if (price === null) return { ok: false, error: 'invalidAmount', fields: { price: 'invalidAmount' } };
@@ -144,14 +134,10 @@ export async function saveDeparture(_: ActionResult | null, fd: FormData): Promi
     const booked = await seatsBooked(ctx.tenantId, id);
     if (fields.capacity < booked)
       return { ok: false, error: 'seatsExceeded', fields: { capacity: 'seatsExceeded' } };
-    const res = await db
-      .collection('departures')
-      .updateOne({ _id: id, tenantId: ctx.tenantId, packageId }, toUpdate(fields));
+    const res = await r.departures.updateOne({ _id: id, packageId }, toUpdate(fields));
     if (!res.matchedCount) return { ok: false, error: 'notFound' };
   } else {
-    await db
-      .collection<Omit<Departure, '_id'>>('departures')
-      .insertOne({ tenantId: ctx.tenantId, packageId, ...fields, createdAt: new Date() });
+    await r.departures.insertOne({ packageId, ...fields, createdAt: new Date() });
   }
   revalidatePath(`/inventory/${packageId}`);
   revalidatePath('/inventory');
@@ -164,14 +150,9 @@ export async function deleteDeparture(_: ActionResult | null, fd: FormData): Pro
   const { ctx } = auth;
   const id = toObjectId(String(fd.get('id') ?? ''));
   if (!id) return { ok: false, error: 'notFound' };
-  const db = await getDb();
-  if (
-    await db.collection('bookings').countDocuments({ tenantId: ctx.tenantId, departureId: id }, { limit: 1 })
-  )
-    return { ok: false, error: 'hasRecords' };
-  const dep = await db
-    .collection<Departure>('departures')
-    .findOneAndDelete({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  if (await r.all.bookings.exists({ departureId: id })) return { ok: false, error: 'hasRecords' };
+  const dep = await r.departures.findOneAndDelete({ _id: id });
   if (!dep) return { ok: false, error: 'notFound' };
   revalidatePath(`/inventory/${dep.packageId}`);
   return { ok: true };
@@ -255,18 +236,15 @@ export async function importFromWebsite(): Promise<ActionResult> {
   } catch {
     return { ok: false, error: 'importFailed' };
   }
-  const db = await getDb();
+  const r = await repo(ctx);
   const now = new Date();
   let added = 0;
   let dates = 0;
   for (const p of list) {
     if (typeof p.slug !== 'string' || !/^[a-z0-9][a-z0-9-]{1,80}$/.test(p.slug) || !p.title) continue;
-    let pkg = await db
-      .collection<TravelPackage>('packages')
-      .findOne({ tenantId: ctx.tenantId, slug: p.slug });
+    let pkg = await r.packages.findOne({ slug: p.slug });
     if (!pkg) {
-      const doc: Omit<TravelPackage, '_id'> = {
-        tenantId: ctx.tenantId,
+      const doc: Omit<TravelPackage, '_id' | 'tenantId'> = {
         slug: p.slug,
         title: String(p.title).slice(0, 160),
         titleEn: p.titleEn ? String(p.titleEn).slice(0, 160) : undefined,
@@ -280,18 +258,13 @@ export async function importFromWebsite(): Promise<ActionResult> {
         createdAt: now,
         updatedAt: now,
       };
-      const res = await db.collection<Omit<TravelPackage, '_id'>>('packages').insertOne(doc);
-      pkg = { ...doc, _id: res.insertedId };
+      pkg = { ...doc, tenantId: ctx.tenantId, _id: await r.packages.insertOne(doc) };
       added++;
     }
     for (const d of Array.isArray(p.departures) ? p.departures : []) {
       if (typeof d.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(d.date)) continue;
-      const exists = await db
-        .collection('departures')
-        .countDocuments({ tenantId: ctx.tenantId, packageId: pkg._id, date: d.date }, { limit: 1 });
-      if (exists) continue;
-      await db.collection<Omit<Departure, '_id'>>('departures').insertOne({
-        tenantId: ctx.tenantId,
+      if (await r.departures.exists({ packageId: pkg._id, date: d.date })) continue;
+      await r.departures.insertOne({
         packageId: pkg._id,
         date: d.date,
         capacity: 20,

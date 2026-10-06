@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { MessageCircle, Phone } from 'lucide-react';
-import { requireTenant, toObjectId } from '@/lib/session';
+import { requireTenant, toObjectId, branchOptions, branchName } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { getStaff } from '@/lib/queries';
 import { packageOptions } from '@/lib/lookups';
@@ -12,7 +12,6 @@ import { formatDate, formatDateTime } from '@/lib/dates';
 import { formatMoney, moneyInput } from '@/lib/money';
 import { waLink } from '@/lib/phone';
 import { STAGE_TONE } from '@/lib/ui-tones';
-import type { Booking, Customer, Lead } from '@/lib/types';
 import { Badge, Card, DL, PageHeader, buttonClass } from '@/components/ui';
 import { Timeline } from '@/components/crm/Timeline';
 import { RelatedTasks } from '@/components/crm/RelatedTasks';
@@ -26,21 +25,15 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   const { t, lang } = await getI18n();
   const id = toObjectId((await params).id);
   if (!id) notFound();
-  const db = await getDb();
-  const lead = await db.collection<Lead>('leads').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const lead = await r.leads.findOne({ _id: id });
   if (!lead) notFound();
   const [staff, packages, customer, booking, sameCustomer] = await Promise.all([
     getStaff(ctx.tenantId),
     packageOptions(ctx.tenantId),
-    lead.customerId
-      ? db.collection<Customer>('customers').findOne({ _id: lead.customerId, tenantId: ctx.tenantId })
-      : null,
-    lead.bookingId
-      ? db.collection<Booking>('bookings').findOne({ _id: lead.bookingId, tenantId: ctx.tenantId })
-      : null,
-    !lead.customerId
-      ? db.collection<Customer>('customers').findOne({ tenantId: ctx.tenantId, phone: lead.phone })
-      : null,
+    lead.customerId ? r.customers.findOne({ _id: lead.customerId }) : null,
+    lead.bookingId ? r.bookings.findOne({ _id: lead.bookingId }) : null,
+    !lead.customerId ? r.customers.findOne({ phone: lead.phone }) : null,
   ]);
   const canWrite = can(ctx.role, 'leads.write');
   const cur = ctx.tenant.settings.currency;
@@ -100,6 +93,9 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             <DL
               cols={3}
               items={[
+                ...(ctx.allBranches.length > 1
+                  ? [[t('workspace.branch'), branchName(ctx, lead.branchId) ?? '—'] as [string, string]]
+                  : []),
                 [
                   t('common.phone'),
                   <span key="p" dir="ltr" className="font-latin">
@@ -153,10 +149,12 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
                 <div className="mt-5">
                   <LeadForm
                     staff={staff.filter((s) => s.active)}
+                    branches={branchOptions(ctx, lead.branchId)}
                     packages={packages}
                     me={String(ctx.user._id)}
                     values={{
                       id: String(lead._id),
+                      branchId: String(lead.branchId),
                       name: lead.name,
                       phone: lead.phone,
                       email: lead.email,

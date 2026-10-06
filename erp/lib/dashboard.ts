@@ -1,10 +1,11 @@
 import 'server-only';
 import type { ObjectId } from 'mongodb';
-import { getDb } from './db';
+import { repo } from './repo';
+import type { TenantCtx } from './session';
 import { addDays, todayISO } from './dates';
 import { convert } from './money';
 import { SEAT_HOLDING } from './bookings';
-import type { Booking, Customer, Departure, Lead, Payment, Task, Tenant, TravelPackage } from './types';
+import type { Payment } from './types';
 
 /** First day of the month `offset` months from the current one (YYYY-MM-DD). */
 export function monthStart(offset = 0): string {
@@ -13,9 +14,11 @@ export function monthStart(offset = 0): string {
   return d.toISOString().slice(0, 10);
 }
 
-export async function dashboardData(tenant: Tenant, userId: ObjectId) {
-  const db = await getDb();
-  const tenantId = tenant._id;
+/** Figures for the member's dashboard, limited to the branches/records they can see. */
+export async function dashboardData(ctx: TenantCtx) {
+  const r = await repo(ctx);
+  const tenant = ctx.tenant;
+  const userId = ctx.user._id;
   const cur = tenant.settings.currency;
   const rate = tenant.settings.usdRate;
   const today = todayISO();
@@ -39,37 +42,27 @@ export async function dashboardData(tenant: Tenant, userId: ObjectId) {
     followUps,
     recentLeads,
   ] = await Promise.all([
-    db.collection<Lead>('leads').countDocuments({ tenantId, createdAt: { $gte: since30 } }),
-    db
-      .collection<Lead>('leads')
+    r.leads.countDocuments({ createdAt: { $gte: since30 } }),
+    r.leads
       .aggregate<{ _id: string; n: number }>([
-        { $match: { tenantId, createdAt: { $gte: since90 } } },
+        { $match: { createdAt: { $gte: since90 } } },
         { $group: { _id: '$stage', n: { $sum: 1 } } },
       ])
       .toArray(),
-    db
-      .collection<Lead>('leads')
-      .aggregate<{ _id: string; n: number }>([
-        { $match: { tenantId } },
-        { $group: { _id: '$stage', n: { $sum: 1 } } },
-      ])
-      .toArray(),
-    db.collection<Booking>('bookings').countDocuments({
-      tenantId,
+    r.leads.aggregate<{ _id: string; n: number }>([{ $group: { _id: '$stage', n: { $sum: 1 } } }]).toArray(),
+    r.bookings.countDocuments({
       status: { $ne: 'cancelled' },
       createdAt: { $gte: new Date(`${monthFrom}T00:00:00Z`) },
     }),
-    db
-      .collection<Payment>('payments')
+    r.payments
       .find(
-        { tenantId, voided: false, date: { $gte: sixMonthsFrom } },
+        { voided: false, date: { $gte: sixMonthsFrom } },
         { projection: { amount: 1, currency: 1, kind: 1, date: 1 } },
       )
       .toArray(),
-    db
-      .collection<Booking>('bookings')
+    r.bookings
       .find(
-        { tenantId, status: { $in: ['draft', 'confirmed'] } },
+        { status: { $in: ['draft', 'confirmed'] } },
         {
           projection: {
             total: 1,
@@ -85,27 +78,18 @@ export async function dashboardData(tenant: Tenant, userId: ObjectId) {
         },
       )
       .toArray(),
-    db.collection<Booking>('bookings').countDocuments({
-      tenantId,
+    r.bookings.countDocuments({
       status: { $in: ['confirmed', 'draft'] },
       travelDate: { $gte: today, $lte: in30 },
     }),
-    db
-      .collection<Task>('tasks')
-      .countDocuments({ tenantId, done: false, assignedTo: userId, dueDate: { $lt: today } }),
-    db
-      .collection<Task>('tasks')
-      .find({ tenantId, done: false, assignedTo: userId })
-      .sort({ dueDate: 1 })
-      .limit(6)
-      .toArray(),
-    db.collection('visas').countDocuments({ tenantId, status: { $in: ['collecting', 'submitted'] } }),
-    db.collection<Lead>('leads').countDocuments({
-      tenantId,
+    r.tasks.countDocuments({ done: false, assignedTo: userId, dueDate: { $lt: today } }),
+    r.tasks.find({ done: false, assignedTo: userId }).sort({ dueDate: 1 }).limit(6).toArray(),
+    r.visas.countDocuments({ status: { $in: ['collecting', 'submitted'] } }),
+    r.leads.countDocuments({
       stage: { $in: ['new', 'contacted', 'quoted'] },
       nextFollowUp: { $lte: today },
     }),
-    db.collection<Lead>('leads').find({ tenantId }).sort({ createdAt: -1 }).limit(5).toArray(),
+    r.leads.find({}).sort({ createdAt: -1 }).limit(5).toArray(),
   ]);
 
   const toCur = (amount: number, c: 'IQD' | 'USD') => convert(amount, c, cur, rate);
@@ -136,9 +120,8 @@ export async function dashboardData(tenant: Tenant, userId: ObjectId) {
   );
   let passportAlerts = 0;
   if (upcoming.length) {
-    const customers = await db
-      .collection<Customer>('customers')
-      .find({ tenantId, _id: { $in: upcoming.map((b) => b.customerId) } }, { projection: { travellers: 1 } })
+    const customers = await r.customers
+      .find({ _id: { $in: upcoming.map((b) => b.customerId) } }, { projection: { travellers: 1 } })
       .toArray();
     for (const b of upcoming) {
       const c = customers.find((x) => String(x._id) === String(b.customerId));
@@ -153,21 +136,17 @@ export async function dashboardData(tenant: Tenant, userId: ObjectId) {
   }
 
   // Next departures with seats.
-  const deps = await db
-    .collection<Departure>('departures')
-    .find({ tenantId, date: { $gte: today }, closed: false })
+  const deps = await r.departures
+    .find({ date: { $gte: today }, closed: false })
     .sort({ date: 1 })
     .limit(5)
     .toArray();
   const [pkgs, seatRows] = await Promise.all([
-    db
-      .collection<TravelPackage>('packages')
-      .find({ _id: { $in: deps.map((d) => d.packageId) } }, { projection: { title: 1 } })
-      .toArray(),
-    db
-      .collection('bookings')
+    r.packages.find({ _id: { $in: deps.map((d) => d.packageId) } }, { projection: { title: 1 } }).toArray(),
+    // Seats are shared by every branch.
+    r.all.bookings
       .aggregate<{ _id: ObjectId; n: number }>([
-        { $match: { tenantId, departureId: { $in: deps.map((d) => d._id) }, status: { $in: SEAT_HOLDING } } },
+        { $match: { departureId: { $in: deps.map((d) => d._id) }, status: { $in: SEAT_HOLDING } } },
         { $group: { _id: '$departureId', n: { $sum: { $add: ['$adults', '$children'] } } } },
       ])
       .toArray(),

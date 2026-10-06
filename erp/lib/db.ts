@@ -1,6 +1,7 @@
 import 'server-only';
 import { MongoClient, type Db } from 'mongodb';
 import { ensureIndexes } from './indexes';
+import { migrate } from './migrations';
 
 // One client per server process (reused across hot reloads in development and
 // across invocations of a warm serverless function).
@@ -24,6 +25,7 @@ export function getDb(): Promise<Db> {
       .then(async (client) => {
         const db = client.db(process.env.MONGODB_DB || 'niura_erp');
         await ensureIndexes(db);
+        await migrate(db);
         return db;
       })
       .catch((err) => {

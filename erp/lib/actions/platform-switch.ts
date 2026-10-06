@@ -14,7 +14,12 @@ export async function enterTenant(fd: FormData): Promise<void> {
   const db = await getDb();
   const tenant = await db.collection('tenants').findOne({ _id: tenantId });
   if (!tenant) redirect('/platform');
-  await db.collection('sessions').updateOne({ _id: ctx.session._id }, { $set: { activeTenantId: tenantId } });
+  await db
+    .collection('sessions')
+    .updateOne(
+      { _id: ctx.session._id },
+      { $set: { activeTenantId: tenantId }, $unset: { branchFilter: '' } },
+    );
   await audit({ tenantId, userId: ctx.user._id, action: 'platform.enter', summary: ctx.user.email });
   redirect('/');
 }
@@ -23,6 +28,8 @@ export async function leaveTenant(): Promise<void> {
   const ctx = await getCtx();
   if (!ctx || ctx.role !== 'platform') redirect('/login');
   const db = await getDb();
-  await db.collection('sessions').updateOne({ _id: ctx.session._id }, { $unset: { activeTenantId: '' } });
+  await db
+    .collection('sessions')
+    .updateOne({ _id: ctx.session._id }, { $unset: { activeTenantId: '', branchFilter: '' } });
   redirect('/platform');
 }

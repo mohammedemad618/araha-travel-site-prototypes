@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { getStaff, pageParams, PAGE_SIZE } from '@/lib/queries';
 import { formatDateTime } from '@/lib/dates';
-import type { AuditLog } from '@/lib/types';
 import { Card, PageHeader, Table } from '@/components/ui';
 import { Pagination } from '@/components/ListControls';
 import { SettingsTabs } from '../SettingsTabs';
@@ -15,16 +14,10 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   const ctx = await requireTenant('audit.read');
   const { t, lang } = await getI18n();
   const { page, skip } = pageParams((await searchParams).page);
-  const db = await getDb();
+  const r = await repo(ctx);
   const [rows, total, staff] = await Promise.all([
-    db
-      .collection<AuditLog>('auditLogs')
-      .find({ tenantId: ctx.tenantId })
-      .sort({ at: -1 })
-      .skip(skip)
-      .limit(PAGE_SIZE)
-      .toArray(),
-    db.collection<AuditLog>('auditLogs').countDocuments({ tenantId: ctx.tenantId }),
+    r.auditLogs.find({}).sort({ at: -1 }).skip(skip).limit(PAGE_SIZE).toArray(),
+    r.auditLogs.countDocuments({}),
     getStaff(ctx.tenantId),
   ]);
   return (

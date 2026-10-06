@@ -1,12 +1,15 @@
-import type { Tenant } from '@/lib/types';
+import type { Branch, Tenant } from '@/lib/types';
 
 export function PrintHeader({
   tenant,
+  branch,
   title,
   number,
   date,
 }: {
   tenant: Tenant;
+  /** Shown under the company name when the company has several branches. */
+  branch?: Branch;
   title: string;
   number: string;
   date: string;
@@ -22,12 +25,13 @@ export function PrintHeader({
           />
           <span className="text-[22px] font-semibold">{tenant.name}</span>
         </div>
-        {tenant.settings.address && (
-          <div className="mt-1 text-[13px] text-muted">{tenant.settings.address}</div>
+        {branch && <div className="mt-1 text-[13.5px] font-medium">{branch.name}</div>}
+        {(branch?.address || tenant.settings.address) && (
+          <div className="mt-1 text-[13px] text-muted">{branch?.address || tenant.settings.address}</div>
         )}
-        {tenant.settings.phone && (
+        {(branch?.phone || tenant.settings.phone) && (
           <div className="font-latin text-[13px] text-muted" dir="ltr">
-            {tenant.settings.phone}
+            {branch?.phone || tenant.settings.phone}
           </div>
         )}
       </div>
@@ -38,4 +42,13 @@ export function PrintHeader({
       </div>
     </header>
   );
+}
+
+/** The branch to print on a document, when the company has more than one. */
+export function printBranch(
+  ctx: { allBranches: Branch[] },
+  id: { toString(): string } | undefined,
+): Branch | undefined {
+  if (ctx.allBranches.length < 2 || !id) return undefined;
+  return ctx.allBranches.find((b) => String(b._id) === String(id));
 }

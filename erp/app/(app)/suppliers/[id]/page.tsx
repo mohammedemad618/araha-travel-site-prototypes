@@ -3,13 +3,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireTenant, toObjectId } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { formatDate, todayISO } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { formatMulti } from '@/lib/money-multi';
 import { supplierBalances } from '@/lib/suppliers';
-import type { Booking, Supplier, SupplierPayment } from '@/lib/types';
 import { Card, DL, PageHeader, Stat, Table } from '@/components/ui';
 import { Timeline } from '@/components/crm/Timeline';
 import { Attachments } from '@/components/crm/Attachments';
@@ -27,27 +26,20 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
   const { t, lang } = await getI18n();
   const id = toObjectId((await params).id);
   if (!id) notFound();
-  const db = await getDb();
-  const s = await db.collection<Supplier>('suppliers').findOne({ _id: id, tenantId: ctx.tenantId });
+  const r = await repo(ctx);
+  const s = await r.suppliers.findOne({ _id: id });
   if (!s) notFound();
   const seeFinance = can(ctx.role, 'finance.read');
   const [bookings, payments, balances] = await Promise.all([
-    db
-      .collection<Booking>('bookings')
+    r.all.bookings
       .find(
-        { tenantId: ctx.tenantId, 'costs.supplierId': id },
+        { 'costs.supplierId': id },
         { projection: { number: 1, title: 1, costs: 1, status: 1, travelDate: 1 } },
       )
       .sort({ createdAt: -1 })
       .limit(200)
       .toArray(),
-    seeFinance
-      ? db
-          .collection<SupplierPayment>('supplierPayments')
-          .find({ tenantId: ctx.tenantId, supplierId: id })
-          .sort({ date: -1 })
-          .toArray()
-      : [],
+    seeFinance ? r.supplierPayments.find({ supplierId: id }).sort({ date: -1 }).toArray() : [],
     supplierBalances(ctx.tenantId, [id]),
   ]);
   const bal = balances.get(String(id)) ?? { costs: { IQD: 0, USD: 0 }, paid: { IQD: 0, USD: 0 } };

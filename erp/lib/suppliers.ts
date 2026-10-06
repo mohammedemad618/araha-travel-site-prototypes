@@ -1,6 +1,6 @@
 import 'server-only';
 import type { ObjectId } from 'mongodb';
-import { getDb } from './db';
+import { tenantRepo } from './repo';
 import type { Currency } from './types';
 
 export type SupplierBalance = { costs: Record<Currency, number>; paid: Record<Currency, number> };
@@ -12,22 +12,21 @@ export async function supplierBalances(
   tenantId: ObjectId,
   supplierIds?: ObjectId[],
 ): Promise<Map<string, SupplierBalance>> {
-  const db = await getDb();
+  // Supplier balances are company-wide: costs from every branch count.
+  const r = await tenantRepo(tenantId);
   const idFilter = supplierIds ? { $in: supplierIds } : { $exists: true, $ne: null };
   const [costs, paid] = await Promise.all([
-    db
-      .collection('bookings')
+    r.bookings
       .aggregate<{ _id: { s: ObjectId; c: Currency }; n: number }>([
-        { $match: { tenantId, 'costs.supplierId': idFilter } },
+        { $match: { 'costs.supplierId': idFilter } },
         { $unwind: '$costs' },
         { $match: { 'costs.supplierId': idFilter } },
         { $group: { _id: { s: '$costs.supplierId', c: '$costs.currency' }, n: { $sum: '$costs.amount' } } },
       ])
       .toArray(),
-    db
-      .collection('supplierPayments')
+    r.supplierPayments
       .aggregate<{ _id: { s: ObjectId; c: Currency }; n: number }>([
-        { $match: { tenantId, supplierId: idFilter } },
+        { $match: { supplierId: idFilter } },
         { $group: { _id: { s: '$supplierId', c: '$currency' }, n: { $sum: '$amount' } } },
       ])
       .toArray(),

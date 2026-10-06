@@ -4,7 +4,7 @@ import { Inbox, Plus, LayoutGrid, List } from 'lucide-react';
 import type { Filter } from 'mongodb';
 import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
-import { getDb } from '@/lib/db';
+import { repo } from '@/lib/repo';
 import { can } from '@/lib/rbac';
 import { getStaff, nameOrPhone, pageParams, PAGE_SIZE } from '@/lib/queries';
 import { formatDateTime, formatDate, todayISO } from '@/lib/dates';
@@ -23,11 +23,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const { t, lang } = await getI18n();
   const sp = await searchParams;
   const view = sp.view === 'list' ? 'list' : 'board';
-  const db = await getDb();
+  const r = await repo(ctx);
   const staff = await getStaff(ctx.tenantId);
   const canWrite = can(ctx.role, 'leads.write');
 
-  const filter: Filter<Lead> = { tenantId: ctx.tenantId, ...(nameOrPhone(sp.q) as Filter<Lead>) };
+  const filter: Filter<Lead> = { ...(nameOrPhone(sp.q) as Filter<Lead>) };
   if (sp.source && (leadSources as readonly string[]).includes(sp.source))
     filter.source = sp.source as Lead['source'];
   if (sp.mine === '1') filter.assignedTo = ctx.user._id;
@@ -117,8 +117,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       leadStages.map(async (stage) => {
         const f = { ...filter, stage } as Filter<Lead>;
         const [items, count] = await Promise.all([
-          db.collection<Lead>('leads').find(f).sort({ updatedAt: -1 }).limit(40).toArray(),
-          db.collection<Lead>('leads').countDocuments(f),
+          r.leads.find(f).sort({ updatedAt: -1 }).limit(40).toArray(),
+          r.leads.countDocuments(f),
         ]);
         return { stage, items, count };
       }),
@@ -203,14 +203,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
   const { page, skip } = pageParams(sp.page);
   const [items, total] = await Promise.all([
-    db
-      .collection<Lead>('leads')
-      .find(listFilter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(PAGE_SIZE)
-      .toArray(),
-    db.collection<Lead>('leads').countDocuments(listFilter),
+    r.leads.find(listFilter).sort({ createdAt: -1 }).skip(skip).limit(PAGE_SIZE).toArray(),
+    r.leads.countDocuments(listFilter),
   ]);
   return (
     <>
