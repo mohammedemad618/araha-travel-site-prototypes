@@ -50,7 +50,6 @@ if (old) {
 }
 
 const tenantId = new ObjectId();
-const now = new Date();
 await db.collection('tenants').insertOne({
   _id: tenantId,
   slug,
@@ -382,7 +381,7 @@ await db.collection('leads').insertMany(leads);
 await db
   .collection('activities')
   .insertMany(
-    leads.flatMap((l, i) => [
+    leads.flatMap((l) => [
       {
         tenantId,
         entity: { type: 'lead', id: l._id },
