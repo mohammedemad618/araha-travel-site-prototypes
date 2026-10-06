@@ -30,6 +30,7 @@ const TENANT_NAV: { label?: string; items: Item[] }[] = [
       { key: 'payments', href: '/payments', perm: 'finance.read' },
       { key: 'invoices', href: '/invoices', perm: 'finance.read' },
       { key: 'suppliers', href: '/suppliers', perm: 'suppliers.read' },
+      { key: 'accounting', href: '/accounting', perm: 'accounting.read' },
       { key: 'reports', href: '/reports', perm: 'reports.read' },
     ],
   },

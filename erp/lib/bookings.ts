@@ -3,6 +3,7 @@ import type { ObjectId } from 'mongodb';
 import { tenantRepo } from './repo';
 import { nextNumber } from './counters';
 import { lineTotals } from './services';
+import { ledger } from './accounting/ledger';
 import type { Booking, BookingStatus, Currency, Tenant } from './types';
 
 /** Bookings that hold seats on a departure. */
@@ -27,6 +28,8 @@ export async function recalcBooking(tenantId: ObjectId, bookingId: ObjectId): Pr
     0,
   );
   await r.bookings.updateOne({ _id: bookingId }, { $set: { total, costTotal, paid, updatedAt: new Date() } });
+  // Revenue and supplier costs follow the booking into the ledger.
+  await ledger.syncBooking(tenantId, bookingId);
 }
 
 export async function seatsBooked(

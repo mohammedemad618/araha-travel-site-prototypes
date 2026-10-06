@@ -9,6 +9,7 @@ import { fieldErrors, optText, reqDate, type ActionResult } from '../forms';
 import { convert, formatMoney, parseMoney } from '../money';
 import { nextNumber } from '../counters';
 import { recalcBooking } from '../bookings';
+import { ledger } from '../accounting/ledger';
 import { paymentMethods } from '../types';
 
 const paymentSchema = z.object({
@@ -57,10 +58,13 @@ export async function recordPayment(_: ActionResult | null, fd: FormData): Promi
     receivedBy: ctx.user._id,
     createdAt: new Date(),
   });
+  const saved = await r.all.payments.findOne({ _id: paymentId });
+  if (saved) await ledger.payment(ctx.tenantId, saved);
   await recalcBooking(ctx.tenantId, booking._id);
   // A first payment on a draft confirms the booking.
   if (d.kind === 'payment' && booking.status === 'draft') {
     await r.bookings.updateOne({ _id: booking._id }, { $set: { status: 'confirmed' } });
+    await ledger.syncBooking(ctx.tenantId, booking._id);
     await logActivity(
       ctx.tenantId,
       { type: 'booking', id: booking._id },
@@ -102,6 +106,7 @@ export async function voidPayment(_: ActionResult | null, fd: FormData): Promise
     return { ok: false, error: 'notFound' };
   const p = await r.all.payments.findOneAndUpdate({ _id: id, voided: false }, { $set: { voided: true } });
   if (!p) return { ok: false, error: 'notFound' };
+  await ledger.voidPayment(ctx.tenantId, p);
   await recalcBooking(ctx.tenantId, p.bookingId);
   await logActivity(
     ctx.tenantId,
@@ -147,7 +152,7 @@ export async function recordSupplierPayment(_: ActionResult | null, fd: FormData
   const supplierId = toObjectId(d.supplierId);
   const supplier = supplierId ? await r.suppliers.findOne({ _id: supplierId }) : null;
   if (!supplier) return { ok: false, error: 'notFound' };
-  await r.supplierPayments.insertOne({
+  const supplierPaymentId = await r.supplierPayments.insertOne({
     supplierId: supplier._id,
     amount,
     currency: d.currency,
@@ -158,6 +163,8 @@ export async function recordSupplierPayment(_: ActionResult | null, fd: FormData
     createdBy: ctx.user._id,
     createdAt: new Date(),
   });
+  const savedSp = await r.supplierPayments.findOne({ _id: supplierPaymentId });
+  if (savedSp) await ledger.supplierPayment(ctx.tenantId, savedSp);
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
@@ -180,6 +187,7 @@ export async function deleteSupplierPayment(_: ActionResult | null, fd: FormData
   const r = await repo(ctx);
   const p = await r.supplierPayments.findOneAndDelete({ _id: id });
   if (!p) return { ok: false, error: 'notFound' };
+  await ledger.removeSupplierPayment(ctx.tenantId, p);
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,

@@ -7,6 +7,7 @@ import { scopedFilter, visibilityFilter, visibilityFor } from '../lib/scope';
 import { ObjectId } from 'mongodb';
 import { lineTotals, readiness } from '../lib/services';
 import { quoteState } from '../lib/quotes';
+import { checkBalanced, differences, naturalBalance, reversed } from '../lib/accounting/math';
 
 test('money parsing and conversion stay exact', () => {
   expect(parseMoney('1,250,000', 'IQD')).toBe(1250000);
@@ -94,4 +95,20 @@ test('service totals skip cancelled lines and count supplier costs', () => {
   expect(readiness(lines)).toEqual({ confirmed: 1, total: 2 });
   expect(quoteState({ status: 'sent', validUntil: '2026-01-01' }, '2026-02-01')).toBe('expired');
   expect(quoteState({ status: 'accepted', validUntil: '2026-01-01' }, '2026-02-01')).toBe('accepted');
+});
+
+test('double entry: balance checks, natural balances, differences and reversals', () => {
+  const line = (accountId: string, debit: number, credit: number) => ({ accountId, debit, credit });
+  expect(checkBalanced([line('a', 100, 0), line('b', 0, 100)])).toEqual({ ok: true, total: 100 });
+  expect(checkBalanced([line('a', 100, 0), line('b', 0, 90)])).toEqual({ ok: false, error: 'unbalanced' });
+  expect(checkBalanced([line('a', 100, 100), line('b', 0, 0)])).toEqual({
+    ok: false,
+    error: 'oneSidePerLine',
+  });
+  expect(checkBalanced([line('a', 100, 0)])).toEqual({ ok: false, error: 'entryTooShort' });
+  expect(naturalBalance('asset', 500, 200)).toBe(300);
+  expect(naturalBalance('revenue', 0, 700)).toBe(700);
+  // A booking whose cost moved from one supplier to another posts both changes.
+  expect(differences({ s1: 300, s2: 100 }, { s1: 300, s3: 250 })).toEqual({ s2: -100, s3: 250 });
+  expect(reversed([line('a', 100, 0), line('b', 0, 100)])).toEqual([line('a', 0, 100), line('b', 100, 0)]);
 });

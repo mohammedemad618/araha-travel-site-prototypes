@@ -20,6 +20,7 @@ import {
   X,
   FileText,
   Receipt,
+  Landmark,
   type LucideIcon,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/client';
@@ -29,6 +30,7 @@ const ICONS: Record<string, LucideIcon> = {
   leads: Inbox,
   quotes: FileText,
   invoices: Receipt,
+  accounting: Landmark,
   customers: Users,
   tasks: CheckSquare,
   bookings: Briefcase,

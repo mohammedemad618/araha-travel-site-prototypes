@@ -35,6 +35,9 @@ if (old) {
     'branches',
     'quotes',
     'invoices',
+    'accounts',
+    'journalEntries',
+    'expenses',
     'leads',
     'customers',
     'packages',
@@ -623,6 +626,110 @@ await db.collection('invoices').insertMany(
 await db
   .collection('counters')
   .updateOne({ _id: `${tenantId}:invoice:${year}` }, { $set: { seq: invoiced.length } }, { upsert: true });
+
+// Accounting: the accounts the demo needs (the app adds the rest of the chart),
+// the owner's opening capital, and a few months of running expenses. Bookings,
+// payments and supplier payments are posted by the app the first time
+// accounting is opened.
+const acc = (code, name, type, extra = {}) => ({
+  _id: new ObjectId(),
+  tenantId,
+  code,
+  name,
+  type,
+  active: true,
+  createdAt: ago(120),
+  ...extra,
+});
+const ledgerAccounts = {
+  cash: acc('1100', 'الصندوق', 'asset', { key: 'cash', isCash: true }),
+  bank: acc('1110', 'البنك', 'asset', { key: 'bank', isCash: true }),
+  capital: acc('3100', 'رأس المال', 'equity', { key: 'capital' }),
+  salaries: acc('6100', 'الرواتب والأجور', 'expense'),
+  rent: acc('6200', 'الإيجار', 'expense'),
+  utilities: acc('6300', 'الكهرباء والإنترنت والاتصالات', 'expense'),
+  marketing: acc('6400', 'التسويق والإعلانات', 'expense'),
+};
+await db.collection('accounts').insertMany(Object.values(ledgerAccounts));
+await db.collection('journalEntries').insertOne({
+  tenantId,
+  number: `JE-${year}-0001`,
+  date: day(-120),
+  memo: 'رأس المال الافتتاحي',
+  source: { type: 'manual' },
+  branchId: mainBranch,
+  lines: [
+    { accountId: ledgerAccounts.bank._id, debit: 25000000, credit: 0 },
+    { accountId: ledgerAccounts.capital._id, debit: 0, credit: 25000000 },
+  ],
+  total: 25000000,
+  createdBy: owner._id,
+  createdAt: ago(120),
+});
+await db
+  .collection('counters')
+  .updateOne({ _id: `${tenantId}:journal:${year}` }, { $set: { seq: 1 } }, { upsert: true });
+const expenseRows = [];
+for (let m = 3; m >= 0; m--) {
+  expenseRows.push(
+    {
+      account: ledgerAccounts.rent,
+      paidFrom: ledgerAccounts.bank,
+      amount: 500000,
+      payee: 'مالك المكتب',
+      memo: 'إيجار الشهر',
+      days: m * 30 + 2,
+    },
+    {
+      account: ledgerAccounts.salaries,
+      paidFrom: ledgerAccounts.cash,
+      amount: 900000,
+      payee: 'الموظفون',
+      memo: 'رواتب الشهر',
+      days: m * 30 + 1,
+    },
+    {
+      account: ledgerAccounts.utilities,
+      paidFrom: ledgerAccounts.cash,
+      amount: 100000,
+      payee: 'شركة الاتصالات',
+      memo: 'إنترنت وكهرباء',
+      days: m * 30 + 6,
+    },
+  );
+  if (m % 2 === 0)
+    expenseRows.push({
+      account: ledgerAccounts.marketing,
+      paidFrom: ledgerAccounts.bank,
+      amount: 200000,
+      payee: 'إعلانات ممولة',
+      memo: 'حملة الموسم',
+      days: m * 30 + 10,
+    });
+}
+await db.collection('expenses').insertMany(
+  expenseRows
+    .filter((e) => e.days >= 1)
+    .map((e, i) => ({
+      tenantId,
+      branchId: mainBranch,
+      number: `EX-${year}-${String(i + 1).padStart(4, '0')}`,
+      date: day(-e.days),
+      accountId: e.account._id,
+      paidFrom: e.paidFrom._id,
+      amount: e.amount,
+      currency: 'IQD',
+      amountBase: e.amount,
+      payee: e.payee,
+      memo: e.memo,
+      voided: false,
+      createdBy: owner._id,
+      createdAt: ago(e.days),
+    })),
+);
+await db
+  .collection('counters')
+  .updateOne({ _id: `${tenantId}:expense:${year}` }, { $set: { seq: expenseRows.length } }, { upsert: true });
 
 // Every scoped record belongs to a branch; about a third of the work is in the second one.
 for (const c of ['leads', 'bookings', 'visas', 'quotes', 'invoices'])

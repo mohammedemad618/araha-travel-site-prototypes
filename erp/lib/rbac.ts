@@ -18,6 +18,8 @@ export const permissions = [
   'visas.read',
   'visas.write',
   'reports.read',
+  'accounting.read',
+  'accounting.write',
   'settings.manage',
   'users.manage',
   'audit.read',
@@ -50,6 +52,8 @@ const ROLE_PERMISSIONS: Record<TenantRole, Set<Permission>> = {
     'finance.read',
   ]),
   accountant: new Set<Permission>([
+    'accounting.read',
+    'accounting.write',
     'quotes.read',
     'customers.read',
     'bookings.read',

@@ -38,6 +38,8 @@ export type Tenant = {
   status: 'active' | 'suspended';
   settings: TenantSettings;
   website: TenantWebsite;
+  /** Set once the ledger has its chart of accounts and every past record posted. */
+  accounting?: { readyAt?: Date; lockedAt?: Date };
   createdAt: Date;
 };
 
@@ -273,6 +275,12 @@ export type Booking = {
   paid: number;
   /** The quotation this booking was made from. */
   quoteId?: ObjectId;
+  /**
+   * What the ledger already holds for this booking, in the booking currency:
+   * revenue, and supplier cost per supplier ("none" for costs without one).
+   * Changes are posted as the difference, so edits never double-count.
+   */
+  ledger?: { version: number; revenue: number; costs: Record<string, number> };
   assignedTo?: ObjectId;
   notes?: string;
   createdBy: ObjectId;
@@ -461,4 +469,97 @@ export type AuditLog = {
   entityId?: ObjectId;
   summary: string;
   at: Date;
+};
+
+export const accountTypes = ['asset', 'liability', 'equity', 'revenue', 'expense'] as const;
+export type AccountType = (typeof accountTypes)[number];
+
+/** System accounts the automatic entries post to. */
+export const accountKeys = [
+  'cash',
+  'bank',
+  'wallet',
+  'receivable',
+  'payable',
+  'capital',
+  'retained',
+  'sales',
+  'cogs',
+  'expenses',
+] as const;
+export type AccountKey = (typeof accountKeys)[number];
+
+export type Account = {
+  _id: ObjectId;
+  tenantId: ObjectId;
+  code: string;
+  name: string;
+  type: AccountType;
+  /** Set for system accounts used by automatic entries; they cannot be closed. */
+  key?: AccountKey;
+  /** Shown in the "paid from" lists for expenses and transfers. */
+  isCash?: boolean;
+  active: boolean;
+  createdAt: Date;
+};
+
+export const journalSources = [
+  'booking',
+  'payment',
+  'paymentVoid',
+  'supplierPayment',
+  'supplierPaymentVoid',
+  'expense',
+  'expenseVoid',
+  'manual',
+  'reversal',
+] as const;
+export type JournalSource = (typeof journalSources)[number];
+
+/** Amounts are in the company currency, in minor units. */
+export type JournalLine = {
+  accountId: ObjectId;
+  debit: number;
+  credit: number;
+  memo?: string;
+  /** Who the line concerns, for statements (customer or supplier). */
+  party?: { type: 'customer' | 'supplier'; id: ObjectId };
+};
+
+export type JournalEntry = {
+  _id: ObjectId;
+  tenantId: ObjectId;
+  number: string;
+  date: ISODate;
+  memo: string;
+  source: { type: JournalSource; id?: ObjectId; ref?: string };
+  /** "payment:<id>" etc. for records posted once; a unique index rejects a second posting. */
+  uniqueKey?: string;
+  branchId?: ObjectId;
+  lines: JournalLine[];
+  total: number;
+  /** Set on a manual entry that has been reversed, pointing at the reversal. */
+  reversedBy?: ObjectId;
+  reverses?: ObjectId;
+  createdBy?: ObjectId;
+  createdAt: Date;
+};
+
+export type Expense = {
+  _id: ObjectId;
+  tenantId: ObjectId;
+  branchId: ObjectId;
+  number: string;
+  date: ISODate;
+  accountId: ObjectId;
+  /** The cash, bank or wallet account it was paid from. */
+  paidFrom: ObjectId;
+  amount: number;
+  currency: Currency;
+  amountBase: number;
+  payee?: string;
+  memo?: string;
+  voided: boolean;
+  createdBy: ObjectId;
+  createdAt: Date;
 };

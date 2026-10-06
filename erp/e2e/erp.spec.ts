@@ -291,6 +291,39 @@ test('a quote is priced, sent, accepted into a booking, then invoiced', async ({
   await page.goto('/invoices');
   await expect(page.getByRole('link', { name: /INV-\d{4}-0001/ })).toBeVisible();
 
+  // The ledger: balanced, and receivables equal what confirmed bookings still owe
+  // (booking 1 at 1,750,000 after its payment was voided; booking 2 is a draft).
+  await page.goto('/accounting');
+  await expect(page.getByText('1,750,000 د.ع').first()).toBeVisible();
+  await page.goto('/accounting/reports?report=trial');
+  await expect(page.getByText('الميزان متوازن')).toBeVisible();
+
+  // An expense paid from cash reaches the income statement.
+  await page.goto('/accounting/expenses');
+  await label(page, 'بند المصروف').selectOption({ label: '6200 — الإيجار' });
+  await label(page, 'المبلغ').fill('250000');
+  await label(page, 'المستفيد').fill('مالك المكتب');
+  await page.getByRole('button', { name: 'تسجيل مصروف' }).click();
+  await expect(page.getByRole('cell', { name: /EX-\d{4}-0001/ })).toBeVisible();
+  await page.goto('/accounting/reports?report=pl');
+  await expect(page.getByRole('link', { name: /الإيجار/ })).toBeVisible();
+
+  // Manual entries must balance; a posted one can be reversed.
+  await page.goto('/accounting/journal/new');
+  await label(page, 'البيان').fill('رأس المال الافتتاحي');
+  await page.getByLabel('الحساب 1').selectOption({ label: '1110 — البنك' });
+  await page.getByLabel('مدين 1').fill('5000000');
+  await page.getByLabel('الحساب 2').selectOption({ label: '3100 — رأس المال' });
+  await page.getByLabel('دائن 2').fill('4000000');
+  await page.getByRole('button', { name: 'ترحيل القيد' }).click();
+  await expect(page.locator('p[role="alert"]')).toContainText('غير متوازن');
+  await page.getByLabel('دائن 2').fill('5000000');
+  await page.getByRole('button', { name: 'ترحيل القيد' }).click();
+  await expect(page).toHaveURL(/\/accounting\/journal\/[a-f0-9]{24}$/);
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'عكس القيد' }).click();
+  await expect(page.getByText('عكس قيد').first()).toBeVisible();
+
   const csv = await page.request.get('/api/export/bookings');
   expect(csv.headers()['content-type']).toContain('text/csv');
   const text = await csv.text();
@@ -330,7 +363,7 @@ test('roles limit what staff can open', async ({ page }) => {
   await expect(nav.getByRole('link', { name: 'الطلبات' })).toBeVisible();
   await expect(nav.getByRole('link', { name: 'التقارير' })).toHaveCount(0);
   await expect(nav.getByRole('link', { name: 'الإعدادات' })).toHaveCount(0);
-  for (const path of ['/reports', '/settings/users', '/suppliers']) {
+  for (const path of ['/reports', '/settings/users', '/suppliers', '/accounting', '/accounting/journal']) {
     await page.goto(path);
     await expect(page.getByText('الصفحة غير موجودة')).toBeVisible();
   }

@@ -26,6 +26,9 @@ import {
   type Visibility,
 } from './scope';
 import type {
+  Account,
+  Expense,
+  JournalEntry,
   Activity,
   AuditLog,
   Booking,
@@ -146,6 +149,9 @@ function collections(db: Db, tenantId: ObjectId, v: Visibility) {
     activities: plain<Activity>('activities'),
     branches: plain<Branch>('branches'),
     memberships: plain<Membership>('memberships'),
+    accounts: plain<Account>('accounts'),
+    journalEntries: plain<JournalEntry>('journalEntries'),
+    expenses: plain<Expense>('expenses'),
     auditLogs: plain<AuditLog & { tenantId: ObjectId }>('auditLogs'),
   };
 }

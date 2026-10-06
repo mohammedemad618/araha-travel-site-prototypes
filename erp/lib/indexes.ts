@@ -59,6 +59,28 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection('invoices').createIndex({ tenantId: 1, bookingId: 1 }),
     db.collection('invoices').createIndex({ tenantId: 1, date: -1 }),
 
+    db.collection('accounts').createIndex({ tenantId: 1, code: 1 }, { unique: true }),
+    db
+      .collection('accounts')
+      .createIndex(
+        { tenantId: 1, key: 1 },
+        { unique: true, partialFilterExpression: { key: { $type: 'string' } } },
+      ),
+    db.collection('journalEntries').createIndex({ tenantId: 1, number: 1 }, { unique: true }),
+    db.collection('journalEntries').createIndex({ tenantId: 1, date: -1 }),
+    db.collection('journalEntries').createIndex({ tenantId: 1, 'lines.accountId': 1, date: 1 }),
+    // One entry per payment, void, supplier payment or expense: posting twice is impossible.
+    db
+      .collection('journalEntries')
+      .createIndex(
+        { tenantId: 1, uniqueKey: 1 },
+        { unique: true, partialFilterExpression: { uniqueKey: { $type: 'string' } } },
+      ),
+    db
+      .collection('journalEntries')
+      .createIndex({ tenantId: 1, 'source.type': 1, 'source.id': 1, date: 1 }, { name: 'by_source' }),
+    db.collection('expenses').createIndex({ tenantId: 1, date: -1 }),
+
     db.collection('suppliers').createIndex({ tenantId: 1, name: 1 }),
     db.collection('supplierPayments').createIndex({ tenantId: 1, supplierId: 1, date: -1 }),
 

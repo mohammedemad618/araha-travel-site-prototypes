@@ -13,6 +13,7 @@ import { addDays } from '../dates';
 import { can } from '../rbac';
 import { newBookingNumber, recalcBooking, seatsBooked } from '../bookings';
 import { packageLines, parseLine } from '../services';
+import { ledger } from '../accounting/ledger';
 import { getI18n } from '../i18n/server';
 import {
   bookingStatuses,
@@ -211,6 +212,7 @@ export async function setBookingStatus(_: ActionResult | null, fd: FormData): Pr
       return { ok: false, error: 'seatsExceeded' };
   }
   await r.bookings.updateOne({ _id: id }, { $set: { status: status.data, updatedAt: new Date() } });
+  await ledger.syncBooking(ctx.tenantId, id);
   await logActivity(ctx.tenantId, { type: 'booking', id }, 'system', `status:${status.data}`, ctx.user._id);
   await audit({
     tenantId: ctx.tenantId,
