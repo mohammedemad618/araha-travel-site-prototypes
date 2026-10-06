@@ -362,13 +362,16 @@ test('one person can work in two companies and switch between them', async ({ pa
   const switcher = page.locator('header').getByLabel('تبديل الشركة');
   await expect(switcher).toBeVisible();
   await switcher.selectOption({ label: 'شركة بيتا للسفر' });
-  await expect(page.getByText('شركة بيتا للسفر').first()).toBeVisible();
+  // The sidebar shows the company being worked in once the switch has completed.
+  const brand = page.locator('aside').first();
+  await expect(brand.getByText('شركة بيتا للسفر')).toBeVisible();
   await page.goto('/leads?view=list');
   await expect(page.getByRole('link', { name: 'زبون من الموقع' })).toHaveCount(0);
   // As a manager here, reports are open; in the first company (sales) they are not.
   await page.goto('/reports');
   await expect(page.getByText('الصفحة غير موجودة')).toHaveCount(0);
   await page.locator('header').getByLabel('تبديل الشركة').selectOption({ label: 'شركة ألفا للسياحة' });
+  await expect(brand.getByText('شركة ألفا للسياحة')).toBeVisible();
   await page.goto('/reports');
   await expect(page.getByText('الصفحة غير موجودة')).toBeVisible();
 });
