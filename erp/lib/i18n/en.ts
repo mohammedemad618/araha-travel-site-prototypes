@@ -408,7 +408,8 @@ export const en: Dict = {
     noPackages:
       'No packages yet. Add one with the same identifier as on the website to show its dates and seats there.',
     publish: 'Update website',
-    publishHint: 'Rebuilds the website so it shows current dates and prices.',
+    publishHint:
+      'Prices, dates and seats show on the website live within a minute. This rebuilds the site to refresh search engines and the fallback copy.',
     published: 'Website update started; it appears in about two minutes',
     noHook: 'Add a Build hook URL in website settings first.',
     import: 'Import from website',
@@ -754,7 +755,8 @@ export const en: Dict = {
     allowedOriginsHint: 'One per line, e.g. https://example.com',
     siteUrl: 'Website URL',
     buildHook: 'Netlify build hook URL',
-    buildHookHint: 'Used by the “Update website” button so new dates and prices appear.',
+    buildHookHint:
+      'Optional: prices and seats show on the website live. "Update website" rebuilds it for search engines.',
     regenerate: 'Generate new key',
     regenerateConfirm: 'The current key stops working until the website uses the new one. Continue?',
     catalog: 'Package data URL for the website',

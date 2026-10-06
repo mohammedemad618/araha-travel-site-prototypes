@@ -16,7 +16,7 @@ import {
 import { formatDate, formatPrice } from '@/lib/format';
 import { absoluteUrl, fillPrice, localizedPath, ogImageUrl, pageMetadata } from '@/lib/seo';
 import { PageHero } from '@/components/PageHero';
-import { Price } from '@/components/ui/Price';
+import { LivePrice } from '@/components/package/LivePrice';
 import { Arrow } from '@/components/ui/Arrow';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Icon, type AnyIconName } from '@/components/ui/Icon';
@@ -105,7 +105,8 @@ export default async function PackagePage({ params }: Props) {
       >
         <div data-hide-booking-bar className="border-s border-gold/60 ps-6">
           <div className="mb-1.5 text-sm text-mist">{tc('from')}</div>
-          <Price
+          <LivePrice
+            slug={pkg.slug}
             value={pkg.price}
             className="text-[clamp(36px,3.6vw,52px)] leading-none"
             unitClassName="text-[0.45em] text-gold"
@@ -226,6 +227,7 @@ export default async function PackagePage({ params }: Props) {
           </div>
 
           <EnquiryCard
+            slug={pkg.slug}
             title={pkg.title[locale]}
             price={pkg.price}
             childPrice={pkg.childPrice}
@@ -287,7 +289,7 @@ export default async function PackagePage({ params }: Props) {
         </div>
       </section>
 
-      <MobileBookingBar price={pkg.price} />
+      <MobileBookingBar slug={pkg.slug} price={pkg.price} />
 
       <JsonLd
         data={[

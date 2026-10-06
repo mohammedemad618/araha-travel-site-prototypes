@@ -157,6 +157,7 @@
     "waMessageDate": "مرحباً نيورا، أستفسر عن باقة {title} — موعد {date}",
     "bookShort": "احجز",
     "waMessageFull": "مرحباً نيورا، أستفسر عن باقة {title} — الموعد: {date} — المسافرون: {travellers}",
+    "seatsLeft": "المقاعد المتبقية: {count}",
     "status": {
       "available": "متاح",
       "limited": "مقاعد محدودة",

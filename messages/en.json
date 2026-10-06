@@ -157,6 +157,7 @@
     "waMessageDate": "Hello Niura, I’d like to ask about the {title} package — departure {date}",
     "bookShort": "Book",
     "waMessageFull": "Hello Niura, I’d like to ask about the {title} package — date: {date} — travellers: {travellers}",
+    "seatsLeft": "{count, plural, one {# seat left} other {# seats left}}",
     "status": {
       "available": "Available",
       "limited": "Limited seats",

@@ -121,8 +121,9 @@
    - `NEXT_PUBLIC_ERP_KEY` = المفتاح العام (يبدأ بـ `pk_`).
 4. أعد نشر الموقع. بعدها:
    - كل نموذج في الموقع يصل إلى **الطلبات** فوراً، وتبقى نسخة في Netlify Forms كاحتياط.
-   - أسعار ومواعيد ومقاعد الباقات التي يديرها النظام تظهر في الموقع عند كل بناء.
-5. اختياري: أنشئ Build hook في Netlify لموقع الشركة، وضعه في خانة **Build hook**. يصبح زر **تحديث الموقع** في صفحة الباقات يعيد النشر فوراً.
+   - أسعار ومواعيد ومقاعد الباقات التي يديرها النظام تظهر في الموقع **مباشرة** خلال دقيقة تقريباً، دون إعادة نشر. المواعيد المكتملة تظهر «مكتمل»، والمحدودة تعرض عدد المقاعد المتبقية.
+   - إن تعذّر الوصول إلى النظام يعرض الموقع آخر نسخة مبنية.
+5. اختياري: أنشئ Build hook في Netlify لموقع الشركة، وضعه في خانة **Build hook**. زر **تحديث الموقع** في صفحة الباقات يعيد بناء الموقع، وهذا مفيد لمحركات البحث وللنسخة الاحتياطية. الأسعار والمقاعد لا تحتاجه.
 6. لتسريع البداية، استخدم زر **استيراد من الموقع** في صفحة الباقات. يضيف كل باقات الموقع ومواعيدها بنقرة.
 
 ## التطوير والاختبار محلياً
@@ -203,6 +204,9 @@ Multi-tenant back office for travel agencies, linked to their websites:
 
 1. In the company's **Settings → Website connection**, set the site URL.
 2. On the website's Netlify site, add `ERP_URL` and `NEXT_PUBLIC_ERP_KEY`.
-3. Redeploy the website. Its forms then create leads in the ERP, and its builds pull live prices, dates and seats.
+3. Redeploy the website.
+   - Its forms then create leads in the ERP.
+   - Its pages show the ERP's current prices, dates and seats left, live (read in the browser through the site's `/erp-api` proxy).
+   - Builds keep a fallback copy.
 
 **Tests:** `npm run build && npm run test:e2e` runs end-to-end flows against a throwaway MongoDB. The flows cover setup, companies, the public API, conversion, seat limits, multi-currency payments, tenant isolation, roles and language.

@@ -7,7 +7,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { Locale } from '@/i18n/routing';
 import type { Package } from '@/lib/schema';
 import type { DepartureStatus } from '@/lib/constants';
-import { formatPrice } from '@/lib/format';
+import { formatDate, formatPrice } from '@/lib/format';
+import { useLivePackage } from '@/lib/live-catalog';
 import { track } from '@/lib/analytics';
 import { useModal } from '@/lib/useModal';
 import { Arrow } from '../ui/Arrow';
@@ -106,7 +107,15 @@ export function Itinerary({ days }: { days: Package['itinerary'] }) {
   );
 }
 
-type DepartureOption = { date: string; label: string; status: DepartureStatus; note?: string };
+type DepartureOption = {
+  date: string;
+  label: string;
+  status: DepartureStatus;
+  note?: string;
+  /** From the ERP: seats still free, and a date-specific price if set. */
+  seatsLeft?: number;
+  price?: number;
+};
 
 const STATUS_STYLE: Record<DepartureStatus, string> = {
   available: 'bg-whatsapp',
@@ -214,15 +223,17 @@ function Drawer({
 const VISIBLE_DATES = 3;
 
 export function EnquiryCard({
+  slug,
   title,
-  price,
-  childPrice,
+  price: builtPrice,
+  childPrice: builtChildPrice,
   priceNote,
   departures,
   phone,
   phoneDisplay,
   usd,
 }: {
+  slug: string;
   title: string;
   price: number;
   childPrice?: number;
@@ -235,12 +246,27 @@ export function EnquiryCard({
 }) {
   const t = useTranslations('package');
   const tc = useTranslations('common');
-  // Build-time dates are re-filtered in the browser so a date never stays bookable after it passes.
+  const locale = useLocale() as Locale;
+  // Current prices, dates and seats from the ERP replace the built ones once they load.
+  const live = useLivePackage(slug);
+  const price = live?.price ?? builtPrice;
+  const childPrice = live?.childPrice ?? builtChildPrice;
+  // Dates are re-filtered in the browser so a date never stays bookable after it passes.
   const [options, setOptions] = useState(departures);
   useEffect(() => {
     const today = new Date().toISOString().slice(0, 10);
-    setOptions(departures.filter((d) => d.date >= today));
-  }, [departures]);
+    const list: DepartureOption[] = live
+      ? live.departures.map((d) => ({
+          date: d.date,
+          label: formatDate(d.date, locale),
+          status: d.status,
+          seatsLeft: d.seatsLeft,
+          price: d.price,
+          note: departures.find((x) => x.date === d.date)?.note,
+        }))
+      : departures;
+    setOptions(list.filter((d) => d.date >= today));
+  }, [departures, live, locale]);
   const firstOpen = Math.max(
     0,
     options.findIndex((d) => d.status !== 'soldout'),
@@ -257,7 +283,8 @@ export function EnquiryCard({
   const picked = options[sel];
   const travellers = t('travellersSummary', { adults, children });
   const waText = t('waMessageFull', { title, date: picked?.label ?? tc('onRequest'), travellers });
-  const estimate = adults * price + (childPrice !== undefined ? children * childPrice : 0);
+  const adultPrice = picked?.price ?? price;
+  const estimate = adults * adultPrice + (childPrice !== undefined ? children * childPrice : 0);
   // Always keep the selected date visible, even when the list is collapsed.
   const shown = showAll ? options : options.filter((_, i) => i < VISIBLE_DATES || i === sel);
 
@@ -346,7 +373,9 @@ export function EnquiryCard({
                       className={`h-1.5 w-1.5 rounded-full ${STATUS_STYLE[d.status]}`}
                       aria-hidden="true"
                     />
-                    {t(`status.${d.status}`)}
+                    {d.status === 'limited' && d.seatsLeft
+                      ? t('seatsLeft', { count: d.seatsLeft })
+                      : t(`status.${d.status}`)}
                   </span>
                 </button>
               );
@@ -469,7 +498,9 @@ export function EnquiryCard({
  * Price + actions bar on phones and tablets. It hides while the hero price or
  * the booking card is on screen, so the price is never shown twice.
  */
-export function MobileBookingBar({ price }: { price: number }) {
+export function MobileBookingBar({ slug, price: builtPrice }: { slug: string; price: number }) {
+  const live = useLivePackage(slug);
+  const price = live?.price ?? builtPrice;
   const tc = useTranslations('common');
   const tp = useTranslations('package');
   const { toggle } = useWhatsApp();

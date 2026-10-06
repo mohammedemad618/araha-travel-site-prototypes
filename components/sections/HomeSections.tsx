@@ -5,7 +5,7 @@ import type { Locale } from '@/i18n/routing';
 import type { Destination, Home, ImageData, Package, Site, Testimonial } from '@/lib/schema';
 import { formatDate } from '@/lib/format';
 import { Photo } from '../ui/Photo';
-import { Price } from '../ui/Price';
+import { LivePrice } from '../package/LivePrice';
 import { Arrow } from '../ui/Arrow';
 import { Eyebrow } from '../ui/Eyebrow';
 import { Icon, WhatsAppGlyph } from '../ui/Icon';
@@ -231,6 +231,7 @@ export function FeaturedPackages({
                 </span>
               )}
               <NextDeparture
+                slug={featured.slug}
                 dates={nextDepartures[featured.slug] ?? []}
                 locale={locale}
                 className="hidden items-center gap-1.5 rounded-[1px] bg-ink/70 px-3 py-[7px] text-[12.5px] whitespace-nowrap text-ivory md:flex"
@@ -276,7 +277,11 @@ export function FeaturedPackages({
               <div className="flex flex-wrap items-end justify-between gap-5">
                 <div>
                   <div className="mb-1 text-[13px] text-mist">{tc('from')}</div>
-                  <Price value={featured.price} className="text-[clamp(26px,2.4vw,34px)]" />
+                  <LivePrice
+                    slug={featured.slug}
+                    value={featured.price}
+                    className="text-[clamp(26px,2.4vw,34px)]"
+                  />
                   <div className="mt-1 text-[12.5px] text-fog">{featured.priceNote[locale]}</div>
                 </div>
                 <div className="flex w-full flex-col gap-2.5 text-center md:w-auto md:flex-row">
@@ -543,7 +548,8 @@ export function SeasonalOffer({
           <div className="flex flex-wrap items-end gap-x-12 gap-y-7">
             <div>
               <div className="mb-1.5 text-sm text-mist">{tc('from')}</div>
-              <Price
+              <LivePrice
+                slug={pkg.slug}
                 value={pkg.price}
                 className="text-[clamp(40px,4.4vw,64px)] leading-none text-gold"
                 unitClassName="text-[0.42em] text-ivory"

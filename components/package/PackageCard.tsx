@@ -3,7 +3,7 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import type { Destination, Package } from '@/lib/schema';
 import { Photo } from '../ui/Photo';
-import { Price } from '../ui/Price';
+import { LivePrice } from './LivePrice';
 import { Arrow } from '../ui/Arrow';
 import { Check } from 'lucide-react';
 import { NextDeparture } from './NextDeparture';
@@ -74,6 +74,7 @@ export function PackageCard({
           </span>
         </span>
         <NextDeparture
+          slug={pkg.slug}
           dates={departures}
           locale={locale}
           className="pointer-events-none absolute start-4 bottom-4 flex items-center gap-1.5 rounded-[1px] bg-ink/80 px-3 py-1.5 text-[12.5px] text-ivory"
@@ -116,7 +117,8 @@ export function PackageCard({
         <div className="flex flex-wrap items-end justify-between gap-3.5">
           <div>
             <div className="mb-0.5 text-[12.5px] text-muted">{t('from')}</div>
-            <Price
+            <LivePrice
+              slug={pkg.slug}
               value={pkg.price}
               className="text-[22px] text-ink"
               unitClassName="text-[13px] text-bronze"
