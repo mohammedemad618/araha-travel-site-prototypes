@@ -11,7 +11,9 @@ import { formatMoney } from '@/lib/money';
 import { waLink } from '@/lib/phone';
 import { paymentState } from '@/lib/bookings';
 import { BOOKING_TONE, PAY_TONE, VISA_TONE } from '@/lib/ui-tones';
+import { EditableRow, EditableTable } from '@/components/EditableRow';
 import { Badge, Card, DL, LinkButton, PageHeader, Table, buttonClass } from '@/components/ui';
+import { QuotesList } from '@/components/trip/QuotesList';
 import { Timeline } from '@/components/crm/Timeline';
 import { RelatedTasks } from '@/components/crm/RelatedTasks';
 import { Attachments } from '@/components/crm/Attachments';
@@ -28,11 +30,12 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
   const r = await repo(ctx);
   const c = await r.customers.findOne({ _id: id });
   if (!c) notFound();
-  const [bookings, visas] = await Promise.all([
+  const [bookings, visas, quotes] = await Promise.all([
     can(ctx.role, 'bookings.read')
       ? r.bookings.find({ customerId: id }).sort({ createdAt: -1 }).toArray()
       : [],
     can(ctx.role, 'visas.read') ? r.visas.find({ customerId: id }).sort({ createdAt: -1 }).toArray() : [],
+    can(ctx.role, 'quotes.read') ? r.quotes.find({ customerId: id }).sort({ createdAt: -1 }).toArray() : [],
   ]);
   const canWrite = can(ctx.role, 'customers.write');
   const today = todayISO();
@@ -82,6 +85,9 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               <LinkButton href={`/bookings/new?customer=${c._id}`} variant="primary" icon={Plus}>
                 {t('bookings.new')}
               </LinkButton>
+            )}
+            {can(ctx.role, 'quotes.write') && (
+              <LinkButton href={`/quotes/new?customer=${c._id}`}>{t('quotes.new')}</LinkButton>
             )}
             {can(ctx.role, 'visas.write') && (
               <LinkButton href={`/visas/new?customer=${c._id}`}>{t('visas.new')}</LinkButton>
@@ -146,87 +152,96 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
             {c.travellers.length === 0 ? (
               <p className="m-0 p-5 text-[13.5px] text-muted">{t('customers.noTravellers')}</p>
             ) : (
-              <Table>
-                <thead>
-                  <tr>
-                    <th>{t('common.name')}</th>
-                    <th>{t('customers.relation')}</th>
-                    <th>{t('customers.birthDate')}</th>
-                    <th>{t('customers.passportNo')}</th>
-                    <th>{t('customers.passportExpiry')}</th>
-                    <th>
-                      <span className="sr-only">{t('common.actions')}</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {c.travellers.map((tr) => {
-                    const exp = tr.passportExpiry;
-                    return (
-                      <tr key={String(tr._id)}>
-                        <td>
-                          <div className="font-medium">{tr.name}</div>
-                          {tr.nameEn && (
-                            <div className="font-latin text-[12.5px] text-muted" dir="ltr">
-                              {tr.nameEn}
-                            </div>
-                          )}
-                        </td>
-                        <td>{tr.relation ?? '—'}</td>
-                        <td>{tr.birthDate ? formatDate(tr.birthDate, lang) : '—'}</td>
-                        <td className="font-latin" dir="ltr">
-                          {tr.passportNo ?? '—'}
-                        </td>
-                        <td>
-                          {exp ? (
-                            <span className="flex items-center gap-2">
-                              {formatDate(exp, lang)}
-                              {exp < today ? (
-                                <Badge tone="danger">{t('customers.passportExpired')}</Badge>
-                              ) : exp < soon ? (
-                                <Badge tone="warning">{t('customers.passportExpiring')}</Badge>
-                              ) : null}
-                            </span>
-                          ) : (
-                            '—'
-                          )}
-                        </td>
-                        <td>
-                          {canWrite && (
-                            <div className="flex items-center justify-end gap-1">
-                              <details className="relative">
-                                <summary className={buttonClass('ghost', 'sm', 'list-none')}>
-                                  {t('common.edit')}
-                                </summary>
-                                <div className="absolute end-0 z-20 mt-2 w-[min(720px,90vw)] rounded-xl border border-line bg-surface p-4 shadow-xl">
-                                  <TravellerForm
-                                    customerId={String(c._id)}
-                                    values={{
-                                      travellerId: String(tr._id),
-                                      name: tr.name,
-                                      nameEn: tr.nameEn,
-                                      relation: tr.relation,
-                                      birthDate: tr.birthDate,
-                                      gender: tr.gender,
-                                      passportNo: tr.passportNo,
-                                      passportExpiry: tr.passportExpiry,
-                                      nationality: tr.nationality,
-                                    }}
-                                  />
-                                </div>
-                              </details>
+              <EditableTable
+                editors={
+                  canWrite
+                    ? Object.fromEntries(
+                        c.travellers.map((tr) => [
+                          String(tr._id),
+                          <TravellerForm
+                            key={String(tr._id)}
+                            customerId={String(c._id)}
+                            values={{
+                              travellerId: String(tr._id),
+                              name: tr.name,
+                              nameEn: tr.nameEn,
+                              relation: tr.relation,
+                              birthDate: tr.birthDate,
+                              gender: tr.gender,
+                              passportNo: tr.passportNo,
+                              passportExpiry: tr.passportExpiry,
+                              nationality: tr.nationality,
+                            }}
+                          />,
+                        ]),
+                      )
+                    : {}
+                }
+              >
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>{t('common.name')}</th>
+                      <th>{t('customers.relation')}</th>
+                      <th>{t('customers.birthDate')}</th>
+                      <th>{t('customers.passportNo')}</th>
+                      <th>{t('customers.passportExpiry')}</th>
+                      <th>
+                        <span className="sr-only">{t('common.actions')}</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {c.travellers.map((tr) => {
+                      const exp = tr.passportExpiry;
+                      return (
+                        <EditableRow
+                          key={String(tr._id)}
+                          id={String(tr._id)}
+                          editable={canWrite}
+                          label={`${t('common.edit')} — ${tr.name}`}
+                          actions={
+                            canWrite ? (
                               <DeleteTravellerButton
                                 customerId={String(c._id)}
                                 travellerId={String(tr._id)}
                               />
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </Table>
+                            ) : undefined
+                          }
+                        >
+                          <td>
+                            <div className="font-medium">{tr.name}</div>
+                            {tr.nameEn && (
+                              <div className="font-latin text-[12.5px] text-muted" dir="ltr">
+                                {tr.nameEn}
+                              </div>
+                            )}
+                          </td>
+                          <td>{tr.relation ?? '—'}</td>
+                          <td>{tr.birthDate ? formatDate(tr.birthDate, lang) : '—'}</td>
+                          <td className="font-latin" dir="ltr">
+                            {tr.passportNo ?? '—'}
+                          </td>
+                          <td>
+                            {exp ? (
+                              <span className="flex items-center gap-2">
+                                {formatDate(exp, lang)}
+                                {exp < today ? (
+                                  <Badge tone="danger">{t('customers.passportExpired')}</Badge>
+                                ) : exp < soon ? (
+                                  <Badge tone="warning">{t('customers.passportExpiring')}</Badge>
+                                ) : null}
+                              </span>
+                            ) : (
+                              '—'
+                            )}
+                          </td>
+                        </EditableRow>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </EditableTable>
             )}
             {canWrite && (
               <details className="border-t border-line px-5 py-4">
@@ -237,6 +252,8 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               </details>
             )}
           </Card>
+
+          {quotes.length > 0 && <QuotesList quotes={quotes} />}
 
           {bookings.length > 0 && (
             <Card title={t('customers.bookings')} padded={false}>

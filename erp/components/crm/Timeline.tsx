@@ -15,12 +15,34 @@ const ICON = { note: StickyNote, call: Phone, whatsapp: MessageSquare, meeting: 
 function systemText(text: string, t: TFn): string {
   const [key, ...rest] = text.split(':');
   const value = rest.join(':');
-  const known = ['created', 'stage', 'converted', 'status', 'payment', 'refund', 'void', 'website', 'visa'];
+  const known = [
+    'created',
+    'stage',
+    'converted',
+    'status',
+    'payment',
+    'refund',
+    'void',
+    'website',
+    'visa',
+    'quote',
+    'quoteCreated',
+    'accepted',
+    'from',
+    'service',
+    'invoice',
+    'invoice-void',
+  ];
   if (!key || !known.includes(key)) return text;
   let shown = value;
   if (key === 'stage') shown = t(`leads.stages.${value}`);
   if (key === 'status') shown = t(`bookings.statuses.${value}`);
   if (key === 'visa') return t('activities.system.status', { value: t(`visas.statuses.${value}`) });
+  if (key === 'quote') return t('activities.system.status', { value: t(`quotes.statuses.${value}`) });
+  if (key === 'service') {
+    const [status, ...desc] = rest;
+    return t('activities.system.service', { name: desc.join(':'), value: t(`services.statuses.${status}`) });
+  }
   return t(`activities.system.${key}`, { value: shown });
 }
 

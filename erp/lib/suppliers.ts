@@ -18,10 +18,22 @@ export async function supplierBalances(
   const [costs, paid] = await Promise.all([
     r.bookings
       .aggregate<{ _id: { s: ObjectId; c: Currency }; n: number }>([
-        { $match: { 'costs.supplierId': idFilter } },
-        { $unwind: '$costs' },
-        { $match: { 'costs.supplierId': idFilter } },
-        { $group: { _id: { s: '$costs.supplierId', c: '$costs.currency' }, n: { $sum: '$costs.amount' } } },
+        { $match: { 'services.supplierId': idFilter } },
+        { $unwind: '$services' },
+        // Cancelled services and lines without a cost owe the supplier nothing.
+        {
+          $match: {
+            'services.supplierId': idFilter,
+            'services.status': { $ne: 'cancelled' },
+            'services.cost': { $gt: 0 },
+          },
+        },
+        {
+          $group: {
+            _id: { s: '$services.supplierId', c: '$services.costCurrency' },
+            n: { $sum: '$services.cost' },
+          },
+        },
       ])
       .toArray(),
     r.supplierPayments

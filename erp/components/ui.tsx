@@ -188,7 +188,8 @@ export function DL({ items, cols = 2 }: { items: [string, React.ReactNode][]; co
 
 export function Table({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`overflow-x-auto ${className}`}>
+    // Relative: anything positioned inside the table (screen-reader text) stays within its scroll area.
+    <div className={`relative overflow-x-auto ${className}`}>
       <table className="data-table">{children}</table>
     </div>
   );

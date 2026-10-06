@@ -8,14 +8,16 @@ import { actionTenant, pickBranch, toObjectId, type TenantCtx } from '../session
 import { repo } from '../repo';
 import { audit, logActivity } from '../audit';
 import { fieldErrors, intField, optDate, optText, text, toUpdate, type ActionResult } from '../forms';
-import { convert, parseMoney } from '../money';
+import { parseMoney } from '../money';
 import { addDays } from '../dates';
 import { can } from '../rbac';
-import { newBookingNumber, packageItems, recalcBooking, seatsBooked } from '../bookings';
+import { newBookingNumber, recalcBooking, seatsBooked } from '../bookings';
+import { packageLines, parseLine } from '../services';
 import { getI18n } from '../i18n/server';
 import {
   bookingStatuses,
   bookingTypes,
+  serviceStatuses,
   type Booking,
   type BookingStatus,
   type Departure,
@@ -89,8 +91,8 @@ export async function createBooking(_: ActionResult | null, fd: FormData): Promi
 
   const now = new Date();
   const currency = pkg?.currency ?? d.currency;
-  const items = pkg
-    ? packageItems(pkg, dep, d.adults, d.children, {
+  const services = pkg
+    ? packageLines(pkg, dep, d.adults, d.children, {
         adult: t('bookings.adults'),
         child: t('bookings.children'),
       })
@@ -111,10 +113,9 @@ export async function createBooking(_: ActionResult | null, fd: FormData): Promi
     travellerIds: [],
     status: 'draft',
     currency,
-    items,
+    services,
     discount: 0,
     total: 0,
-    costs: [],
     costTotal: 0,
     paid: 0,
     assignedTo: toObjectId(d.assignedTo) ?? ctx.user._id,
@@ -135,7 +136,7 @@ export async function createBooking(_: ActionResult | null, fd: FormData): Promi
     summary: booking.number,
   });
   revalidatePath('/bookings');
-  redirect(`/bookings/${bookingId}${items.length ? '?auto=1' : ''}`);
+  redirect(`/bookings/${bookingId}${services.length ? '?auto=1' : ''}`);
 }
 
 export async function updateBooking(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
@@ -157,7 +158,9 @@ export async function updateBooking(_: ActionResult | null, fd: FormData): Promi
   const { pkg, dep } = resolved.value;
   // The currency is fixed once money has moved, so balances stay consistent.
   const currency =
-    existing.paid !== 0 || existing.costs.length ? existing.currency : (pkg?.currency ?? d.currency);
+    existing.paid !== 0 || existing.services.some((l) => l.cost)
+      ? existing.currency
+      : (pkg?.currency ?? d.currency);
   await r.bookings.updateOne(
     { _id: id },
     toUpdate({
@@ -229,66 +232,6 @@ async function loadEditable(ctx: TenantCtx, fd: FormData) {
   return r.bookings.findOne({ _id: id });
 }
 
-const itemSchema = z.object({ description: text(300), qty: intField(1, 10000), unitPrice: z.string() });
-
-export async function saveItem(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
-  const auth = await actionTenant('bookings.write');
-  if (!auth.ok) return auth;
-  const { ctx } = auth;
-  const b = await loadEditable(ctx, fd);
-  if (!b) return { ok: false, error: 'notFound' };
-  const parsed = itemSchema.safeParse(Object.fromEntries(fd));
-  if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
-  const unitPrice = parseMoney(parsed.data.unitPrice, b.currency);
-  if (unitPrice === null || unitPrice < 0)
-    return { ok: false, error: 'invalidAmount', fields: { unitPrice: 'invalidAmount' } };
-  const r = await repo(ctx);
-  const itemId = toObjectId(String(fd.get('itemId') ?? ''));
-  if (itemId) {
-    await r.bookings.updateOne(
-      { _id: b._id, 'items._id': itemId },
-      {
-        $set: {
-          'items.$.description': parsed.data.description,
-          'items.$.qty': parsed.data.qty,
-          'items.$.unitPrice': unitPrice,
-        },
-      },
-    );
-  } else {
-    await r.bookings.updateOne(
-      { _id: b._id },
-      {
-        $push: {
-          items: {
-            _id: new ObjectId(),
-            description: parsed.data.description,
-            qty: parsed.data.qty,
-            unitPrice,
-          },
-        },
-      },
-    );
-  }
-  await recalcBooking(ctx.tenantId, b._id);
-  revalidatePath(`/bookings/${b._id}`);
-  return { ok: true };
-}
-
-export async function deleteItem(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
-  const auth = await actionTenant('bookings.write');
-  if (!auth.ok) return auth;
-  const { ctx } = auth;
-  const b = await loadEditable(ctx, fd);
-  const itemId = toObjectId(String(fd.get('itemId') ?? ''));
-  if (!b || !itemId) return { ok: false, error: 'notFound' };
-  const r = await repo(ctx);
-  await r.bookings.updateOne({ _id: b._id }, { $pull: { items: { _id: itemId } } });
-  await recalcBooking(ctx.tenantId, b._id);
-  revalidatePath(`/bookings/${b._id}`);
-  return { ok: true };
-}
-
 export async function setDiscount(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
   const auth = await actionTenant('bookings.write');
   if (!auth.ok) return auth;
@@ -306,64 +249,108 @@ export async function setDiscount(_: ActionResult | null, fd: FormData): Promise
   return { ok: true };
 }
 
-const costSchema = z.object({
-  description: text(300),
-  amount: z.string(),
-  currency: z.enum(['IQD', 'USD']),
-  supplierId: z.string().optional(),
-});
-
 /** Supplier costs: visible with finance access, editable by booking staff who can see them. */
 function canEditCosts(ctx: TenantCtx) {
   return can(ctx.role, 'bookings.write') && can(ctx.role, 'finance.read');
 }
 
-export async function saveCost(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
+/** The supplier chosen in a service form, if it belongs to this company. */
+async function supplierChoice(ctx: TenantCtx, fd: FormData): Promise<Set<string>> {
+  const id = toObjectId(String(fd.get('supplierId') ?? ''));
+  if (!id) return new Set();
+  const r = await repo(ctx);
+  return (await r.suppliers.exists({ _id: id })) ? new Set([String(id)]) : new Set();
+}
+
+/** Adds or edits one service of a booking (flight, hotel, visa…). */
+export async function saveService(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
   const auth = await actionTenant('bookings.write');
   if (!auth.ok) return auth;
   const { ctx } = auth;
-  if (!canEditCosts(ctx)) return { ok: false, error: 'forbidden' };
   const b = await loadEditable(ctx, fd);
   if (!b) return { ok: false, error: 'notFound' };
-  const parsed = costSchema.safeParse(Object.fromEntries(fd));
-  if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
-  const amount = parseMoney(parsed.data.amount, parsed.data.currency);
-  if (amount === null || amount <= 0)
-    return { ok: false, error: 'invalidAmount', fields: { amount: 'invalidAmount' } };
+  if (b.status === 'cancelled') return { ok: false, error: 'forbidden' };
+  const lineId = toObjectId(String(fd.get('lineId') ?? ''));
+  const previous = lineId ? b.services.find((l) => String(l._id) === String(lineId)) : undefined;
+  if (lineId && !previous) return { ok: false, error: 'notFound' };
+  const parsed = parseLine(fd, {
+    currency: b.currency,
+    usdRate: ctx.tenant.settings.usdRate,
+    canCost: canEditCosts(ctx),
+    previous,
+    supplierIds: await supplierChoice(ctx, fd),
+  });
+  if (!parsed.ok) return { ok: false, error: 'required', fields: parsed.fields };
   const r = await repo(ctx);
-  const supplierId = toObjectId(parsed.data.supplierId);
-  if (supplierId && !(await r.suppliers.exists({ _id: supplierId }))) return { ok: false, error: 'notFound' };
-  await r.bookings.updateOne(
-    { _id: b._id },
-    {
-      $push: {
-        costs: {
-          _id: new ObjectId(),
-          supplierId: supplierId ?? undefined,
-          description: parsed.data.description,
-          amount,
-          currency: parsed.data.currency,
-          amountInBooking: convert(amount, parsed.data.currency, b.currency, ctx.tenant.settings.usdRate),
-        },
-      },
-    },
-  );
+  if (previous) {
+    await r.bookings.updateOne(
+      { _id: b._id, 'services._id': previous._id },
+      { $set: { 'services.$': { ...parsed.line, _id: previous._id }, updatedAt: new Date() } },
+    );
+    if (previous.status !== parsed.line.status)
+      await logActivity(
+        ctx.tenantId,
+        { type: 'booking', id: b._id },
+        'system',
+        `service:${parsed.line.status}:${parsed.line.description}`,
+        ctx.user._id,
+      );
+  } else {
+    await r.bookings.updateOne(
+      { _id: b._id },
+      { $push: { services: { ...parsed.line, _id: new ObjectId() } }, $set: { updatedAt: new Date() } },
+    );
+  }
   await recalcBooking(ctx.tenantId, b._id);
   revalidatePath(`/bookings/${b._id}`);
-  if (supplierId) revalidatePath(`/suppliers/${supplierId}`);
   return { ok: true };
 }
 
-export async function deleteCost(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
+/** Quick status change of a service, with its supplier reference. */
+export async function setServiceStatus(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
   const auth = await actionTenant('bookings.write');
   if (!auth.ok) return auth;
   const { ctx } = auth;
-  if (!canEditCosts(ctx)) return { ok: false, error: 'forbidden' };
   const b = await loadEditable(ctx, fd);
-  const costId = toObjectId(String(fd.get('costId') ?? ''));
-  if (!b || !costId) return { ok: false, error: 'notFound' };
+  const lineId = toObjectId(String(fd.get('lineId') ?? ''));
+  const status = z.enum(serviceStatuses).safeParse(fd.get('status'));
+  const line = b && lineId ? b.services.find((l) => String(l._id) === String(lineId)) : undefined;
+  if (!b || !line || !status.success) return { ok: false, error: 'notFound' };
+  if (b.status === 'cancelled') return { ok: false, error: 'forbidden' };
+  const confirmation =
+    String(fd.get('confirmation') ?? '')
+      .trim()
+      .slice(0, 80) || line.confirmation;
   const r = await repo(ctx);
-  await r.bookings.updateOne({ _id: b._id }, { $pull: { costs: { _id: costId } } });
+  await r.bookings.updateOne(
+    { _id: b._id, 'services._id': line._id },
+    toUpdate({ status: status.data, confirmation }, 'services.$.'),
+  );
+  if (line.status !== status.data)
+    await logActivity(
+      ctx.tenantId,
+      { type: 'booking', id: b._id },
+      'system',
+      `service:${status.data}:${line.description}`,
+      ctx.user._id,
+    );
+  await recalcBooking(ctx.tenantId, b._id);
+  revalidatePath(`/bookings/${b._id}`);
+  return { ok: true };
+}
+
+export async function deleteService(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
+  const auth = await actionTenant('bookings.write');
+  if (!auth.ok) return auth;
+  const { ctx } = auth;
+  const b = await loadEditable(ctx, fd);
+  const lineId = toObjectId(String(fd.get('lineId') ?? ''));
+  if (!b || !lineId) return { ok: false, error: 'notFound' };
+  const line = b.services.find((l) => String(l._id) === String(lineId));
+  // A service with a supplier cost is part of the supplier's account: only finance staff remove it.
+  if (line?.cost && !canEditCosts(ctx)) return { ok: false, error: 'forbidden' };
+  const r = await repo(ctx);
+  await r.bookings.updateOne({ _id: b._id }, { $pull: { services: { _id: lineId } } });
   await recalcBooking(ctx.tenantId, b._id);
   revalidatePath(`/bookings/${b._id}`);
   return { ok: true };

@@ -18,6 +18,8 @@ import {
   ShieldCheck,
   Menu,
   X,
+  FileText,
+  Receipt,
   type LucideIcon,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/client';
@@ -25,6 +27,8 @@ import { useI18n } from '@/lib/i18n/client';
 const ICONS: Record<string, LucideIcon> = {
   dashboard: LayoutDashboard,
   leads: Inbox,
+  quotes: FileText,
+  invoices: Receipt,
   customers: Users,
   tasks: CheckSquare,
   bookings: Briefcase,

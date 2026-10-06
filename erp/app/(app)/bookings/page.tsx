@@ -17,7 +17,15 @@ import { FilterBar, Pagination } from '@/components/ListControls';
 
 export const metadata: Metadata = { title: 'Bookings' };
 
-type SP = { q?: string; status?: string; type?: string; departure?: string; due?: string; page?: string };
+type SP = {
+  q?: string;
+  status?: string;
+  type?: string;
+  departure?: string;
+  due?: string;
+  pending?: string;
+  page?: string;
+};
 
 export default async function BookingsPage({ searchParams }: { searchParams: Promise<SP> }) {
   const ctx = await requireTenant('bookings.read');
@@ -31,6 +39,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
     filter.type = sp.type as Booking['type'];
   const dep = toObjectId(sp.departure);
   if (dep) filter.departureId = dep;
+  if (sp.pending === '1') {
+    // Open bookings with services still waiting for the supplier.
+    filter.status = { $in: ['draft', 'confirmed'] };
+    filter.services = { $elemMatch: { status: { $in: ['pending', 'requested'] } } };
+  }
   if (sp.due === '1') {
     filter.status = { $ne: 'cancelled' };
     filter.$expr = { $gt: ['$total', '$paid'] };
@@ -86,7 +99,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
       />
       <FilterBar
         q={sp.q}
-        hidden={{ departure: sp.departure }}
+        hidden={{ departure: sp.departure, pending: sp.pending }}
         selects={[
           {
             name: 'status',
@@ -172,7 +185,14 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
         )}
         <Pagination
           base="/bookings"
-          params={{ q: sp.q, status: sp.status, type: sp.type, departure: sp.departure, due: sp.due }}
+          params={{
+            q: sp.q,
+            status: sp.status,
+            type: sp.type,
+            departure: sp.departure,
+            due: sp.due,
+            pending: sp.pending,
+          }}
           page={page}
           total={total}
         />

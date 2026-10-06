@@ -33,8 +33,8 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
   const [bookings, payments, balances] = await Promise.all([
     r.all.bookings
       .find(
-        { 'costs.supplierId': id },
-        { projection: { number: 1, title: 1, costs: 1, status: 1, travelDate: 1 } },
+        { 'services.supplierId': id },
+        { projection: { number: 1, title: 1, services: 1, status: 1, travelDate: 1 } },
       )
       .sort({ createdAt: -1 })
       .limit(200)
@@ -45,7 +45,9 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
   const bal = balances.get(String(id)) ?? { costs: { IQD: 0, USD: 0 }, paid: { IQD: 0, USD: 0 } };
   const owed = { IQD: bal.costs.IQD - bal.paid.IQD, USD: bal.costs.USD - bal.paid.USD };
   const lines = bookings.flatMap((b) =>
-    b.costs.filter((c) => String(c.supplierId) === String(id)).map((c) => ({ b, c })),
+    b.services
+      .filter((c) => String(c.supplierId) === String(id) && c.cost && c.status !== 'cancelled')
+      .map((c) => ({ b, c })),
   );
 
   return (
@@ -134,7 +136,7 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                         </td>
                         <td>{c.description}</td>
                         <td>{b.travelDate ? formatDate(b.travelDate, lang) : '—'}</td>
-                        <td className="num">{formatMoney(c.amount, c.currency, lang)}</td>
+                        <td className="num">{formatMoney(c.cost ?? 0, c.costCurrency ?? 'IQD', lang)}</td>
                       </tr>
                     ))}
                   </tbody>

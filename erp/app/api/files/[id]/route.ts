@@ -13,6 +13,7 @@ const READ: Record<EntityType, Permission> = {
   booking: 'bookings.read',
   visa: 'visas.read',
   supplier: 'suppliers.read',
+  quote: 'quotes.read',
 };
 
 const COLLECTION = {
@@ -21,6 +22,7 @@ const COLLECTION = {
   booking: 'bookings',
   visa: 'visas',
   supplier: 'suppliers',
+  quote: 'quotes',
 } as const satisfies Record<EntityType, string>;
 
 /** Streams an attachment to signed-in staff of the same company only. */

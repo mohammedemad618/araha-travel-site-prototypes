@@ -5,6 +5,8 @@ import { can } from '../lib/rbac';
 import { addDays, isISODate } from '../lib/dates';
 import { scopedFilter, visibilityFilter, visibilityFor } from '../lib/scope';
 import { ObjectId } from 'mongodb';
+import { lineTotals, readiness } from '../lib/services';
+import { quoteState } from '../lib/quotes';
 
 test('money parsing and conversion stay exact', () => {
   expect(parseMoney('1,250,000', 'IQD')).toBe(1250000);
@@ -75,4 +77,21 @@ test('visibility: scope and branch filter combine into the right query', () => {
   expect(q.tenantId).toEqual(tenant);
   expect(q.$and).toHaveLength(2);
   expect(scopedFilter(tenant, undefined, {})).toEqual({ tenantId: tenant });
+});
+
+test('service totals skip cancelled lines and count supplier costs', () => {
+  const line = (status: 'pending' | 'confirmed' | 'cancelled', unitPrice: number, cost = 0) => ({
+    _id: new ObjectId(),
+    type: 'hotel' as const,
+    description: 'x',
+    qty: 2,
+    unitPrice,
+    costInBooking: cost,
+    status,
+  });
+  const lines = [line('confirmed', 500, 300), line('pending', 100), line('cancelled', 999, 999)];
+  expect(lineTotals(lines, 50)).toEqual({ subtotal: 1200, total: 1150, costTotal: 300 });
+  expect(readiness(lines)).toEqual({ confirmed: 1, total: 2 });
+  expect(quoteState({ status: 'sent', validUntil: '2026-01-01' }, '2026-02-01')).toBe('expired');
+  expect(quoteState({ status: 'accepted', validUntil: '2026-01-01' }, '2026-02-01')).toBe('accepted');
 });

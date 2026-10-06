@@ -4,6 +4,8 @@
 export const permissions = [
   'leads.read',
   'leads.write',
+  'quotes.read',
+  'quotes.write',
   'customers.read',
   'customers.write',
   'bookings.read',
@@ -37,6 +39,8 @@ const ROLE_PERMISSIONS: Record<TenantRole, Set<Permission>> = {
   sales: new Set<Permission>([
     'leads.read',
     'leads.write',
+    'quotes.read',
+    'quotes.write',
     'customers.read',
     'customers.write',
     'bookings.read',
@@ -46,6 +50,7 @@ const ROLE_PERMISSIONS: Record<TenantRole, Set<Permission>> = {
     'finance.read',
   ]),
   accountant: new Set<Permission>([
+    'quotes.read',
     'customers.read',
     'bookings.read',
     'finance.read',
@@ -56,6 +61,7 @@ const ROLE_PERMISSIONS: Record<TenantRole, Set<Permission>> = {
     'data.export',
   ]),
   operations: new Set<Permission>([
+    'quotes.read',
     'customers.read',
     'customers.write',
     'bookings.read',

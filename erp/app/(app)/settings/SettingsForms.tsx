@@ -31,6 +31,8 @@ export type CompanyValues = {
   accent: string;
   bookingPrefix: string;
   receiptPrefix: string;
+  quotePrefix: string;
+  invoicePrefix: string;
   phone?: string;
   address?: string;
   invoiceFooter?: string;
@@ -79,6 +81,20 @@ export function CompanyForm({ values }: { values: CompanyValues }) {
           name="receiptPrefix"
           required
           defaultValue={values.receiptPrefix}
+          dir="ltr"
+        />
+        <TextField
+          label={t('settings.quotePrefix')}
+          name="quotePrefix"
+          required
+          defaultValue={values.quotePrefix}
+          dir="ltr"
+        />
+        <TextField
+          label={t('settings.invoicePrefix')}
+          name="invoicePrefix"
+          required
+          defaultValue={values.invoicePrefix}
           dir="ltr"
         />
       </div>

@@ -18,6 +18,8 @@ export const SCOPED_COLLECTIONS = {
   bookings: ['assignedTo', 'createdBy'],
   visas: ['assignedTo', 'createdBy'],
   payments: ['receivedBy'],
+  quotes: ['assignedTo', 'createdBy'],
+  invoices: ['createdBy'],
 } as const;
 export type ScopedCollection = keyof typeof SCOPED_COLLECTIONS;
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { MessageCircle, Phone } from 'lucide-react';
+import { MessageCircle, Phone, FileText } from 'lucide-react';
 import { requireTenant, toObjectId, branchOptions, branchName } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
 import { repo } from '@/lib/repo';
@@ -12,10 +12,11 @@ import { formatDate, formatDateTime } from '@/lib/dates';
 import { formatMoney, moneyInput } from '@/lib/money';
 import { waLink } from '@/lib/phone';
 import { STAGE_TONE } from '@/lib/ui-tones';
-import { Badge, Card, DL, PageHeader, buttonClass } from '@/components/ui';
+import { Badge, Card, DL, PageHeader, buttonClass, LinkButton } from '@/components/ui';
 import { Timeline } from '@/components/crm/Timeline';
 import { RelatedTasks } from '@/components/crm/RelatedTasks';
 import { LeadForm } from '../LeadForm';
+import { QuotesList } from '@/components/trip/QuotesList';
 import { ConvertButton, DeleteLeadButton, LostForm, StageButtons } from './LeadActions';
 
 export const metadata: Metadata = { title: 'Lead' };
@@ -28,12 +29,13 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   const r = await repo(ctx);
   const lead = await r.leads.findOne({ _id: id });
   if (!lead) notFound();
-  const [staff, packages, customer, booking, sameCustomer] = await Promise.all([
+  const [staff, packages, customer, booking, sameCustomer, quotes] = await Promise.all([
     getStaff(ctx.tenantId),
     packageOptions(ctx.tenantId),
     lead.customerId ? r.customers.findOne({ _id: lead.customerId }) : null,
     lead.bookingId ? r.bookings.findOne({ _id: lead.bookingId }) : null,
     !lead.customerId ? r.customers.findOne({ phone: lead.phone }) : null,
+    can(ctx.role, 'quotes.read') ? r.quotes.find({ leadId: id }).sort({ createdAt: -1 }).toArray() : [],
   ]);
   const canWrite = can(ctx.role, 'leads.write');
   const cur = ctx.tenant.settings.currency;
@@ -63,6 +65,11 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             <a href={`tel:${lead.phone}`} className={buttonClass('secondary')}>
               <Phone size={16} aria-hidden="true" /> {t('common.call')}
             </a>
+            {!lead.bookingId && can(ctx.role, 'quotes.write') && (
+              <LinkButton href={`/quotes/new?lead=${id}`} variant="primary" icon={FileText}>
+                {t('quotes.new')}
+              </LinkButton>
+            )}
             {!lead.bookingId && can(ctx.role, 'bookings.write') && <ConvertButton id={String(id)} />}
             {canWrite && <DeleteLeadButton id={String(id)} />}
           </>
@@ -71,6 +78,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
+          {quotes.length > 0 && <QuotesList quotes={quotes} />}
           {canWrite && (
             <Card title={t('leads.stage')}>
               <StageButtons id={String(id)} stage={lead.stage} />

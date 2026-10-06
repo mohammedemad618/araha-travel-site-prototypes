@@ -70,6 +70,53 @@ const MIGRATIONS: Migration[] = [
       }
     },
   },
+  {
+    // Sale lines and supplier costs become one list of trip services.
+    id: '2026-10-booking-services',
+    run: async (db) => {
+      const bookings = db.collection('bookings');
+      for await (const b of bookings.find({ services: { $exists: false } })) {
+        const done = b.status === 'confirmed' || b.status === 'completed';
+        const services = [
+          ...(
+            (b.items ?? []) as { _id: ObjectId; description: string; qty: number; unitPrice: number }[]
+          ).map((i) => ({
+            _id: i._id,
+            type: b.type === 'package' ? 'package' : 'other',
+            description: i.description,
+            qty: i.qty,
+            unitPrice: i.unitPrice,
+            status: done ? 'confirmed' : 'pending',
+          })),
+          ...(
+            (b.costs ?? []) as {
+              _id: ObjectId;
+              supplierId?: ObjectId;
+              description: string;
+              amount: number;
+              currency: string;
+              amountInBooking: number;
+            }[]
+          ).map((c) => ({
+            _id: c._id,
+            type: 'other',
+            description: c.description,
+            qty: 1,
+            unitPrice: 0,
+            supplierId: c.supplierId,
+            cost: c.amount,
+            costCurrency: c.currency,
+            costInBooking: c.amountInBooking,
+            status: done ? 'confirmed' : 'pending',
+          })),
+        ];
+        await bookings.updateOne(
+          { _id: b._id, services: { $exists: false } },
+          { $set: { services }, $unset: { items: '', costs: '' } },
+        );
+      }
+    },
+  },
 ];
 
 export async function migrate(db: Db): Promise<void> {

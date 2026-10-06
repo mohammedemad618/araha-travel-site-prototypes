@@ -9,6 +9,8 @@ export function defaultSettings(): TenantSettings {
     accent: '#c99755',
     bookingPrefix: 'BK',
     receiptPrefix: 'RC',
+    quotePrefix: 'QT',
+    invoicePrefix: 'INV',
   };
 }
 

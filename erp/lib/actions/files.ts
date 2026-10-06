@@ -14,13 +14,18 @@ import type { ActionResult } from '../forms';
 
 const WRITE: Record<
   EntityType,
-  { collection: 'leads' | 'customers' | 'bookings' | 'visas' | 'suppliers'; perm: Permission; path: string }
+  {
+    collection: 'leads' | 'customers' | 'bookings' | 'visas' | 'suppliers' | 'quotes';
+    perm: Permission;
+    path: string;
+  }
 > = {
   lead: { collection: 'leads', perm: 'leads.write', path: '/leads' },
   customer: { collection: 'customers', perm: 'customers.write', path: '/customers' },
   booking: { collection: 'bookings', perm: 'bookings.write', path: '/bookings' },
   visa: { collection: 'visas', perm: 'visas.write', path: '/visas' },
   supplier: { collection: 'suppliers', perm: 'suppliers.write', path: '/suppliers' },
+  quote: { collection: 'quotes', perm: 'quotes.write', path: '/quotes' },
 };
 
 export async function uploadAttachment(_: ActionResult | null, fd: FormData): Promise<ActionResult> {

@@ -7,6 +7,8 @@ import { formatDate, todayISO } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { bookingTotals } from '@/lib/bookings';
 import { PrintHeader, printBranch } from '../../PrintHeader';
+import { PrintLines, Row } from '../../PrintParts';
+import { isActive, lineTotal } from '@/lib/services';
 
 export const metadata: Metadata = { title: 'Invoice' };
 
@@ -32,7 +34,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
       <PrintHeader
         tenant={ctx.tenant}
         branch={printBranch(ctx, b.branchId)}
-        title={t('bookings.invoiceTitle')}
+        title={t('bookings.statementTitle')}
         number={b.number}
         date={formatDate(todayISO(), lang)}
       />
@@ -40,8 +42,10 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         <div>
           <div className="text-[12.5px] text-muted">{t('bookings.customer')}</div>
           <div className="text-[16px] font-medium">{customer?.name}</div>
-          <div className="font-latin text-muted" dir="ltr">
-            {customer?.phone}
+          <div className="text-muted">
+            <span className="font-latin" dir="ltr">
+              {customer?.phone}
+            </span>
           </div>
         </div>
         <div>
@@ -59,26 +63,24 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <p className="m-0">{travellers.map((tr) => tr.nameEn || tr.name).join('، ')}</p>
         </section>
       )}
-      <table className="data-table mb-6">
-        <thead>
-          <tr>
-            <th>{t('bookings.description')}</th>
-            <th>{t('bookings.qty')}</th>
-            <th>{t('bookings.unitPrice')}</th>
-            <th>{t('bookings.lineTotal')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {b.items.map((i) => (
-            <tr key={String(i._id)}>
-              <td>{i.description}</td>
-              <td className="num">{i.qty}</td>
-              <td className="num">{money(i.unitPrice)}</td>
-              <td className="num">{money(i.qty * i.unitPrice)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <PrintLines
+        lines={b.services
+          .filter((l) => isActive(l) && lineTotal(l) > 0)
+          .map((l) => ({ ...l, key: String(l._id) }))}
+        money={(v) => money(v)}
+        dateLabel={(l) =>
+          [l.startDate, l.endDate]
+            .filter(Boolean)
+            .map((d) => formatDate(d, lang))
+            .join(' — ')
+        }
+        labels={{
+          description: t('bookings.description'),
+          qty: t('bookings.qty'),
+          unitPrice: t('bookings.unitPrice'),
+          lineTotal: t('bookings.lineTotal'),
+        }}
+      />
       <section className="ms-auto mb-8 w-full max-w-[320px] text-[14px]">
         <Row label={t('bookings.subtotal')} value={money(subtotal)} />
         {b.discount > 0 && <Row label={t('bookings.discount')} value={`−${money(b.discount)}`} />}
@@ -112,14 +114,5 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         <div className="w-48 border-t border-ink pt-1 text-center text-ink">{t('bookings.signature')}</div>
       </footer>
     </article>
-  );
-}
-
-function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
-  return (
-    <div className={`flex justify-between border-b border-line py-1.5 ${strong ? 'font-semibold' : ''}`}>
-      <span>{label}</span>
-      <span className="num">{value}</span>
-    </div>
   );
 }

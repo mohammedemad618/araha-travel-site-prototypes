@@ -74,6 +74,7 @@ export async function dashboardData(ctx: TenantCtx) {
             customerId: 1,
             travellerIds: 1,
             returnDate: 1,
+            services: 1,
           },
         },
       )
@@ -112,6 +113,15 @@ export async function dashboardData(ctx: TenantCtx) {
   const unpaidSoon = openBookings.filter(
     (b) => b.travelDate && b.travelDate >= today && b.travelDate <= in14 && b.total > b.paid,
   );
+
+  // Trips within 14 days with services the supplier has not confirmed yet.
+  const unconfirmed = openBookings.filter(
+    (b) =>
+      b.travelDate &&
+      b.travelDate >= today &&
+      b.travelDate <= in14 &&
+      (b.services ?? []).some((l) => l.status === 'pending' || l.status === 'requested'),
+  ).length;
 
   // Passports that expire within 6 months of the return date, for upcoming trips.
   const upcoming = openBookings.filter(
@@ -169,7 +179,14 @@ export async function dashboardData(ctx: TenantCtx) {
     upcomingCount,
     byMonth,
     stages: Object.fromEntries(stageCounts.map((r) => [r._id, r.n])) as Record<string, number>,
-    alerts: { overdueTasks, passportAlerts, unpaidSoon: unpaidSoon.length, pendingVisas, followUps },
+    alerts: {
+      overdueTasks,
+      passportAlerts,
+      unpaidSoon: unpaidSoon.length,
+      pendingVisas,
+      followUps,
+      unconfirmed,
+    },
     myTasks,
     recentLeads,
     departures,

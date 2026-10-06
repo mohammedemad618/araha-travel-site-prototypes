@@ -9,7 +9,7 @@ import { can, type Permission } from '../rbac';
 import { fieldErrors, optDate, text, toUpdate, type ActionResult } from '../forms';
 import { activityKinds, entityTypes, type EntityType } from '../types';
 
-type EntityCollection = 'leads' | 'customers' | 'bookings' | 'visas' | 'suppliers';
+type EntityCollection = 'leads' | 'customers' | 'bookings' | 'visas' | 'suppliers' | 'quotes';
 
 const ENTITY: Record<EntityType, { collection: EntityCollection; perm: Permission; path: string }> = {
   lead: { collection: 'leads', perm: 'leads.read', path: '/leads' },
@@ -17,6 +17,7 @@ const ENTITY: Record<EntityType, { collection: EntityCollection; perm: Permissio
   booking: { collection: 'bookings', perm: 'bookings.read', path: '/bookings' },
   visa: { collection: 'visas', perm: 'visas.read', path: '/visas' },
   supplier: { collection: 'suppliers', perm: 'suppliers.read', path: '/suppliers' },
+  quote: { collection: 'quotes', perm: 'quotes.read', path: '/quotes' },
 };
 
 /** Resolves an entity reference from a form and checks the member can see it. */

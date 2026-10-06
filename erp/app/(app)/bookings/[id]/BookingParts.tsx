@@ -1,17 +1,8 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
 import { ActionForm, SelectField, SubmitButton, TextField } from '@/components/form';
-import {
-  deleteBooking,
-  deleteCost,
-  deleteItem,
-  saveCost,
-  saveItem,
-  setBookingStatus,
-  setDiscount,
-  setTravellers,
-} from '@/lib/actions/bookings';
+import { deleteBooking, setBookingStatus, setTravellers } from '@/lib/actions/bookings';
+import { issueInvoice, voidInvoice } from '@/lib/actions/invoices';
 import { recordPayment, voidPayment } from '@/lib/actions/payments';
 import { useI18n } from '@/lib/i18n/client';
 import { paymentMethods } from '@/lib/types';
@@ -49,136 +40,6 @@ export function DeleteBookingButton({ id }: { id: string }) {
       <input type="hidden" name="id" value={id} />
       <SubmitButton variant="danger" confirm={t('common.confirmDelete')}>
         {t('common.delete')}
-      </SubmitButton>
-    </ActionForm>
-  );
-}
-
-export function ItemForm({
-  bookingId,
-  item,
-}: {
-  bookingId: string;
-  item?: { id: string; description: string; qty: number; unitPrice: string };
-}) {
-  const { t } = useI18n();
-  return (
-    <ActionForm
-      action={saveItem}
-      resetOnSuccess={!item}
-      successMessage={false}
-      className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[2fr_0.6fr_1fr_auto]"
-    >
-      <input type="hidden" name="bookingId" value={bookingId} />
-      {item && <input type="hidden" name="itemId" value={item.id} />}
-      <TextField
-        label={t('bookings.description')}
-        name="description"
-        required
-        defaultValue={item?.description}
-      />
-      <TextField
-        label={t('bookings.qty')}
-        name="qty"
-        type="number"
-        min={1}
-        required
-        defaultValue={item?.qty ?? 1}
-      />
-      <TextField
-        label={t('bookings.unitPrice')}
-        name="unitPrice"
-        required
-        inputMode="decimal"
-        dir="ltr"
-        defaultValue={item?.unitPrice}
-      />
-      <SubmitButton size="md" variant={item ? 'primary' : 'secondary'}>
-        {item ? t('common.save') : t('bookings.addItem')}
-      </SubmitButton>
-    </ActionForm>
-  );
-}
-
-export function DeleteRowButton({
-  kind,
-  bookingId,
-  rowId,
-}: {
-  kind: 'item' | 'cost';
-  bookingId: string;
-  rowId: string;
-}) {
-  const { t } = useI18n();
-  return (
-    <ActionForm action={kind === 'item' ? deleteItem : deleteCost} successMessage={false} className="inline">
-      <input type="hidden" name="bookingId" value={bookingId} />
-      <input type="hidden" name={kind === 'item' ? 'itemId' : 'costId'} value={rowId} />
-      <SubmitButton size="sm" variant="ghost" confirm={t('common.confirmDelete')}>
-        <Trash2 size={14} aria-hidden="true" />
-        <span className="sr-only">{t('common.delete')}</span>
-      </SubmitButton>
-    </ActionForm>
-  );
-}
-
-export function DiscountForm({ bookingId, value }: { bookingId: string; value: string }) {
-  const { t } = useI18n();
-  return (
-    <ActionForm action={setDiscount} successMessage={false} className="flex items-end gap-2">
-      <input type="hidden" name="bookingId" value={bookingId} />
-      <TextField
-        label={t('bookings.discount')}
-        name="discount"
-        inputMode="decimal"
-        dir="ltr"
-        defaultValue={value}
-        fieldClassName="w-40"
-      />
-      <SubmitButton size="md" variant="secondary">
-        {t('common.save')}
-      </SubmitButton>
-    </ActionForm>
-  );
-}
-
-export function CostForm({
-  bookingId,
-  suppliers,
-  currency,
-}: {
-  bookingId: string;
-  suppliers: { id: string; name: string }[];
-  currency: string;
-}) {
-  const { t } = useI18n();
-  return (
-    <ActionForm
-      action={saveCost}
-      resetOnSuccess
-      successMessage={false}
-      className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.6fr_1fr_0.7fr_auto]"
-    >
-      <input type="hidden" name="bookingId" value={bookingId} />
-      <SelectField
-        label={t('bookings.supplier')}
-        name="supplierId"
-        placeholder={t('common.none')}
-        options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
-      />
-      <TextField label={t('bookings.description')} name="description" required />
-      <TextField label={t('common.amount')} name="amount" required inputMode="decimal" dir="ltr" />
-      <SelectField
-        label={t('common.currency')}
-        name="currency"
-        defaultValue={currency}
-        options={[
-          { value: 'IQD', label: 'IQD' },
-          { value: 'USD', label: 'USD' },
-        ]}
-      />
-      <SubmitButton size="md" variant="secondary">
-        {t('bookings.addCost')}
       </SubmitButton>
     </ActionForm>
   );
@@ -302,6 +163,35 @@ export function VoidPaymentButton({ id }: { id: string }) {
       <input type="hidden" name="id" value={id} />
       <SubmitButton size="sm" variant="ghost" confirm={t('payments.voidConfirm')}>
         {t('payments.void')}
+      </SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function IssueInvoiceForm({ bookingId, today }: { bookingId: string; today: string }) {
+  const { t } = useI18n();
+  return (
+    <ActionForm
+      action={issueInvoice}
+      successMessage={false}
+      className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[1fr_1fr_auto]"
+    >
+      <input type="hidden" name="bookingId" value={bookingId} />
+      <TextField label={t('invoices.date')} name="date" type="date" defaultValue={today} />
+      <TextField label={t('invoices.dueDate')} name="dueDate" type="date" />
+      <SubmitButton>{t('invoices.issue')}</SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function VoidInvoiceForm({ id }: { id: string }) {
+  const { t } = useI18n();
+  return (
+    <ActionForm action={voidInvoice} successMessage={false} className="flex flex-wrap items-end gap-2">
+      <input type="hidden" name="id" value={id} />
+      <TextField label={t('invoices.voidReason')} name="reason" fieldClassName="min-w-[200px] flex-1" />
+      <SubmitButton variant="danger" size="md" confirm={t('invoices.voidConfirm')}>
+        {t('invoices.void')}
       </SubmitButton>
     </ActionForm>
   );

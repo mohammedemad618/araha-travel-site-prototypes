@@ -33,6 +33,8 @@ if (old) {
   for (const c of [
     'memberships',
     'branches',
+    'quotes',
+    'invoices',
     'leads',
     'customers',
     'packages',
@@ -280,39 +282,69 @@ customers.slice(0, 13).forEach((c, i) => {
   const dep = i < 3 ? futureDeps[0] : futureDeps[1 + (i % 3)];
   const adults = 1 + (i % 3 === 0 ? 1 : 0);
   const children = c.travellers.length > 1 ? 1 : 0;
-  const items = [
-    { _id: new ObjectId(), description: `${p.title} — البالغون`, qty: adults, unitPrice: p.price },
-  ];
-  if (children)
-    items.push({
-      _id: new ObjectId(),
-      description: `${p.title} — الأطفال`,
-      qty: children,
-      unitPrice: p.childPrice,
-    });
-  const total = items.reduce((s, x) => s + x.qty * x.unitPrice, 0);
-  const costs = [
-    {
-      _id: new ObjectId(),
-      supplierId: pick(suppliers, i % 2 ? 1 : 2)._id,
-      description: 'تذاكر الطيران',
-      amount: Math.round(total * 0.35),
-      currency: 'IQD',
-      amountInBooking: Math.round(total * 0.35),
-    },
-    {
-      _id: new ObjectId(),
-      supplierId: suppliers[0]._id,
-      description: 'الفندق',
-      amount: Math.round((total * 0.3) / 1310) * 100,
-      currency: 'USD',
-      amountInBooking: Math.round((total * 0.3) / 1310) * 1310,
-    },
-  ];
-  const costTotal = costs.reduce((s, x) => s + x.amountInBooking, 0);
   const createdAt = ago(95 - i * 7);
   const status = dep.date < day(0) ? 'completed' : i % 6 === 5 ? 'draft' : 'confirmed';
   const paidShare = status === 'completed' ? 1 : status === 'draft' ? 0 : pick([1, 0.5, 0.3, 1], i);
+  // The trip as separate services: the package sold to the customer, and the
+  // flight and hotel bought from suppliers (their cost is inside the package price).
+  const done = status !== 'draft';
+  const services = [
+    {
+      _id: new ObjectId(),
+      type: 'package',
+      description: `${p.title} — البالغون`,
+      startDate: dep.date,
+      qty: adults,
+      unitPrice: p.price,
+      status: done ? 'confirmed' : 'pending',
+    },
+  ];
+  if (children)
+    services.push({
+      _id: new ObjectId(),
+      type: 'package',
+      description: `${p.title} — الأطفال`,
+      startDate: dep.date,
+      qty: children,
+      unitPrice: p.childPrice,
+      status: done ? 'confirmed' : 'pending',
+    });
+  const total = services.reduce((s, x) => s + x.qty * x.unitPrice, 0);
+  const flightCost = Math.round(total * 0.35);
+  const hotelUsd = Math.round((total * 0.3) / 1310) * 100;
+  services.push(
+    {
+      _id: new ObjectId(),
+      type: 'flight',
+      description: 'تذاكر الطيران ذهاباً وإياباً',
+      details: 'EBL ↔ IST',
+      startDate: dep.date,
+      qty: adults + children,
+      unitPrice: 0,
+      supplierId: pick(suppliers, i % 2 ? 1 : 2)._id,
+      cost: flightCost,
+      costCurrency: 'IQD',
+      costInBooking: flightCost,
+      status: done ? 'confirmed' : 'pending',
+      confirmation: done ? `PNR${(73100 + i * 17).toString(36).toUpperCase()}` : undefined,
+    },
+    {
+      _id: new ObjectId(),
+      type: 'hotel',
+      description: 'الإقامة في الفندق',
+      details: 'غرفة عائلية مع الإفطار',
+      startDate: dep.date,
+      qty: 1,
+      unitPrice: 0,
+      supplierId: suppliers[0]._id,
+      cost: hotelUsd,
+      costCurrency: 'USD',
+      costInBooking: (hotelUsd / 100) * 1310,
+      // Some upcoming hotels are still waiting for the supplier.
+      status: status === 'completed' ? 'confirmed' : done ? (i % 2 ? 'requested' : 'confirmed') : 'pending',
+    },
+  );
+  const costTotal = services.reduce((s, x) => s + (x.costInBooking ?? 0), 0);
   const b = {
     _id: new ObjectId(),
     tenantId,
@@ -328,10 +360,9 @@ customers.slice(0, 13).forEach((c, i) => {
     travellerIds: c.travellers.slice(0, adults + children).map((t) => t._id),
     status,
     currency: 'IQD',
-    items,
+    services,
     discount: 0,
     total,
-    costs,
     costTotal,
     paid: 0,
     assignedTo: pick([sales, owner], i)._id,
@@ -501,15 +532,108 @@ await db.collection('tasks').insertMany([
   },
 ]);
 
+// Quotes at every stage, and invoices for some confirmed bookings.
+const quoteStates = [
+  { status: 'draft', validUntil: day(6) },
+  { status: 'sent', validUntil: day(4), sentAt: ago(2) },
+  { status: 'sent', validUntil: day(-3), sentAt: ago(12) },
+  { status: 'rejected', validUntil: day(-10), sentAt: ago(20) },
+];
+const quotes = quoteStates.map((qs, i) => {
+  const c = customers[13 + i] ?? customers[i];
+  const p = pick(packages, i + 2);
+  const lines = [
+    {
+      _id: new ObjectId(),
+      type: 'flight',
+      description: 'تذاكر طيران — البالغون',
+      qty: 2,
+      unitPrice: 450000,
+      status: 'pending',
+    },
+    {
+      _id: new ObjectId(),
+      type: 'hotel',
+      description: `فندق 4 نجوم — ${p.nights} ليالٍ`,
+      qty: 1,
+      unitPrice: 600000,
+      status: 'pending',
+    },
+    {
+      _id: new ObjectId(),
+      type: 'transfer',
+      description: 'الاستقبال والتوديع من المطار',
+      qty: 1,
+      unitPrice: 60000,
+      status: 'pending',
+    },
+  ];
+  const total = lines.reduce((s, l) => s + l.qty * l.unitPrice, 0);
+  return {
+    _id: new ObjectId(),
+    tenantId,
+    branchId: mainBranch,
+    number: `QT-${year}-${String(i + 1).padStart(4, '0')}`,
+    customerId: c._id,
+    title: `${p.destination} — ${c.name}`,
+    travelDate: day(30 + i * 7),
+    adults: 2,
+    children: 0,
+    currency: 'IQD',
+    lines,
+    discount: 0,
+    total,
+    costTotal: 0,
+    ...qs,
+    assignedTo: sales._id,
+    createdBy: sales._id,
+    createdAt: ago(25 - i * 5),
+    updatedAt: ago(1),
+  };
+});
+await db.collection('quotes').insertMany(quotes);
+await db
+  .collection('counters')
+  .updateOne({ _id: `${tenantId}:quote:${year}` }, { $set: { seq: quotes.length } }, { upsert: true });
+
+const invoiced = bookings.filter((b) => b.status !== 'draft').slice(0, 5);
+await db.collection('invoices').insertMany(
+  invoiced.map((b, i) => {
+    const c = customers.find((x) => String(x._id) === String(b.customerId));
+    return {
+      tenantId,
+      branchId: mainBranch,
+      number: `INV-${year}-${String(i + 1).padStart(4, '0')}`,
+      bookingId: b._id,
+      customerId: b.customerId,
+      customer: { name: c.name, phone: c.phone },
+      date: b.createdAt.toISOString().slice(0, 10),
+      currency: b.currency,
+      lines: b.services
+        .filter((l) => l.unitPrice > 0)
+        .map((l) => ({ description: l.description, qty: l.qty, unitPrice: l.unitPrice })),
+      discount: 0,
+      total: b.total,
+      status: 'issued',
+      createdBy: accounts._id,
+      createdAt: b.createdAt,
+    };
+  }),
+);
+await db
+  .collection('counters')
+  .updateOne({ _id: `${tenantId}:invoice:${year}` }, { $set: { seq: invoiced.length } }, { upsert: true });
+
 // Every scoped record belongs to a branch; about a third of the work is in the second one.
-for (const c of ['leads', 'bookings', 'visas'])
+for (const c of ['leads', 'bookings', 'visas', 'quotes', 'invoices'])
   await db.collection(c).updateMany({ tenantId }, { $set: { branchId: mainBranch } });
 const moved = bookings.filter((_, i) => i % 3 === 2).map((b) => b._id);
 await db.collection('bookings').updateMany({ _id: { $in: moved } }, { $set: { branchId: secondBranch } });
 await db.collection('payments').updateMany({ tenantId }, { $set: { branchId: mainBranch } });
-await db
-  .collection('payments')
-  .updateMany({ tenantId, bookingId: { $in: moved } }, { $set: { branchId: secondBranch } });
+for (const c of ['payments', 'invoices'])
+  await db
+    .collection(c)
+    .updateMany({ tenantId, bookingId: { $in: moved } }, { $set: { branchId: secondBranch } });
 await db
   .collection('visas')
   .updateMany({ tenantId, bookingId: { $in: moved } }, { $set: { branchId: secondBranch } });

@@ -50,6 +50,12 @@ export default async function DashboardPage() {
       show: seeLeads && d.alerts.followUps > 0,
     },
     {
+      icon: AlertTriangle,
+      text: t('dashboard.unconfirmedServices', { count: d.alerts.unconfirmed }),
+      href: '/bookings?pending=1',
+      show: can(ctx.role, 'bookings.read') && d.alerts.unconfirmed > 0,
+    },
+    {
       icon: Wallet,
       text: t('dashboard.unpaidDepartures', { count: d.alerts.unpaidSoon }),
       href: '/bookings?due=1',

@@ -31,6 +31,16 @@ const companySchema = z.object({
     .trim()
     .toUpperCase()
     .regex(/^[A-Z0-9]{1,6}$/, 'invalidSlug'),
+  quotePrefix: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z0-9]{1,6}$/, 'invalidSlug'),
+  invoicePrefix: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z0-9]{1,6}$/, 'invalidSlug'),
   phone: optText(40),
   address: optText(300),
   invoiceFooter: optText(600),

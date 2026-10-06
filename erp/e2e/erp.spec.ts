@@ -202,12 +202,13 @@ test('a package booking prices itself and respects seats', async ({ page }) => {
   await page.reload();
   await expect(page.getByText('15 تموز 2030').first()).toBeVisible();
 
-  // Sale lines: 2 adults at 875,000.
-  const item = page.locator('form').filter({ has: page.getByRole('button', { name: 'إضافة بند' }) });
+  // The package as a trip service: 2 adults at 875,000.
+  const item = page.locator('form').filter({ has: page.getByRole('button', { name: 'إضافة خدمة' }) });
+  await item.getByLabel(/^نوع الخدمة/).selectOption('package');
   await item.getByLabel(/^الوصف/).fill('إسطنبول — البالغون');
   await item.getByLabel(/^الكمية/).fill('2');
   await item.getByLabel(/^سعر الوحدة/).fill('875000');
-  await item.getByRole('button', { name: 'إضافة بند' }).click();
+  await item.getByRole('button', { name: 'إضافة خدمة' }).click();
   await expect(page.getByText('1,750,000 د.ع').first()).toBeVisible();
 });
 
@@ -237,11 +238,59 @@ test('the catalog reports remaining seats to the website', async ({ request }) =
   expect(pkg.departures[0]).toMatchObject({ date: '2030-07-15', seatsLeft: 1, status: 'limited' });
 });
 
-test('invoice and CSV export are available', async ({ page }) => {
+test('a quote is priced, sent, accepted into a booking, then invoiced', async ({ page }) => {
   await login(page, OWNER_A.email, OWNER_A.password);
   const id = state.bookingUrl!.split('/').pop();
   await page.goto(`/print/booking/${id}`);
-  await expect(page.getByText('فاتورة حجز')).toBeVisible();
+  await expect(page.getByText('كشف حساب الحجز')).toBeVisible();
+
+  // A quote for the website lead (its customer already exists).
+  await page.goto(`/quotes/new?lead=${state.leadId}`);
+  await label(page.locator('main'), 'عنوان الحجز').fill('طرابزون — عرض العائلة');
+  await page.getByRole('button', { name: 'عرض سعر جديد' }).click();
+  await expect(page).toHaveURL(/\/quotes\/[a-f0-9]{24}$/);
+  await expect(page.getByRole('heading', { name: /QT-\d{4}-0001/ })).toBeVisible();
+  const line = page.locator('form').filter({ has: page.getByRole('button', { name: 'إضافة خدمة' }) });
+  await line.getByLabel(/^نوع الخدمة/).selectOption('flight');
+  await line.getByLabel(/^الوصف/).fill('تذاكر طيران أربيل — طرابزون');
+  await line.getByLabel(/^الكمية/).fill('2');
+  await line.getByLabel(/^سعر الوحدة/).fill('450000');
+  await line.getByRole('button', { name: 'إضافة خدمة' }).click();
+  await expect(page.getByText('900,000 د.ع').first()).toBeVisible();
+  await page.getByRole('button', { name: 'تم الإرسال للعميل' }).click();
+  await expect(page.getByText('مُرسل').first()).toBeVisible();
+  const quoteUrl = page.url();
+  await page.goto(`/print/quote/${quoteUrl.split('/').pop()}`);
+  await expect(page.getByText('عرض سعر', { exact: true })).toBeVisible();
+  await expect(page.getByText(/هذا العرض صالح حتى/)).toBeVisible();
+
+  // Accepting creates the booking with the same services, waiting for the supplier.
+  await page.goto(quoteUrl);
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'قبول وتحويل إلى حجز' }).click();
+  await expect(page).toHaveURL(/\/bookings\/[a-f0-9]{24}$/);
+  await expect(page.getByRole('heading', { name: /BK-\d{4}-0002/ })).toBeVisible();
+  await expect(page.getByText('0 من 1 مؤكدة')).toBeVisible();
+  await page.getByLabel(/^الحالة — تذاكر طيران/).selectOption('confirmed');
+  await expect(page.getByText('1 من 1 مؤكدة')).toBeVisible();
+
+  // A numbered invoice, printable, and voidable with its number kept.
+  await page.getByRole('button', { name: 'إصدار فاتورة' }).click();
+  const invoice = page.getByRole('link', { name: /INV-\d{4}-0001/ });
+  await expect(invoice).toBeVisible();
+  const invoiceHref = await invoice.getAttribute('href');
+  await page.goto(invoiceHref!);
+  await expect(page.getByText('فاتورة', { exact: true })).toBeVisible();
+  await expect(page.getByText('900,000 د.ع').first()).toBeVisible();
+  await page.goBack();
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'إلغاء الفاتورة' }).click();
+  const invoices = page.locator('section', { has: page.getByRole('heading', { name: 'الفواتير' }) });
+  await expect(invoices.getByText('ملغاة')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'إصدار فاتورة' })).toBeVisible();
+  await page.goto('/invoices');
+  await expect(page.getByRole('link', { name: /INV-\d{4}-0001/ })).toBeVisible();
+
   const csv = await page.request.get('/api/export/bookings');
   expect(csv.headers()['content-type']).toContain('text/csv');
   const text = await csv.text();

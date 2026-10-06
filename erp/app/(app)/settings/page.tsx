@@ -28,6 +28,8 @@ export default async function CompanySettingsPage() {
             accent: s.accent,
             bookingPrefix: s.bookingPrefix,
             receiptPrefix: s.receiptPrefix,
+            quotePrefix: s.quotePrefix || 'QT',
+            invoicePrefix: s.invoicePrefix || 'INV',
             phone: s.phone,
             address: s.address,
             invoiceFooter: s.invoiceFooter,

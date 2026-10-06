@@ -11,6 +11,7 @@ const TENANT_NAV: { label?: string; items: Item[] }[] = [
     label: 'sales',
     items: [
       { key: 'leads', href: '/leads', perm: 'leads.read' },
+      { key: 'quotes', href: '/quotes', perm: 'quotes.read' },
       { key: 'customers', href: '/customers', perm: 'customers.read' },
       { key: 'tasks', href: '/tasks' },
     ],
@@ -27,6 +28,7 @@ const TENANT_NAV: { label?: string; items: Item[] }[] = [
     label: 'finance',
     items: [
       { key: 'payments', href: '/payments', perm: 'finance.read' },
+      { key: 'invoices', href: '/invoices', perm: 'finance.read' },
       { key: 'suppliers', href: '/suppliers', perm: 'suppliers.read' },
       { key: 'reports', href: '/reports', perm: 'reports.read' },
     ],

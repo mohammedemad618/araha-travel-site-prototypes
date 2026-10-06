@@ -1,17 +1,15 @@
 import 'server-only';
-import { ObjectId } from 'mongodb';
+import type { ObjectId } from 'mongodb';
 import { tenantRepo } from './repo';
 import { nextNumber } from './counters';
-import type { Booking, BookingStatus, Currency, Departure, Tenant, TravelPackage } from './types';
+import { lineTotals } from './services';
+import type { Booking, BookingStatus, Currency, Tenant } from './types';
 
 /** Bookings that hold seats on a departure. */
 export const SEAT_HOLDING: BookingStatus[] = ['draft', 'confirmed', 'completed'];
 
-export function bookingTotals(b: Pick<Booking, 'items' | 'discount' | 'costs'>) {
-  const subtotal = b.items.reduce((s, i) => s + i.qty * i.unitPrice, 0);
-  const total = Math.max(0, subtotal - (b.discount || 0));
-  const costTotal = b.costs.reduce((s, c) => s + c.amountInBooking, 0);
-  return { subtotal, total, costTotal };
+export function bookingTotals(b: Pick<Booking, 'services' | 'discount'>) {
+  return lineTotals(b.services, b.discount);
 }
 
 /** Recomputes the stored totals and paid amount of a booking from its parts. */
@@ -65,35 +63,16 @@ export async function seatsByDeparture(
   return new Map(rows.map((r) => [String(r._id), r.n]));
 }
 
-/** Sale lines for a package departure: adults and children at the departure's prices. */
-export function packageItems(
-  pkg: TravelPackage,
-  dep: Departure | null,
-  adults: number,
-  children: number,
-  labels: { adult: string; child: string },
-) {
-  const adultPrice = dep?.price ?? pkg.price;
-  const items = [];
-  if (adults > 0)
-    items.push({
-      _id: new ObjectId(),
-      description: `${pkg.title} — ${labels.adult}`,
-      qty: adults,
-      unitPrice: adultPrice,
-    });
-  if (children > 0)
-    items.push({
-      _id: new ObjectId(),
-      description: `${pkg.title} — ${labels.child}`,
-      qty: children,
-      unitPrice: pkg.childPrice ?? adultPrice,
-    });
-  return items;
-}
-
 export async function newBookingNumber(tenant: Tenant): Promise<string> {
   return nextNumber(tenant._id, tenant.settings.bookingPrefix || 'BK', 'booking');
+}
+
+export async function newQuoteNumber(tenant: Tenant): Promise<string> {
+  return nextNumber(tenant._id, tenant.settings.quotePrefix || 'QT', 'quote');
+}
+
+export async function newInvoiceNumber(tenant: Tenant): Promise<string> {
+  return nextNumber(tenant._id, tenant.settings.invoicePrefix || 'INV', 'invoice');
 }
 
 export function balanceOf(b: Pick<Booking, 'total' | 'paid'>): number {

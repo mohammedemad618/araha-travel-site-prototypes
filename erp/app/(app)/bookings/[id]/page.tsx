@@ -10,24 +10,24 @@ import { getStaff } from '@/lib/queries';
 import { packageChoices } from '@/lib/package-choices';
 import { addDays, formatDate, todayISO } from '@/lib/dates';
 import { formatMoney, moneyInput } from '@/lib/money';
-import { bookingTotals, paymentState } from '@/lib/bookings';
+import { paymentState } from '@/lib/bookings';
 import { BOOKING_TONE, PAY_TONE } from '@/lib/ui-tones';
-import { Badge, Card, DL, LinkButton, PageHeader, Stat, Table, buttonClass } from '@/components/ui';
+import { Badge, Card, DL, LinkButton, PageHeader, Stat } from '@/components/ui';
 import { Timeline } from '@/components/crm/Timeline';
 import { RelatedTasks } from '@/components/crm/RelatedTasks';
 import { Attachments } from '@/components/crm/Attachments';
 import { BookingForm } from '../BookingForm';
 import {
-  CostForm,
   DeleteBookingButton,
-  DeleteRowButton,
-  DiscountForm,
-  ItemForm,
+  IssueInvoiceForm,
   PaymentForm,
   StatusButton,
   TravellersForm,
+  VoidInvoiceForm,
   VoidPaymentButton,
 } from './BookingParts';
+import { ServicesCard } from '@/components/trip/ServicesCard';
+import { deleteService, saveService, setDiscount, setServiceStatus } from '@/lib/actions/bookings';
 
 export const metadata: Metadata = { title: 'Booking' };
 
@@ -47,20 +47,31 @@ export default async function BookingPage({
   if (!b) notFound();
 
   const seeFinance = can(ctx.role, 'finance.read');
-  const [customer, pkg, dep, payments, suppliers, staff, packages] = await Promise.all([
-    r.customers.findOne({ _id: b.customerId }),
-    b.packageId ? r.packages.findOne({ _id: b.packageId }) : null,
-    b.departureId ? r.departures.findOne({ _id: b.departureId }) : null,
-    // Every receipt of a visible booking is shown, whoever recorded it.
-    r.all.payments.find({ bookingId: id }).sort({ date: -1, createdAt: -1 }).toArray(),
-    seeFinance ? r.suppliers.find({}).sort({ name: 1 }).toArray() : [],
-    getStaff(ctx.tenantId),
-    packageChoices(ctx.tenantId, lang, b.packageId),
-  ]);
+  const [customer, pkg, dep, payments, suppliers, staff, packages, invoices, quote, activePackages] =
+    await Promise.all([
+      r.customers.findOne({ _id: b.customerId }),
+      b.packageId ? r.packages.findOne({ _id: b.packageId }) : null,
+      b.departureId ? r.departures.findOne({ _id: b.departureId }) : null,
+      // Every receipt of a visible booking is shown, whoever recorded it.
+      r.all.payments.find({ bookingId: id }).sort({ date: -1, createdAt: -1 }).toArray(),
+      seeFinance ? r.suppliers.find({}).sort({ name: 1 }).toArray() : [],
+      getStaff(ctx.tenantId),
+      packageChoices(ctx.tenantId, lang, b.packageId),
+      seeFinance ? r.all.invoices.find({ bookingId: id }).sort({ createdAt: -1 }).toArray() : [],
+      b.quoteId ? r.all.quotes.findOne({ _id: b.quoteId }, { projection: { number: 1 } }) : null,
+      r.packages.find({ active: true, currency: b.currency }).sort({ title: 1 }).toArray(),
+    ]);
+  const pricedPackages = activePackages.map((p) => ({
+    id: String(p._id),
+    title: p.title,
+    price: moneyInput(p.price, p.currency),
+  }));
+  const invoice = invoices.find((i) => i.status === 'issued');
+  // The issued invoice no longer matches when services or the discount changed afterwards.
+  const invoiceOutdated = invoice ? invoice.total !== b.total : false;
   const canWrite = can(ctx.role, 'bookings.write') && b.status !== 'cancelled';
   const canPay = can(ctx.role, 'finance.write');
   const cur = b.currency;
-  const { subtotal } = bookingTotals(b);
   const balance = b.total - b.paid;
   const profit = b.total - b.costTotal;
   const money = (v: number, c = cur) => formatMoney(v, c, lang);
@@ -112,7 +123,7 @@ export default async function BookingPage({
         actions={
           <>
             <LinkButton href={`/print/booking/${b._id}`} icon={Printer} target="_blank">
-              {t('bookings.invoice')}
+              {t('bookings.statement')}
             </LinkButton>
             {statusActions.map((a) => (
               <StatusButton
@@ -169,6 +180,20 @@ export default async function BookingPage({
               cols={3}
               items={[
                 [t('bookings.type'), t(`bookings.types.${b.type}`)],
+                ...(quote
+                  ? [
+                      [
+                        t('quotes.fromQuote'),
+                        <Link
+                          key="q"
+                          href={`/quotes/${quote._id}`}
+                          className="font-latin text-info hover:underline"
+                        >
+                          {quote.number}
+                        </Link>,
+                      ] as [string, React.ReactNode],
+                    ]
+                  : []),
                 ...(ctx.allBranches.length > 1
                   ? [[t('workspace.branch'), branchName(ctx, b.branchId) ?? '—'] as [string, string]]
                   : []),
@@ -217,7 +242,7 @@ export default async function BookingPage({
                       adults: b.adults,
                       children: b.children,
                       currency: cur,
-                      currencyLocked: b.paid !== 0 || b.costs.length > 0,
+                      currencyLocked: b.paid !== 0 || b.services.some((l) => l.cost),
                       assignedTo: b.assignedTo ? String(b.assignedTo) : '',
                       notes: b.notes,
                     }}
@@ -227,161 +252,24 @@ export default async function BookingPage({
             )}
           </Card>
 
-          <Card title={t('bookings.items')} padded={false}>
-            {b.items.length === 0 ? (
-              <p className="m-0 p-5 text-[13.5px] text-muted">{t('bookings.noItems')}</p>
-            ) : (
-              <Table>
-                <thead>
-                  <tr>
-                    <th>{t('bookings.description')}</th>
-                    <th>{t('bookings.qty')}</th>
-                    <th>{t('bookings.unitPrice')}</th>
-                    <th>{t('bookings.lineTotal')}</th>
-                    <th>
-                      <span className="sr-only">{t('common.actions')}</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {b.items.map((item) => (
-                    <tr key={String(item._id)}>
-                      <td>{item.description}</td>
-                      <td className="num">{item.qty}</td>
-                      <td className="num">{money(item.unitPrice)}</td>
-                      <td className="num font-medium">{money(item.qty * item.unitPrice)}</td>
-                      <td>
-                        {canWrite && (
-                          <div className="flex items-center justify-end gap-1">
-                            <details className="relative">
-                              <summary className={buttonClass('ghost', 'sm', 'list-none')}>
-                                {t('common.edit')}
-                              </summary>
-                              <div className="absolute end-0 z-20 mt-2 w-[min(640px,90vw)] rounded-xl border border-line bg-surface p-4 shadow-xl">
-                                <ItemForm
-                                  bookingId={String(b._id)}
-                                  item={{
-                                    id: String(item._id),
-                                    description: item.description,
-                                    qty: item.qty,
-                                    unitPrice: moneyInput(item.unitPrice, cur),
-                                  }}
-                                />
-                              </div>
-                            </details>
-                            <DeleteRowButton kind="item" bookingId={String(b._id)} rowId={String(item._id)} />
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td colSpan={3} className="text-muted">
-                      {t('bookings.subtotal')}
-                    </td>
-                    <td className="num">{money(subtotal)}</td>
-                    <td />
-                  </tr>
-                  {b.discount > 0 && (
-                    <tr>
-                      <td colSpan={3} className="text-muted">
-                        {t('bookings.discount')}
-                      </td>
-                      <td className="num text-danger">−{money(b.discount)}</td>
-                      <td />
-                    </tr>
-                  )}
-                  <tr>
-                    <td colSpan={3} className="font-semibold">
-                      {t('bookings.total')}
-                    </td>
-                    <td className="num font-semibold">{money(b.total)}</td>
-                    <td />
-                  </tr>
-                </tfoot>
-              </Table>
-            )}
-            {canWrite && (
-              <div className="flex flex-col gap-4 border-t border-line p-5">
-                <ItemForm bookingId={String(b._id)} />
-                <DiscountForm
-                  bookingId={String(b._id)}
-                  value={b.discount ? moneyInput(b.discount, cur) : ''}
-                />
-              </div>
-            )}
-          </Card>
-
-          {seeFinance && (
-            <Card title={t('bookings.costs')} padded={false}>
-              {b.costs.length === 0 ? (
-                <p className="m-0 p-5 text-[13.5px] text-muted">{t('bookings.noCosts')}</p>
-              ) : (
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>{t('bookings.supplier')}</th>
-                      <th>{t('bookings.description')}</th>
-                      <th>{t('common.amount')}</th>
-                      <th>{t('payments.inBookingCurrency')}</th>
-                      <th>
-                        <span className="sr-only">{t('common.actions')}</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {b.costs.map((c) => {
-                      const s = suppliers.find((x) => String(x._id) === String(c.supplierId));
-                      return (
-                        <tr key={String(c._id)}>
-                          <td>
-                            {s ? (
-                              <Link href={`/suppliers/${s._id}`} className="text-info hover:underline">
-                                {s.name}
-                              </Link>
-                            ) : (
-                              '—'
-                            )}
-                          </td>
-                          <td>{c.description}</td>
-                          <td className="num">{money(c.amount, c.currency)}</td>
-                          <td className="num">{money(c.amountInBooking)}</td>
-                          <td>
-                            {canWrite && (
-                              <DeleteRowButton kind="cost" bookingId={String(b._id)} rowId={String(c._id)} />
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colSpan={3} className="font-semibold">
-                        {t('bookings.costTotal')}
-                      </td>
-                      <td className="num font-semibold">{money(b.costTotal)}</td>
-                      <td />
-                    </tr>
-                  </tfoot>
-                </Table>
-              )}
-              {canWrite && (
-                <div className="border-t border-line p-5">
-                  <CostForm
-                    bookingId={String(b._id)}
-                    suppliers={suppliers.map((s) => ({ id: String(s._id), name: s.name }))}
-                    currency={cur}
-                  />
-                  <p className="m-0 mt-3 text-[12.5px] text-faint">
-                    {t('bookings.rateNote', { rate: ctx.tenant.settings.usdRate.toLocaleString('en-US') })}
-                  </p>
-                </div>
-              )}
-            </Card>
-          )}
+          <ServicesCard
+            lines={b.services}
+            discount={b.discount}
+            currency={cur}
+            parent={{ name: 'bookingId', value: String(b._id) }}
+            suppliers={suppliers.map((s) => ({ id: String(s._id), name: s.name }))}
+            packages={pricedPackages}
+            canWrite={canWrite}
+            canCost={seeFinance}
+            operational
+            actions={{
+              save: saveService,
+              remove: deleteService,
+              status: setServiceStatus,
+              discount: setDiscount,
+            }}
+            rateNote={t('bookings.rateNote', { rate: ctx.tenant.settings.usdRate.toLocaleString('en-US') })}
+          />
 
           {customer && (
             <Card title={`${t('bookings.travellers')} (${b.travellerIds.length}/${b.adults + b.children})`}>
@@ -411,6 +299,47 @@ export default async function BookingPage({
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
+          {seeFinance && (
+            <Card title={t('invoices.title')}>
+              {invoices.length > 0 && (
+                <ul className="m-0 mb-4 flex list-none flex-col gap-2 p-0">
+                  {invoices.map((inv) => (
+                    <li
+                      key={String(inv._id)}
+                      className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${inv.status === 'void' ? 'opacity-55' : ''}`}
+                    >
+                      <Link
+                        href={`/print/invoice/${inv._id}`}
+                        target="_blank"
+                        className="font-latin font-medium text-info hover:underline"
+                      >
+                        {inv.number}
+                      </Link>
+                      <span className="text-[12.5px] text-muted">{formatDate(inv.date, lang)}</span>
+                      <span className="num text-[13px]">{money(inv.total, inv.currency)}</span>
+                      {inv.status === 'void' ? (
+                        <Badge tone="danger">{t('invoices.statuses.void')}</Badge>
+                      ) : invoiceOutdated ? (
+                        <Badge tone="warning">{t('invoices.outdated')}</Badge>
+                      ) : (
+                        <Badge tone="success">{t('invoices.statuses.issued')}</Badge>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {invoice && invoiceOutdated && (
+                <p className="m-0 mb-3 text-[13px] text-warning">{t('invoices.outdatedHint')}</p>
+              )}
+              {canPay && invoice && <VoidInvoiceForm id={String(invoice._id)} />}
+              {canPay && !invoice && b.status !== 'cancelled' && b.total > 0 && (
+                <IssueInvoiceForm bookingId={String(b._id)} today={today} />
+              )}
+              {!invoice && (b.total <= 0 || b.status === 'cancelled') && invoices.length === 0 && (
+                <p className="m-0 text-[13px] text-muted">{t('invoices.nothingToInvoice')}</p>
+              )}
+            </Card>
+          )}
           {seeFinance && (
             <Card title={t('bookings.payments')} padded={false}>
               {payments.length > 0 && (

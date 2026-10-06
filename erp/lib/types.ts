@@ -13,6 +13,8 @@ export type TenantSettings = {
   accent: string;
   bookingPrefix: string;
   receiptPrefix: string;
+  quotePrefix?: string;
+  invoicePrefix?: string;
   phone?: string;
   address?: string;
   invoiceFooter?: string;
@@ -205,15 +207,45 @@ export type BookingType = (typeof bookingTypes)[number];
 export const bookingStatuses = ['draft', 'confirmed', 'completed', 'cancelled'] as const;
 export type BookingStatus = (typeof bookingStatuses)[number];
 
-export type BookingItem = { _id: ObjectId; description: string; qty: number; unitPrice: number };
-export type BookingCost = {
+export const serviceTypes = [
+  'package',
+  'flight',
+  'hotel',
+  'visa',
+  'transfer',
+  'tour',
+  'insurance',
+  'other',
+] as const;
+export type ServiceType = (typeof serviceTypes)[number];
+export const serviceStatuses = ['pending', 'requested', 'confirmed', 'cancelled'] as const;
+export type ServiceStatus = (typeof serviceStatuses)[number];
+
+/**
+ * One part of a trip (a flight, a hotel stay, a visa…): what the customer pays
+ * for it, what the supplier charges, and where it stands with the supplier.
+ * Used by bookings (services) and quotations (lines).
+ */
+export type ServiceLine = {
   _id: ObjectId;
-  supplierId?: ObjectId;
+  type: ServiceType;
   description: string;
-  amount: number;
-  currency: Currency;
+  /** Flight number, room type, pick-up point… */
+  details?: string;
+  startDate?: ISODate;
+  endDate?: ISODate;
+  qty: number;
+  /** Sale price per unit, in the booking currency. */
+  unitPrice: number;
+  supplierId?: ObjectId;
+  /** Supplier cost (total for the line) in its own currency. */
+  cost?: number;
+  costCurrency?: Currency;
   /** The cost converted into the booking currency at the rate of the day. */
-  amountInBooking: number;
+  costInBooking?: number;
+  status: ServiceStatus;
+  /** Supplier reference: PNR, hotel confirmation number… */
+  confirmation?: string;
 };
 
 export type Booking = {
@@ -234,17 +266,75 @@ export type Booking = {
   travellerIds: ObjectId[];
   status: BookingStatus;
   currency: Currency;
-  items: BookingItem[];
+  services: ServiceLine[];
   discount: number;
   total: number;
-  costs: BookingCost[];
   costTotal: number;
   paid: number;
+  /** The quotation this booking was made from. */
+  quoteId?: ObjectId;
   assignedTo?: ObjectId;
   notes?: string;
   createdBy: ObjectId;
   createdAt: Date;
   updatedAt: Date;
+};
+
+export const quoteStatuses = ['draft', 'sent', 'accepted', 'rejected'] as const;
+export type QuoteStatus = (typeof quoteStatuses)[number];
+
+/** A priced offer sent to a customer; accepting it creates a booking. */
+export type Quote = {
+  _id: ObjectId;
+  tenantId: ObjectId;
+  branchId: ObjectId;
+  number: string;
+  customerId: ObjectId;
+  leadId?: ObjectId;
+  title: string;
+  travelDate?: ISODate;
+  returnDate?: ISODate;
+  adults: number;
+  children: number;
+  currency: Currency;
+  lines: ServiceLine[];
+  discount: number;
+  total: number;
+  costTotal: number;
+  validUntil?: ISODate;
+  status: QuoteStatus;
+  sentAt?: Date;
+  notes?: string;
+  bookingId?: ObjectId;
+  assignedTo?: ObjectId;
+  createdBy: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+/**
+ * An issued invoice: a numbered, fixed copy of a booking's sale lines. Payments
+ * stay on the booking; voiding keeps the number for the record.
+ */
+export type Invoice = {
+  _id: ObjectId;
+  tenantId: ObjectId;
+  branchId: ObjectId;
+  number: string;
+  bookingId: ObjectId;
+  customerId: ObjectId;
+  customer: { name: string; phone: string };
+  date: ISODate;
+  dueDate?: ISODate;
+  currency: Currency;
+  lines: { description: string; qty: number; unitPrice: number }[];
+  discount: number;
+  total: number;
+  status: 'issued' | 'void';
+  voidReason?: string;
+  voidedAt?: Date;
+  createdBy: ObjectId;
+  createdAt: Date;
 };
 
 export const paymentMethods = ['cash', 'bank_transfer', 'zaincash', 'fastpay', 'card', 'other'] as const;
@@ -332,7 +422,7 @@ export type VisaApplication = {
   updatedAt: Date;
 };
 
-export const entityTypes = ['lead', 'customer', 'booking', 'visa', 'supplier'] as const;
+export const entityTypes = ['lead', 'customer', 'booking', 'visa', 'supplier', 'quote'] as const;
 export type EntityType = (typeof entityTypes)[number];
 export type EntityRef = { type: EntityType; id: ObjectId };
 

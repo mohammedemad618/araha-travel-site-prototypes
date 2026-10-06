@@ -43,13 +43,21 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection('bookings').createIndex({ tenantId: 1, customerId: 1 }),
     db.collection('bookings').createIndex({ tenantId: 1, departureId: 1, status: 1 }),
     db.collection('bookings').createIndex({ tenantId: 1, createdAt: -1 }),
-    db.collection('bookings').createIndex({ tenantId: 1, 'costs.supplierId': 1 }),
+    db.collection('bookings').createIndex({ tenantId: 1, 'services.supplierId': 1 }),
     db.collection('bookings').createIndex({ tenantId: 1, branchId: 1, createdAt: -1 }),
 
     db.collection('payments').createIndex({ tenantId: 1, number: 1 }, { unique: true }),
     db.collection('payments').createIndex({ tenantId: 1, bookingId: 1 }),
     db.collection('payments').createIndex({ tenantId: 1, date: -1 }),
     db.collection('payments').createIndex({ tenantId: 1, branchId: 1, date: -1 }),
+
+    db.collection('quotes').createIndex({ tenantId: 1, number: 1 }, { unique: true }),
+    db.collection('quotes').createIndex({ tenantId: 1, status: 1, createdAt: -1 }),
+    db.collection('quotes').createIndex({ tenantId: 1, customerId: 1 }),
+    db.collection('quotes').createIndex({ tenantId: 1, leadId: 1 }),
+    db.collection('invoices').createIndex({ tenantId: 1, number: 1 }, { unique: true }),
+    db.collection('invoices').createIndex({ tenantId: 1, bookingId: 1 }),
+    db.collection('invoices').createIndex({ tenantId: 1, date: -1 }),
 
     db.collection('suppliers').createIndex({ tenantId: 1, name: 1 }),
     db.collection('supplierPayments').createIndex({ tenantId: 1, supplierId: 1, date: -1 }),
