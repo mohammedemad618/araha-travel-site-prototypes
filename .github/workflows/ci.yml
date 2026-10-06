@@ -43,3 +43,38 @@ jobs:
             playwright-report/
             .lighthouseci/
           retention-days: 14
+
+  erp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: erp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: erp/package-lock.json
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Cache Playwright browsers and MongoDB binary
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/mongodb-binaries
+          key: erp-${{ runner.os }}-${{ hashFiles('erp/package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      # Runs against a throwaway MongoDB started by scripts/test-server.mjs.
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: erp-report
+          path: erp/playwright-report/
+          retention-days: 14

@@ -2,10 +2,10 @@
   "name": "niura-travel",
   "version": "1.0.0",
   "private": true,
-  "description": "Niura Travel & Tourism \u2014 bilingual (AR/EN) website built with Next.js",
+  "description": "Niura Travel & Tourism — bilingual (AR/EN) website built with Next.js",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/sync-erp.mjs && next build && node scripts/erp-proxy.mjs",
     "start": "serve out",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",

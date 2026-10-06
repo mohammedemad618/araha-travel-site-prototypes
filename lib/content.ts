@@ -84,8 +84,42 @@ export const getPackages = (): Package[] =>
         throw new Error(`Package "${p.slug}" references unknown destination "${p.destination}"`);
       }
     }
-    return entries.map((e) => e.data).sort((a, b) => a.order - b.order || a.price - b.price);
+    return entries.map((e) => withErpCatalog(e.data)).sort((a, b) => a.order - b.order || a.price - b.price);
   });
+
+type ErpCatalog = {
+  packages: {
+    slug: string;
+    currency: 'IQD' | 'USD';
+    price: number;
+    childPrice?: number;
+    departures: { date: string; status: 'available' | 'limited' | 'soldout' }[];
+  }[];
+};
+
+/** Live prices and seats pulled from the ERP before the build (see scripts/sync-erp.mjs). */
+const erpCatalog = (): ErpCatalog | null =>
+  cached('erp', () => {
+    const file = path.join(CONTENT_DIR, '.erp-catalog.json');
+    if (!fs.existsSync(file)) return null;
+    try {
+      return JSON.parse(fs.readFileSync(file, 'utf8')) as ErpCatalog;
+    } catch {
+      return null;
+    }
+  });
+
+/** The ERP is the source of truth for price and dates of packages it manages (IQD only). */
+function withErpCatalog(p: Package): Package {
+  const live = erpCatalog()?.packages.find((x) => x.slug === p.slug && x.currency === 'IQD');
+  if (!live) return p;
+  return {
+    ...p,
+    price: Math.round(live.price) || p.price,
+    childPrice: live.childPrice !== undefined ? Math.round(live.childPrice) : p.childPrice,
+    departures: live.departures.map((d) => ({ date: d.date, status: d.status })),
+  };
+}
 
 export const getPackage = (slug: string) => getPackages().find((p) => p.slug === slug);
 export const getDestination = (slug: string) => getDestinations().find((d) => d.slug === slug);

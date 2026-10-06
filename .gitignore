@@ -9,3 +9,6 @@ playwright-report/
 test-results/
 deploy-*.zip
 .lighthouseci/
+
+# Live catalog pulled from the ERP at build time
+content/.erp-catalog.json

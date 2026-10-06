@@ -5,6 +5,24 @@ import { track } from '@/lib/analytics';
 import { isValidPhone } from '@/lib/format';
 
 export type FormStatus = 'idle' | 'sending' | 'sent' | 'error';
+
+const ERP_KEY = process.env.NEXT_PUBLIC_ERP_KEY;
+
+/**
+ * Sends the lead to the Niura ERP through the same-origin /erp-api proxy
+ * (added at build time when ERP_URL is set). Resolves false when the ERP is not
+ * configured, so it never counts as the successful delivery on its own.
+ */
+async function sendToErp(body: URLSearchParams): Promise<boolean> {
+  if (!ERP_KEY) return false;
+  const res = await fetch('/erp-api/v1/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Api-Key': ERP_KEY },
+    body: JSON.stringify(Object.fromEntries(body)),
+  });
+  if (!res.ok) throw new Error(`ERP HTTP ${res.status}`);
+  return true;
+}
 export type FieldErrors = Record<string, 'required' | 'invalidPhone' | 'invalidEmail'>;
 
 type Rules = { required?: string[]; phone?: string; email?: string };
@@ -43,7 +61,8 @@ export function useNetlifyForm(formName: string, rules: Rules) {
     if (Object.keys(found).length) {
       // Focus the first invalid field in reading order.
       const first = [...form.elements].find(
-        (el): el is HTMLElement => el instanceof HTMLElement && 'name' in el && Boolean(found[(el as HTMLInputElement).name]),
+        (el): el is HTMLElement =>
+          el instanceof HTMLElement && 'name' in el && Boolean(found[(el as HTMLInputElement).name]),
       );
       first?.focus();
       return;
@@ -54,12 +73,19 @@ export function useNetlifyForm(formName: string, rules: Rules) {
     try {
       const body = new URLSearchParams();
       data.forEach((value, key) => body.append(key, String(value)));
-      const res = await fetch('/__forms.html', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // Netlify Forms keeps a copy and emails the team; the ERP (when connected)
+      // receives the same lead. Either one succeeding counts as sent.
+      const results = await Promise.allSettled([
+        fetch('/__forms.html', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString(),
+        }).then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        }),
+        sendToErp(body),
+      ]);
+      if (!results.some((r) => r.status === 'fulfilled' && r.value !== false)) throw new Error('not sent');
       const values: Record<string, string> = {};
       data.forEach((value, key) => {
         if (!['form-name', 'page', 'bot-field'].includes(key)) values[key] = String(value);
