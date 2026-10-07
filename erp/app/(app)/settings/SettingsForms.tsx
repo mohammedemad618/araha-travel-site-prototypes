@@ -354,6 +354,7 @@ export function WebsiteForm({
         name="siteUrl"
         defaultValue={siteUrl}
         dir="ltr"
+        autoComplete="off"
         placeholder="https://araha-travel.netlify.app"
       />
       <TextArea
@@ -367,11 +368,17 @@ export function WebsiteForm({
       <TextField
         label={t('settings.buildHook')}
         name="buildHookUrl"
-        type="password"
+        // A text field, not a password one: browsers ignore autocomplete="off" on
+        // password fields and fill in the saved sign-in password.
+        type="text"
+        inputMode="url"
+        spellCheck={false}
         defaultValue={buildHookUrl}
         dir="ltr"
         hint={t('settings.buildHookHint')}
         autoComplete="off"
+        data-1p-ignore
+        data-lpignore="true"
       />
       <div>
         <SubmitButton>{t('common.saveChanges')}</SubmitButton>
