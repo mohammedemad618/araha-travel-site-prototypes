@@ -4,10 +4,12 @@
 [build]
   command = "npm run build"
   publish = "out"
-  # The ERP in erp/ deploys separately; its changes do not rebuild the website.
-  # Builds started by the ERP's build hook always run: they bring new content
-  # from the ERP while the git commit stays the same.
-  ignore = "[ -z \"$INCOMING_HOOK_URL\" ] && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)erp'"
+  # The ERP in erp/ deploys separately, so a push that changes only erp/ does
+  # not rebuild the website. Every other build runs, in particular a rebuild of
+  # the same commit: the ERP's build hook (new content, same code), "Trigger
+  # deploy", or a build without cache, where Netlify sets CACHED_COMMIT_REF to
+  # the current commit (comparing a commit with itself would always skip).
+  ignore = "[ -z \"$INCOMING_HOOK_URL\" ] && [ \"$CACHED_COMMIT_REF\" != \"$COMMIT_REF\" ] && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)erp'"
 
 [build.environment]
   NODE_VERSION = "22"
