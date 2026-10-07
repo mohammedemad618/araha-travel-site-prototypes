@@ -1,7 +1,29 @@
 import 'server-only';
+import { createHash } from 'node:crypto';
 import { MongoClient, type Db } from 'mongodb';
 import { ensureIndexes } from './indexes';
-import { migrate } from './migrations';
+import { MIGRATION_IDS, migrate } from './migrations';
+
+// Changes whenever an index or a migration is added. Each new server process
+// (a cold start on Netlify) checks this one value instead of re-declaring every
+// index and listing migrations, which took dozens of round trips.
+const SCHEMA_VERSION = createHash('sha1')
+  .update(ensureIndexes.toString())
+  .update(MIGRATION_IDS.join(','))
+  .digest('hex')
+  .slice(0, 16);
+
+async function prepare(db: Db): Promise<void> {
+  const meta = db.collection<{ _id: string; version: string; at: Date }>('meta');
+  if ((await meta.findOne({ _id: 'schema' }))?.version === SCHEMA_VERSION) return;
+  await ensureIndexes(db);
+  await migrate(db);
+  await meta.updateOne(
+    { _id: 'schema' },
+    { $set: { version: SCHEMA_VERSION, at: new Date() } },
+    { upsert: true },
+  );
+}
 
 // One client per server process (reused across hot reloads in development and
 // across invocations of a warm serverless function).
@@ -24,8 +46,7 @@ export function getDb(): Promise<Db> {
       .connect()
       .then(async (client) => {
         const db = client.db(process.env.MONGODB_DB || 'niura_erp');
-        await ensureIndexes(db);
-        await migrate(db);
+        await prepare(db);
         return db;
       })
       .catch((err) => {

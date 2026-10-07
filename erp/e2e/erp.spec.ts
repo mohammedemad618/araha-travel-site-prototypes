@@ -35,7 +35,8 @@ async function readTempPassword(page: Page, email: string): Promise<string> {
 test('the health check reports a connected database before setup', async ({ request }) => {
   const res = await request.get('/api/health');
   expect(res.status()).toBe(200);
-  expect(await res.json()).toEqual({ status: 'ok', database: 'connected', setupDone: false });
+  expect(await res.json()).toMatchObject({ status: 'ok', database: 'connected', setupDone: false });
+  expect(typeof (await res.json()).latencyMs).toBe('number');
 });
 
 test('first visit runs the one-time platform setup', async ({ page }) => {

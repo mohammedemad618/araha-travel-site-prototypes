@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { KeyRound, LogOut, Search } from 'lucide-react';
@@ -15,6 +16,7 @@ import { AutoSubmitSelect } from '@/components/WorkspaceSwitcher';
 import type { Tenant } from '@/lib/types';
 import { Sidebar } from '@/components/Sidebar';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { NavigationProgress } from '@/components/NavigationProgress';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,6 +65,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div style={{ ['--accent' as string]: accent }} className="min-h-svh">
+      <Suspense fallback={null}>
+        <NavigationProgress />
+      </Suspense>
       <Sidebar groups={buildNav(ctx, t, badges)} brand={brand} sub={sub} />
       <div className="lg:ps-[248px]">
         {ctx.role === 'platform' && ctx.tenant && (

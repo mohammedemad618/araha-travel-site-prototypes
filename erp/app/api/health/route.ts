@@ -16,9 +16,13 @@ export async function GET() {
     );
   try {
     const db = await getDb();
+    // One round trip to the database, timed: every page makes several, so this
+    // shows how far the servers are from the database.
+    const start = performance.now();
     await db.command({ ping: 1 });
+    const latencyMs = Math.round(performance.now() - start);
     const setupDone = (await db.collection('users').estimatedDocumentCount()) > 0;
-    return NextResponse.json({ status: 'ok', database: 'connected', setupDone }, { headers });
+    return NextResponse.json({ status: 'ok', database: 'connected', setupDone, latencyMs }, { headers });
   } catch (err) {
     const message = String((err as Error)?.message ?? '');
     const database = /auth|credential|password/i.test(message)

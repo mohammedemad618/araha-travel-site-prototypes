@@ -128,38 +128,49 @@ export async function dashboardData(ctx: TenantCtx) {
     (b) =>
       b.travelDate && b.travelDate >= today && b.travelDate <= addDays(today, 120) && b.travellerIds.length,
   );
-  let passportAlerts = 0;
-  if (upcoming.length) {
+  const countPassportAlerts = async () => {
+    let alerts = 0;
+    if (!upcoming.length) return alerts;
     const customers = await r.customers
       .find({ _id: { $in: upcoming.map((b) => b.customerId) } }, { projection: { travellers: 1 } })
       .toArray();
     for (const b of upcoming) {
       const c = customers.find((x) => String(x._id) === String(b.customerId));
       const limit = addDays(b.returnDate ?? b.travelDate!, 183);
-      passportAlerts += (c?.travellers ?? []).filter(
+      alerts += (c?.travellers ?? []).filter(
         (t) =>
           b.travellerIds.some((id) => String(id) === String(t._id)) &&
           t.passportExpiry &&
           t.passportExpiry < limit,
       ).length;
     }
-  }
+    return alerts;
+  };
 
   // Next departures with seats.
-  const deps = await r.departures
-    .find({ date: { $gte: today }, closed: false })
-    .sort({ date: 1 })
-    .limit(5)
-    .toArray();
-  const [pkgs, seatRows] = await Promise.all([
-    r.packages.find({ _id: { $in: deps.map((d) => d.packageId) } }, { projection: { title: 1 } }).toArray(),
-    // Seats are shared by every branch.
-    r.all.bookings
-      .aggregate<{ _id: ObjectId; n: number }>([
-        { $match: { departureId: { $in: deps.map((d) => d._id) }, status: { $in: SEAT_HOLDING } } },
-        { $group: { _id: '$departureId', n: { $sum: { $add: ['$adults', '$children'] } } } },
-      ])
-      .toArray(),
+  const loadDepartures = async () => {
+    const deps = await r.departures
+      .find({ date: { $gte: today }, closed: false })
+      .sort({ date: 1 })
+      .limit(5)
+      .toArray();
+    const [pkgs, seatRows] = await Promise.all([
+      r.packages.find({ _id: { $in: deps.map((d) => d.packageId) } }, { projection: { title: 1 } }).toArray(),
+      // Seats are shared by every branch.
+      r.all.bookings
+        .aggregate<{ _id: ObjectId; n: number }>([
+          { $match: { departureId: { $in: deps.map((d) => d._id) }, status: { $in: SEAT_HOLDING } } },
+          { $group: { _id: '$departureId', n: { $sum: { $add: ['$adults', '$children'] } } } },
+        ])
+        .toArray(),
+    ]);
+    return { deps, pkgs, seatRows };
+  };
+
+  // The two are independent: one round trip of waiting instead of two.
+  const [passportAlerts, { deps, pkgs, seatRows }] = await Promise.all([
+    countPassportAlerts(),
+    loadDepartures(),
   ]);
   const departures = deps.map((d) => ({
     id: String(d._id),

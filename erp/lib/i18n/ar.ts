@@ -6,6 +6,7 @@ export const ar = {
     tagline: 'العملاء والحجوزات والمالية في مكان واحد',
   },
   common: {
+    loading: 'جارٍ التحميل…',
     save: 'حفظ',
     saveChanges: 'حفظ التغييرات',
     cancel: 'إلغاء',

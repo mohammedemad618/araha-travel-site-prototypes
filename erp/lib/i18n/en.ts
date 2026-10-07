@@ -7,6 +7,7 @@ export const en: Dict = {
     tagline: 'Customers, bookings and finance in one place',
   },
   common: {
+    loading: 'Loading…',
     save: 'Save',
     saveChanges: 'Save changes',
     cancel: 'Cancel',

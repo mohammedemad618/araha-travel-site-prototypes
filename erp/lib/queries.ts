@@ -1,15 +1,22 @@
 import 'server-only';
 import { cache } from 'react';
-import type { Filter, ObjectId, Document } from 'mongodb';
+import { ObjectId, type Document, type Filter } from 'mongodb';
 import { getDb } from './db';
 import type { Membership, User } from './types';
 
 export const PAGE_SIZE = 25;
 
 /** Staff of a company (its members), for "assigned to" pickers and name lookups. */
-export const getStaff = cache(async (tenantId: ObjectId) => {
+export const getStaff = (tenantId: ObjectId) => staffOf(String(tenantId));
+
+// Cached per request by the id's text: React's cache compares arguments by
+// identity, and every caller holds its own ObjectId instance.
+const staffOf = cache(async (id: string) => {
   const db = await getDb();
-  const members = await db.collection<Membership>('memberships').find({ tenantId }).toArray();
+  const members = await db
+    .collection<Membership>('memberships')
+    .find({ tenantId: new ObjectId(id) })
+    .toArray();
   const users = await db
     .collection<User>('users')
     .find({ _id: { $in: members.map((m) => m.userId) } }, { projection: { name: 1, email: 1, active: 1 } })

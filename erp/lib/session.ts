@@ -80,27 +80,32 @@ export const getCtx = cache(async (): Promise<Ctx | null> => {
   const db = await getDb();
   const session = await db.collection<Session>('sessions').findOne({ tokenHash: sha256(token) });
   if (!session || session.expiresAt < new Date()) return null;
-  const user = await db.collection<User>('users').findOne({ _id: session.userId });
+  // Everything else depends only on the session, so it is read in one round
+  // trip instead of one after another (each costs a trip to the database).
+  const activeId = session.activeTenantId;
+  if (activeId) loadBranches(String(activeId)).catch(() => undefined); // warms the per-request cache
+  const [user, memberships, activeTenant] = await Promise.all([
+    db.collection<User>('users').findOne({ _id: session.userId }),
+    db
+      .collection<Membership>('memberships')
+      .find({ userId: session.userId, active: true })
+      .sort({ createdAt: 1 })
+      .toArray(),
+    activeId ? db.collection<Tenant>('tenants').findOne({ _id: activeId }) : null,
+  ]);
   if (!user || !user.active) return null;
 
   if (user.platformAdmin) {
-    const tenant = session.activeTenantId
-      ? await db.collection<Tenant>('tenants').findOne({ _id: session.activeTenantId })
-      : null;
-    return { user, role: 'platform', session, tenant, membership: null, memberships: [] };
+    return { user, role: 'platform', session, tenant: activeTenant, membership: null, memberships: [] };
   }
-  const memberships = await db
-    .collection<Membership>('memberships')
-    .find({ userId: user._id, active: true })
-    .sort({ createdAt: 1 })
-    .toArray();
   const membership =
-    memberships.find(
-      (m) => session.activeTenantId && String(m.tenantId) === String(session.activeTenantId),
-    ) ?? memberships[0];
+    memberships.find((m) => activeId && String(m.tenantId) === String(activeId)) ?? memberships[0];
   // A user who belongs to no company any more is treated as signed out.
   if (!membership) return null;
-  const tenant = await db.collection<Tenant>('tenants').findOne({ _id: membership.tenantId });
+  const tenant =
+    activeTenant && String(activeTenant._id) === String(membership.tenantId)
+      ? activeTenant
+      : await db.collection<Tenant>('tenants').findOne({ _id: membership.tenantId });
   return { user, role: membership.role, session, tenant, membership, memberships };
 });
 

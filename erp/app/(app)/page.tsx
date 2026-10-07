@@ -30,8 +30,7 @@ export const metadata: Metadata = { title: 'Dashboard' };
 export default async function DashboardPage() {
   const ctx = await requireTenant();
   const { t, lang } = await getI18n();
-  const d = await dashboardData(ctx);
-  const staff = await getStaff(ctx.tenant._id);
+  const [d, staff] = await Promise.all([dashboardData(ctx), getStaff(ctx.tenant._id)]);
   const money = (v: number) => formatMoney(v, d.currency, lang);
   const seeFinance = can(ctx.role, 'finance.read');
   const seeLeads = can(ctx.role, 'leads.read');

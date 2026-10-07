@@ -119,6 +119,9 @@ const MIGRATIONS: Migration[] = [
   },
 ];
 
+/** Identifies the set of migrations, so a database that has them all can skip the check. */
+export const MIGRATION_IDS = MIGRATIONS.map((m) => m.id);
+
 export async function migrate(db: Db): Promise<void> {
   const done = new Set(
     (
