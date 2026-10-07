@@ -1,8 +1,9 @@
 // Before the build: pull from the Niura ERP (when ERP_URL and NEXT_PUBLIC_ERP_KEY
-// are set) the live prices and dates, and the pages edited in its "Website
-// content" section (trip programs, visas, destinations and their images).
+// are set) the live prices and dates, and everything edited in its "Website
+// content" section: trip programs, visas, destinations, guides, pages, company
+// details, the home page, testimonials, the FAQ and their images.
 // Never fails the build: without the ERP the site uses the files in content/.
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 
 const CATALOG = 'content/.erp-catalog.json';
 const MEDIA_DIR = 'public/uploads/erp';
@@ -83,6 +84,19 @@ try {
   for (const d of content.destinations) await write('destinations', d.slug, d);
   for (const v of content.visas) await write('visas', v.destination, v);
   for (const p of content.packages) await write('packages', p.slug, p);
+  for (const g of content.guides ?? []) await write('guides', g.slug, g);
+  // Once guides are managed in the ERP, its list is the whole list: a guide
+  // deleted there leaves the site.
+  if (content.guides?.length) {
+    const keep = new Set(content.guides.map((g) => `${g.slug}.json`));
+    for (const f of await readdir('content/guides'))
+      if (f.endsWith('.json') && !keep.has(f)) await rm(`content/guides/${f}`, { force: true });
+  }
+  for (const [key, page] of Object.entries(content.pages ?? {}))
+    if (['about', 'privacy', 'terms'].includes(key)) await write('pages', key, page);
+  const singles = { site: 'site', home: 'home', testimonials: 'testimonials', faq: 'faq' };
+  for (const [kind, file] of Object.entries(singles))
+    if (content[kind] && typeof content[kind] === 'object') await write('settings', file, content[kind]);
 
   // Hidden packages leave the site, unless the home page still features them.
   const home = JSON.parse(await readFile('content/settings/home.json', 'utf8'));
@@ -97,7 +111,9 @@ try {
   }
   console.log(
     `[erp] synced ${content.packages.length} trip programs, ${content.visas.length} visas, ` +
-      `${content.destinations.length} destinations, ${local.size} images`,
+      `${content.destinations.length} destinations, ${content.guides?.length ?? 0} guides, ` +
+      `${Object.keys(content.pages ?? {}).length} pages, ` +
+      `${Object.keys(singles).filter((k) => content[k]).length} settings, ${local.size} images`,
   );
 } catch (err) {
   console.warn(`[erp] could not read website content (${err.message}); using the files in content/.`);

@@ -7,14 +7,14 @@ import { repo } from '@/lib/repo';
 import { formatDateTime } from '@/lib/dates';
 import { listMedia, mediaPath } from '@/lib/media';
 import { hasUnpublished } from '@/lib/website-publish';
-import { MEDIA_PREFIX, imageSources } from '@/lib/site-content';
+import { MEDIA_PREFIX, SINGLE_KEY, imageSources, pageKeys, singleKinds } from '@/lib/site-content';
 import { Badge, Card, EmptyState, LinkButton, PageHeader, Table, Tabs } from '@/components/ui';
 import { DeleteMediaButton, ImportContentButton, PublishNowButton } from './WebsiteActions';
 import { MediaUpload } from './MediaUpload';
 
 export const metadata: Metadata = { title: 'Website content' };
 
-const TABS = ['package', 'visa', 'destination', 'media'] as const;
+const TABS = ['package', 'visa', 'destination', 'guide', 'page', 'settings', 'media'] as const;
 type Tab = (typeof TABS)[number];
 
 export default async function WebsitePage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
@@ -104,6 +104,14 @@ export default async function WebsitePage({ searchParams }: { searchParams: Prom
             href: '/website?tab=destination',
             count: of('destination').length,
           },
+          {
+            key: 'guide',
+            label: t('website.tabs.guide'),
+            href: '/website?tab=guide',
+            count: of('guide').length,
+          },
+          { key: 'page', label: t('website.tabs.page'), href: '/website?tab=page' },
+          { key: 'settings', label: t('website.tabs.settings'), href: '/website?tab=settings' },
           { key: 'media', label: t('website.tabs.media'), href: '/website?tab=media', count: media.length },
         ]}
       />
@@ -156,12 +164,12 @@ export default async function WebsitePage({ searchParams }: { searchParams: Prom
         </Card>
       )}
 
-      {(tab === 'visa' || tab === 'destination') && (
+      {(tab === 'visa' || tab === 'destination' || tab === 'guide') && (
         <Card
           padded={false}
           actions={
             <LinkButton href={`/website/${tab}/new`} variant="primary" size="sm">
-              {t(tab === 'visa' ? 'website.newVisa' : 'website.newDestination')}
+              {t(`website.new.${tab}`)}
             </LinkButton>
           }
           title={t(`website.tabs.${tab}`)}
@@ -181,7 +189,7 @@ export default async function WebsitePage({ searchParams }: { searchParams: Prom
                   <tr key={String(p._id)}>
                     <td>
                       <Link href={`/website/${tab}/${p.key}`} className="font-medium hover:underline">
-                        {tab === 'visa' ? p.key : localized(p.data.name)}
+                        {tab === 'visa' ? p.key : localized(tab === 'guide' ? p.data.title : p.data.name)}
                       </Link>
                       {tab === 'visa' && (
                         <span className="ms-2">
@@ -198,6 +206,44 @@ export default async function WebsitePage({ searchParams }: { searchParams: Prom
               </tbody>
             </Table>
           )}
+        </Card>
+      )}
+
+      {(tab === 'page' || tab === 'settings') && (
+        <Card padded={false}>
+          <Table>
+            <thead>
+              <tr>
+                <th>{t('website.page')}</th>
+                <th>{t('website.updated')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(tab === 'page'
+                ? pageKeys.map((k) => ({ kind: 'page' as const, key: k, label: t(`website.pages.${k}`) }))
+                : singleKinds.map((k) => ({ kind: k, key: SINGLE_KEY, label: t(`website.tabs.${k}`) }))
+              ).map((row) => {
+                const page = pages.find((p) => p.kind === row.kind && p.key === row.key);
+                return (
+                  <tr key={`${row.kind}:${row.key}`}>
+                    <td>
+                      <Link href={`/website/${row.kind}/${row.key}`} className="font-medium hover:underline">
+                        {row.label}
+                      </Link>
+                      {!page && (
+                        <span className="ms-2">
+                          <Badge tone="warning">{t('website.notImported')}</Badge>
+                        </span>
+                      )}
+                    </td>
+                    <td className="text-[13px] text-muted">
+                      {page ? formatDateTime(page.updatedAt, lang) : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
         </Card>
       )}
 

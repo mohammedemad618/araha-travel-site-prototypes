@@ -366,7 +366,8 @@ test('website content: destination, visa and trip program are edited and served 
     'Bosphorus cruise',
   ]);
   expect(pkg.image.src).toMatch(/\/api\/public\/media\/[a-f0-9]{24}$/);
-  expect(pkg.seo).toBeUndefined();
+  // Blank optional text is left out rather than sent empty.
+  expect(JSON.stringify(pkg)).not.toContain('""');
   expect(data.visas[0]).toMatchObject({ destination: 'turkey', status: 'e-visa' });
   expect(data.destinations[0]).toMatchObject({ slug: 'turkey', homeLayout: 'mid' });
 
@@ -374,6 +375,52 @@ test('website content: destination, visa and trip program are edited and served 
   const img = await request.get(new URL(pkg.image.src).pathname);
   expect(img.headers()['content-type']).toBe('image/png');
   expect(img.headers()['cache-control']).toContain('immutable');
+
+  // A guide is written, served, then deleted.
+  await page.goto('/website?tab=guide');
+  await page.getByRole('link', { name: 'دليل جديد' }).click();
+  await label(page, 'المعرّف في الرابط').fill('istanbul-tips');
+  await fillLoc(page, 'عنوان الدليل', 'نصائح إسطنبول', 'Istanbul tips');
+  await fillLoc(page, 'مقتطف قصير', 'قبل أن تسافر', 'Before you go');
+  await label(page, 'مصدر الصورة').fill('https://images.unsplash.com/photo-1524231757912-21f4fe3a7200');
+  await fillLoc(page, 'وصف الصورة (لقارئات الشاشة ومحركات البحث)', 'إسطنبول', 'Istanbul');
+  await fillLoc(page, 'العنوان', 'المواصلات', 'Getting around');
+  await fillLoc(page, 'النص', 'استخدم بطاقة المترو', 'Use a metro card');
+  await page.getByRole('button', { name: 'حفظ ونشر' }).click();
+  await expect(page).toHaveURL(/\/website\/guide\/istanbul-tips$/);
+
+  // The FAQ exists once per website and can be filled in before any import.
+  await page.goto('/website?tab=settings');
+  await page.getByRole('link', { name: 'الأسئلة الشائعة' }).click();
+  await expect(page).toHaveURL(/\/website\/faq\/main$/);
+  await page.getByRole('button', { name: 'إضافة السؤال' }).click();
+  await fillLoc(page, 'السؤال', 'هل الأسعار شاملة؟', 'Are prices inclusive?');
+  await fillLoc(page, 'الجواب', 'نعم', 'Yes');
+  await page.getByRole('button', { name: 'حفظ ونشر' }).click();
+  await expect(page.locator('p[role="status"]')).toContainText('تم الحفظ');
+
+  const more = await (await request.get(`/api/public/v1/content?key=${state.apiKey}`)).json();
+  expect(more.guides).toMatchObject([
+    { slug: 'istanbul-tips', category: 'tips', sections: [{ heading: { en: 'Getting around' } }] },
+  ]);
+  expect(more.faq).toEqual({
+    items: [
+      {
+        question: { ar: 'هل الأسعار شاملة؟', en: 'Are prices inclusive?' },
+        answer: { ar: 'نعم', en: 'Yes' },
+      },
+    ],
+  });
+  expect(more.site).toBeNull();
+
+  await page.goto('/website/guide/istanbul-tips');
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'حذف الدليل' }).click();
+  await expect(page).toHaveURL(/\/website\?tab=guide$/);
+  expect((await (await request.get(`/api/public/v1/content?key=${state.apiKey}`)).json()).guides).toEqual([]);
+
+  // Only the website's own fixed pages exist.
+  expect((await page.goto('/website/page/careers'))?.status()).toBe(404);
 
   // Without a key nothing is served.
   expect((await request.get('/api/public/v1/content?key=pk_wrongwrongwrong')).status()).toBe(401);

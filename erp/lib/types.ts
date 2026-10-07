@@ -567,8 +567,9 @@ export type Expense = {
 };
 
 /** Website content edited in the back office, one document per page (see lib/site-content). */
-export const siteContentKinds = ['package', 'visa', 'destination'] as const;
-export type SiteContentKind = (typeof siteContentKinds)[number];
+// Defined with the content schemas, which the website's tests also load.
+import type { SiteContentKind } from './site-content';
+export { siteContentKinds, type SiteContentKind } from './site-content';
 
 export type SiteContent = {
   _id: ObjectId;

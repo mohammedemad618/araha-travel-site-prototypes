@@ -5,7 +5,7 @@ import { FlatCompat } from '@eslint/eslintrc';
 const compat = new FlatCompat({ baseDirectory: dirname(fileURLToPath(import.meta.url)) });
 
 const config = [
-  { ignores: ['.next/**', 'out/**', 'node_modules/**', 'prototype/**', 'erp/**', 'next-env.d.ts', 'public/admin/**', 'playwright-report/**', 'test-results/**'] },
+  { ignores: ['.next/**', 'out/**', 'node_modules/**', 'prototype/**', 'erp/**', 'next-env.d.ts', 'playwright-report/**', 'test-results/**'] },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
 ];
 

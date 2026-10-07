@@ -6,7 +6,7 @@ import { fromMinor } from '@/lib/money';
 import { rateLimit } from '@/lib/rate-limit';
 import { clientIp, tenantByKey } from '@/lib/public-api';
 import { mediaPath } from '@/lib/media';
-import { MEDIA_PREFIX, compact } from '@/lib/site-content';
+import { MEDIA_PREFIX, SINGLE_KEY, compact, singleKinds } from '@/lib/site-content';
 import type { Departure, SiteContent, TravelPackage } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -98,6 +98,15 @@ export async function GET(req: Request) {
       destinations: pages
         .filter((p) => p.kind === 'destination')
         .map((p) => ({ ...shape(p.data), slug: p.key })),
+      guides: pages.filter((p) => p.kind === 'guide').map((p) => ({ ...shape(p.data), slug: p.key })),
+      pages: Object.fromEntries(pages.filter((p) => p.kind === 'page').map((p) => [p.key, shape(p.data)])),
+      // Sections the website has once; null until they are imported or saved.
+      ...Object.fromEntries(
+        singleKinds.map((k) => {
+          const page = pages.find((p) => p.kind === k && p.key === SINGLE_KEY);
+          return [k, page ? shape(page.data) : null];
+        }),
+      ),
     },
     { headers },
   );

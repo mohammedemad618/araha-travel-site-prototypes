@@ -50,10 +50,9 @@
   [headers.values]
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://plausible.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com https://www.google-analytics.com https://www.googletagmanager.com; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://plausible.io; frame-src https://www.google.com https://maps.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
 
-# The CMS needs GitHub/Netlify APIs and its own script bundle.
-[[headers]]
-  for = "/admin/*"
-  [headers.values]
-    X-Robots-Tag = "noindex"
-    Cache-Control = "no-cache"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://images.unsplash.com https://*.githubusercontent.com; font-src 'self' data:; connect-src 'self' https://api.github.com https://api.netlify.com https://unpkg.com https://images.unsplash.com https://*.githubusercontent.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+# Content is edited in the Niura ERP now; old /admin bookmarks land there.
+[[redirects]]
+  from = "/admin/*"
+  to = "https://niura-erp.netlify.app/website"
+  status = 302
+  force = true

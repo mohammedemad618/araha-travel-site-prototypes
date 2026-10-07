@@ -22,9 +22,12 @@ function getAt(obj: unknown, path: Path): unknown {
 function setAt(obj: unknown, path: Path, value: unknown): unknown {
   if (!path.length) return value;
   const [head, ...rest] = path as [string | number, ...Path];
-  if (typeof head === 'number') {
+  // Numbers index lists; so do numeric names inside an existing list (e.g. a two-line headline).
+  const index =
+    typeof head === 'number' ? head : Array.isArray(obj) && /^\d+$/.test(head) ? Number(head) : null;
+  if (index !== null) {
     const arr = Array.isArray(obj) ? [...obj] : [];
-    arr[head] = setAt(arr[head], rest, value);
+    arr[index] = setAt(arr[index], rest, value);
     return arr;
   }
   const o = obj && typeof obj === 'object' && !Array.isArray(obj) ? { ...(obj as Json) } : {};
@@ -168,9 +171,13 @@ function FieldView({ spec, path, ctx }: { spec: FieldSpec; path: Path; ctx: Ctx 
               dir={spec.kind === 'text' ? spec.dir : 'ltr'}
               className="field-input max-w-sm"
               value={v == null ? '' : String(v)}
-              onChange={(e) =>
-                ctx.set(path, spec.kind === 'number' ? Number(e.target.value || 0) : e.target.value)
-              }
+              step={spec.kind === 'number' ? 'any' : undefined}
+              onChange={(e) => {
+                const raw = e.target.value;
+                // A blank optional number stays blank ("not set"), not zero.
+                if (spec.kind !== 'number') ctx.set(path, raw);
+                else ctx.set(path, raw === '' ? (spec.required ? 0 : '') : Number(raw));
+              }}
             />
           )}
         </Field>
@@ -448,7 +455,7 @@ function ImageField({
         </div>
       </div>
       <LocField
-        spec={{ kind: 'loc', name: 'alt', label: t('website.imageAlt'), required: true }}
+        spec={{ kind: 'loc', name: 'alt', label: t('website.imageAlt'), required: required !== false }}
         path={[...path, 'alt']}
         value={getAt(ctx.value, [...path, 'alt'])}
         set={ctx.set}

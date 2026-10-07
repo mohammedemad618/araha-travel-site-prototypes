@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { Readable } from 'node:stream';
 import { z } from 'zod';
 import { getDb } from '../db';
@@ -11,7 +12,15 @@ import { fieldErrors, type ActionResult } from '../forms';
 import { sniffType } from '../files';
 import { IMAGE_TYPES, MAX_IMAGE, mediaBucket, type MediaFile } from '../media';
 import { contentChanged, triggerBuild } from '../website-publish';
-import { MEDIA_PREFIX, contentKey, contentSchemas, imageSources } from '../site-content';
+import {
+  MEDIA_PREFIX,
+  SINGLE_KEY,
+  contentKey,
+  contentSchemas,
+  imageSources,
+  pageKeys,
+  validKey,
+} from '../site-content';
 import { siteContentKinds, type SiteContentKind } from '../types';
 
 const PERM = 'website.write' as const;
@@ -28,9 +37,10 @@ export async function saveContent(_: ActionResult | null, fd: FormData): Promise
   if (!auth.ok) return auth;
   const { ctx } = auth;
   const kind = z.enum(siteContentKinds).safeParse(fd.get('kind'));
-  const key = contentKey.safeParse(String(fd.get('key') ?? '').trim());
   if (!kind.success) return { ok: false, error: 'notFound' };
-  if (!key.success) return { ok: false, error: 'invalidKey', fields: { key: 'invalidKey' } };
+  const key = contentKey.safeParse(String(fd.get('key') ?? '').trim());
+  if (!key.success || !validKey(kind.data, key.data))
+    return { ok: false, error: 'invalidKey', fields: { key: 'invalidKey' } };
   let raw: unknown;
   try {
     raw = JSON.parse(String(fd.get('data') ?? ''));
@@ -135,6 +145,28 @@ export async function deleteMedia(_: ActionResult | null, fd: FormData): Promise
   return { ok: true };
 }
 
+/** Removes a travel guide from the website. */
+export async function deleteGuide(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
+  const auth = await actionTenant(PERM);
+  if (!auth.ok) return auth;
+  const { ctx } = auth;
+  const key = contentKey.safeParse(String(fd.get('key') ?? ''));
+  if (!key.success) return { ok: false, error: 'notFound' };
+  const r = await repo(ctx);
+  const gone = await r.siteContent.findOneAndDelete({ kind: 'guide', key: key.data });
+  if (!gone) return { ok: false, error: 'notFound' };
+  await audit({
+    tenantId: ctx.tenantId,
+    userId: ctx.user._id,
+    action: 'website.delete',
+    summary: `guide:${key.data}`,
+  });
+  await contentChanged(ctx.tenantId);
+  revalidatePath('/website');
+  // On the server: the deleted guide's page no longer exists to come back to.
+  redirect('/website?tab=guide');
+}
+
 /** Starts a website build now, whatever the automatic schedule. */
 export async function publishNow(): Promise<ActionResult> {
   const auth = await actionTenant(PERM);
@@ -205,13 +237,27 @@ export async function importWebsiteContent(): Promise<ActionResult> {
       const { slug, ...data } = d;
       return { kind: 'destination' as const, key: slug, data };
     }),
+    ...list(body.guides).map((g) => {
+      const { slug, ...data } = g;
+      return { kind: 'guide' as const, key: slug, data };
+    }),
+    ...pageKeys.flatMap((k) => {
+      const page = (body.pages as Record<string, Record<string, unknown>> | undefined)?.[k];
+      return page ? [{ kind: 'page' as const, key: k, data: page }] : [];
+    }),
+    ...(['site', 'home', 'testimonials', 'faq'] as const).flatMap((k) => {
+      const data = body[k];
+      return data && typeof data === 'object'
+        ? [{ kind: k, key: SINGLE_KEY, data: data as Record<string, unknown> }]
+        : [];
+    }),
   ];
   let added = 0;
   let skipped = 0;
   for (const item of items) {
     const key = contentKey.safeParse(item.key);
     const parsed = contentSchemas[item.kind].safeParse(item.data);
-    if (!key.success || !parsed.success) {
+    if (!key.success || !validKey(item.kind, key.data) || !parsed.success) {
       skipped++;
       continue;
     }

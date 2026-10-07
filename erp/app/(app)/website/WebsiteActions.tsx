@@ -1,7 +1,7 @@
 'use client';
 
 import { ActionForm, SubmitButton } from '@/components/form';
-import { deleteMedia, importWebsiteContent, publishNow } from '@/lib/actions/site-content';
+import { deleteGuide, deleteMedia, importWebsiteContent, publishNow } from '@/lib/actions/site-content';
 import { useI18n } from '@/lib/i18n/client';
 
 export function PublishNowButton({ primary }: { primary?: boolean }) {
@@ -29,6 +29,18 @@ export function DeleteMediaButton({ id }: { id: string }) {
       <input type="hidden" name="id" value={id} />
       <SubmitButton variant="ghost" size="sm" confirm={t('website.confirmDeleteImage')}>
         {t('common.delete')}
+      </SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function DeleteGuideButton({ contentKey }: { contentKey: string }) {
+  const { t } = useI18n();
+  return (
+    <ActionForm action={deleteGuide} successMessage={false} className="flex flex-col items-start">
+      <input type="hidden" name="key" value={contentKey} />
+      <SubmitButton variant="danger" size="sm" confirm={t('website.confirmDeleteGuide')}>
+        {t('website.deleteGuide')}
       </SubmitButton>
     </ActionForm>
   );

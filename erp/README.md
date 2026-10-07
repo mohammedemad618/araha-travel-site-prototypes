@@ -133,16 +133,18 @@
 
 ### 4) محتوى الموقع من النظام
 
-قسم **محتوى الموقع** يدير ما يقرؤه الزائر، ويحل تدريجياً محل لوحة `/admin`:
+قسم **محتوى الموقع** يدير كل ما يقرؤه الزائر (لم تعد هناك لوحة `/admin` في الموقع):
 
 - **برامج الرحلات:** صفحة لكل باقة من «الباقات والمواعيد». تشمل النصوص والمزايا والمعلومات السريعة وبرنامج الأيام ويشمل/لا يشمل والصور ومحركات البحث. السعر والمدة والمواعيد تبقى في «الباقات والمواعيد».
-- **التأشيرات** و**الوجهات**.
+- **التأشيرات** و**الوجهات** و**أدلة السفر** (إضافة وتعديل، والأدلة تُحذف أيضاً).
+- **الصفحات:** من نحن، والخصوصية، والشروط.
+- **الإعدادات والرئيسية:** معلومات الشركة (الهاتف وواتساب والعنوان والدوام وأرقام الثقة وطرق الدفع)، والصفحة الرئيسية بكل أقسامها، وآراء العملاء (يظهر الموثّق فقط)، والأسئلة الشائعة.
 - **مكتبة الصور:** رفع JPG/PNG/WebP حتى 5 ميغابايت. الصور عامة، ولا تُحذف صورة مستخدمة.
 
 طريقة العمل:
 
 1. أنشئ Build hook لموقع الشركة في Netlify (**Site configuration ← Build & deploy ← Build hooks**) وضعه في **الإعدادات ← ربط الموقع**.
-2. في **محتوى الموقع** اضغط **استيراد محتوى الموقع الحالي** مرة واحدة، فتُنسخ صفحات الموقع كما هي.
+2. في **محتوى الموقع** اضغط **استيراد محتوى الموقع الحالي**، فتُنسخ صفحات الموقع كما هي. الضغط مرة أخرى يضيف الأقسام الجديدة فقط ولا يمس ما عدّلته.
 3. كل **حفظ ونشر** يعيد بناء الموقع تلقائياً، بحد أقصى مرة كل 90 ثانية. التعديلات بين بناءين تنتظر الحفظ التالي أو زر **انشر الآن**.
 
 عند البناء يسحب الموقع المحتوى من `‎/api/public/v1/content` (بالمفتاح العام)، وينزّل صور المكتبة إلى `public/uploads/erp`، ويكتبها فوق ملفات `content/`. يتحقق النظام من كل صفحة بنفس قواعد الموقع قبل الحفظ. إن فشل البناء لأي سبب تبقى النسخة السابقة منشورة.
@@ -221,7 +223,7 @@ Multi-tenant back office for travel agencies, linked to their websites:
 - Operations: packages with departure dates and seat control, bookings with sale items, supplier costs and profit, visa tracking.
 - Finance: IQD/USD payments and refunds, printable invoices and receipts, supplier balances.
 - Reports, roles and permissions, an audit log, CSV export, and Arabic/English (RTL/LTR).
-- Website content: trip programs, visas, destinations and an image library edited in the back office; each save rebuilds the website through its build hook (at most every 90 s), and the build pulls `/api/public/v1/content` and downloads library images.
+- Website content: every website section (trip programs, visas, destinations, guides, pages, company details, home page, testimonials, FAQ) and an image library edited in the back office, replacing the old /admin CMS; each save rebuilds the website through its build hook (at most every 90 s), and the build pulls `/api/public/v1/content` and downloads library images.
 - Lost platform-admin access: set `ADMIN_RESET_TOKEN` (32+ chars), redeploy, use `/reset-admin`, then remove it.
 
 **Deploy:**
