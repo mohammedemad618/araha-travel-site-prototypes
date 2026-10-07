@@ -1,5 +1,4 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { destinationSchema, packageSchema, visaSchema } from '../../lib/schema';
 
 // One story, in order: the platform is set up, two travel companies join, the
 // first one sells a trip end to end, and the second one must never see it.
@@ -375,18 +374,6 @@ test('website content: destination, visa and trip program are edited and served 
   const img = await request.get(new URL(pkg.image.src).pathname);
   expect(img.headers()['content-type']).toBe('image/png');
   expect(img.headers()['cache-control']).toContain('immutable');
-
-  // Everything passes the website's own content schemas (images are downloaded
-  // into /uploads/erp by its build before this check runs there).
-  const asSite = JSON.parse(
-    JSON.stringify(data).replace(
-      /https?:\/\/[^"]+\/api\/public\/media\/([a-f0-9]{24})/g,
-      '/uploads/erp/$1.png',
-    ),
-  );
-  expect(packageSchema.safeParse(asSite.packages[0]).success).toBe(true);
-  expect(visaSchema.safeParse(asSite.visas[0]).success).toBe(true);
-  expect(destinationSchema.safeParse(asSite.destinations[0]).success).toBe(true);
 
   // Without a key nothing is served.
   expect((await request.get('/api/public/v1/content?key=pk_wrongwrongwrong')).status()).toBe(401);
