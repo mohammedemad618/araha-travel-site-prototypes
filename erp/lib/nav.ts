@@ -22,6 +22,7 @@ const TENANT_NAV: { label?: string; items: Item[] }[] = [
       { key: 'bookings', href: '/bookings', perm: 'bookings.read' },
       { key: 'inventory', href: '/inventory', perm: 'bookings.read' },
       { key: 'visas', href: '/visas', perm: 'visas.read' },
+      { key: 'website', href: '/website', perm: 'website.write' },
     ],
   },
   {

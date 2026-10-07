@@ -28,6 +28,8 @@ export type TenantWebsite = {
   /** Secret Netlify build hook used to republish the website. */
   buildHookUrl?: string;
   lastPublishedAt?: Date;
+  /** Last time website content was edited in the back office (compared with lastPublishedAt). */
+  contentUpdatedAt?: Date;
 };
 
 export type Tenant = {
@@ -562,4 +564,20 @@ export type Expense = {
   voided: boolean;
   createdBy: ObjectId;
   createdAt: Date;
+};
+
+/** Website content edited in the back office, one document per page (see lib/site-content). */
+export const siteContentKinds = ['package', 'visa', 'destination'] as const;
+export type SiteContentKind = (typeof siteContentKinds)[number];
+
+export type SiteContent = {
+  _id: ObjectId;
+  tenantId: ObjectId;
+  kind: SiteContentKind;
+  /** The page's identifier on the website: package slug, visa destination or destination slug. */
+  key: string;
+  /** Shaped like the website's own content files. Images may point at the media library. */
+  data: Record<string, unknown>;
+  updatedAt: Date;
+  updatedBy?: ObjectId;
 };

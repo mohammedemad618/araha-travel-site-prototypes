@@ -18,3 +18,13 @@ export async function rateLimit(key: string, limit: number, windowSec: number): 
     );
   return (res?.count ?? 0) <= limit;
 }
+
+/** True when `key` already reached `limit` in the current window (does not count this call). */
+export async function overLimit(key: string, limit: number, windowSec: number): Promise<boolean> {
+  const db = await getDb();
+  const bucket = Math.floor(Date.now() / (windowSec * 1000));
+  const doc = await db
+    .collection<{ _id: string; count: number }>('rateLimits')
+    .findOne({ _id: `${key}:${bucket}` });
+  return (doc?.count ?? 0) >= limit;
+}

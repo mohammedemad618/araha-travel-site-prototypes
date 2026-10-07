@@ -16,7 +16,8 @@ const securityHeaders = [
       // React needs eval only in development (error overlays, fast refresh).
       `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      // Website content previews show Unsplash photos and the website's own uploads.
+      "img-src 'self' data: blob: https:",
       "font-src 'self'",
       "connect-src 'self'",
       "frame-ancestors 'none'",

@@ -3,14 +3,14 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { getDb } from '../db';
 import { actionTenant, toObjectId } from '../session';
 import { repo } from '../repo';
 import { audit } from '../audit';
+import { triggerBuild } from '../website-publish';
 import { fieldErrors, intField, optText, reqDate, text, toUpdate, type ActionResult } from '../forms';
 import { parseMoney } from '../money';
 import { seatsBooked } from '../bookings';
-import type { Tenant, TravelPackage } from '../types';
+import type { TravelPackage } from '../types';
 
 const packageSchema = z.object({
   slug: z
@@ -163,18 +163,9 @@ export async function publishWebsite(): Promise<ActionResult> {
   const auth = await actionTenant('inventory.write');
   if (!auth.ok) return auth;
   const { ctx } = auth;
-  const hook = ctx.tenant.website.buildHookUrl;
-  if (!hook) return { ok: false, error: 'noHook' };
-  try {
-    const res = await fetch(hook, { method: 'POST', body: '{}', signal: AbortSignal.timeout(10000) });
-    if (!res.ok) return { ok: false, error: 'generic' };
-  } catch {
-    return { ok: false, error: 'generic' };
-  }
-  const db = await getDb();
-  await db
-    .collection<Tenant>('tenants')
-    .updateOne({ _id: ctx.tenantId }, { $set: { 'website.lastPublishedAt': new Date() } });
+  const result = await triggerBuild(ctx.tenant);
+  if (result === 'noHook') return { ok: false, error: 'noHook' };
+  if (result === 'failed') return { ok: false, error: 'generic' };
   await audit({
     tenantId: ctx.tenantId,
     userId: ctx.user._id,
@@ -182,6 +173,7 @@ export async function publishWebsite(): Promise<ActionResult> {
     summary: 'build hook',
   });
   revalidatePath('/inventory');
+  revalidatePath('/website');
   return { ok: true, message: 'inventory.published' };
 }
 

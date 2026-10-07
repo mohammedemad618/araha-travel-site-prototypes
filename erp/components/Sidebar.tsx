@@ -21,6 +21,7 @@ import {
   FileText,
   Receipt,
   Landmark,
+  Globe,
   type LucideIcon,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/client';
@@ -41,6 +42,7 @@ const ICONS: Record<string, LucideIcon> = {
   reports: BarChart3,
   settings: Settings,
   platform: ShieldCheck,
+  website: Globe,
 };
 
 export type NavGroup = {

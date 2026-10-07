@@ -7,7 +7,7 @@ import { getDb } from '../db';
 import { timingSafeEqual } from 'node:crypto';
 import { hashPassword, sha256, verifyPassword } from '../crypto';
 import { createSession, destroySession, getCtx } from '../session';
-import { rateLimit } from '../rate-limit';
+import { overLimit, rateLimit } from '../rate-limit';
 import { audit } from '../audit';
 import { fieldErrors, type ActionResult } from '../forms';
 import type { Membership, User } from '../types';
@@ -16,6 +16,10 @@ async function clientIp(): Promise<string> {
   const h = await headers();
   return (h.get('x-nf-client-connection-ip') || h.get('x-forwarded-for') || 'local').split(',')[0]!.trim();
 }
+
+// Sign-ins allowed per address in 15 minutes. Offices share one address, so this
+// is looser than the per-account limit; the end-to-end tests raise it.
+const LOGIN_IP_LIMIT = Number(process.env.LOGIN_IP_LIMIT) || 30;
 
 const loginSchema = z.object({
   email: z.string().trim().toLowerCase().min(1, 'required'),
@@ -28,9 +32,12 @@ export async function login(_: ActionResult | null, fd: FormData): Promise<Actio
   if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
   const { email, password, next } = parsed.data;
 
-  // Limit guessing per account and per address.
+  // Limit guessing: 8 wrong passwords per account, and attempts per address.
+  // Successful sign-ins do not count against the account.
   const ip = await clientIp();
-  const allowed = (await rateLimit(`login:${email}`, 8, 900)) && (await rateLimit(`login-ip:${ip}`, 30, 900));
+  const allowed =
+    !(await overLimit(`login-fail:${email}`, 8, 900)) &&
+    (await rateLimit(`login-ip:${ip}`, LOGIN_IP_LIMIT, 900));
   if (!allowed) return { ok: false, error: 'rateLimited' };
 
   const db = await getDb();
@@ -39,7 +46,10 @@ export async function login(_: ActionResult | null, fd: FormData): Promise<Actio
   const ok = user
     ? await verifyPassword(password, user.passwordHash)
     : await verifyPassword(password, 'scrypt$16384$8$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAA');
-  if (!user || !ok || !user.active) return { ok: false, error: 'wrongCredentials' };
+  if (!user || !ok || !user.active) {
+    await rateLimit(`login-fail:${email}`, 8, 900);
+    return { ok: false, error: 'wrongCredentials' };
+  }
   // Staff need at least one company that still lets them in.
   const membership = user.platformAdmin
     ? null

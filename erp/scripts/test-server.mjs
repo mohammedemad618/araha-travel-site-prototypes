@@ -14,6 +14,8 @@ const app = spawn('npx', ['next', 'start', '-p', port], {
     MONGODB_DB: 'niura_test',
     INSECURE_COOKIES: '1',
     ADMIN_RESET_TOKEN: 'e2e-recovery-token-0123456789abcdef',
+    // Every test signs in from the same address.
+    LOGIN_IP_LIMIT: '200',
   },
 });
 const stop = async (code = 0) => {

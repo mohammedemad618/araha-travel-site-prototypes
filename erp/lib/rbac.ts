@@ -11,6 +11,8 @@ export const permissions = [
   'bookings.read',
   'bookings.write',
   'inventory.write',
+  // Editing what the public website shows: trip programs, visas, destinations and images.
+  'website.write',
   'finance.read',
   'finance.write',
   'suppliers.read',
@@ -71,6 +73,7 @@ const ROLE_PERMISSIONS: Record<TenantRole, Set<Permission>> = {
     'bookings.read',
     'bookings.write',
     'inventory.write',
+    'website.write',
     'suppliers.read',
     'visas.read',
     'visas.write',

@@ -40,6 +40,7 @@ import type {
   Membership,
   Payment,
   Quote,
+  SiteContent,
   Supplier,
   SupplierPayment,
   Task,
@@ -152,6 +153,7 @@ function collections(db: Db, tenantId: ObjectId, v: Visibility) {
     accounts: plain<Account>('accounts'),
     journalEntries: plain<JournalEntry>('journalEntries'),
     expenses: plain<Expense>('expenses'),
+    siteContent: plain<SiteContent>('siteContent'),
     auditLogs: plain<AuditLog & { tenantId: ObjectId }>('auditLogs'),
   };
 }

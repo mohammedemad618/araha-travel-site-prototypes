@@ -12,3 +12,5 @@ deploy-*.zip
 
 # Live catalog pulled from the ERP at build time
 content/.erp-catalog.json
+# Website images downloaded from the ERP's library at build time
+public/uploads/erp/

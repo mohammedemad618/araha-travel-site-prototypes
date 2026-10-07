@@ -28,6 +28,8 @@ display_url: https://araha-travel.netlify.app
 collections:
 - name: packages
   label: الباقات
+  # Edited in the Niura ERP (Website content); kept hidden so pickers elsewhere still list them.
+  hide: true
   label_singular: باقة
   folder: content/packages
   extension: json
@@ -430,6 +432,8 @@ collections:
       required: false
 - name: destinations
   label: الوجهات
+  # Edited in the Niura ERP (Website content); kept hidden so pickers elsewhere still list them.
+  hide: true
   label_singular: وجهة
   folder: content/destinations
   extension: json
@@ -633,6 +637,8 @@ collections:
       required: false
 - name: visas
   label: دليل التأشيرات
+  # Edited in the Niura ERP (Website content); kept hidden so pickers elsewhere still list them.
+  hide: true
   label_singular: تأشيرة
   folder: content/visas
   extension: json

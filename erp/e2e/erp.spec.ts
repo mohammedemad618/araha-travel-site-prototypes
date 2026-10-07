@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { destinationSchema, packageSchema, visaSchema } from '../../lib/schema';
 
 // One story, in order: the platform is set up, two travel companies join, the
 // first one sells a trip end to end, and the second one must never see it.
@@ -266,6 +267,129 @@ test('the catalog reports remaining seats to the website', async ({ request }) =
   const pkg = data.packages.find((p: { slug: string }) => p.slug === 'enchanting-istanbul');
   expect(pkg.price).toBe(875000);
   expect(pkg.departures[0]).toMatchObject({ date: '2030-07-15', seatsLeft: 1, status: 'limited' });
+});
+
+/** Fills a bilingual field (its two inputs are named "<label> — العربية" / "<label> — English"). */
+async function fillLoc(scope: Page | Locator, name: string, ar: string, en: string, nth = 0) {
+  await scope.getByLabel(`${name} — العربية`, { exact: true }).nth(nth).fill(ar);
+  await scope.getByLabel(`${name} — English`, { exact: true }).nth(nth).fill(en);
+}
+
+// A 1×1 PNG, enough for the image checks.
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+test('website content: destination, visa and trip program are edited and served to the website build', async ({
+  page,
+  request,
+}) => {
+  await login(page, OWNER_A.email, OWNER_A.password);
+  await page.goto('/website');
+  await expect(page.getByRole('heading', { name: 'محتوى الموقع' })).toBeVisible();
+
+  // A destination, with an Unsplash photo.
+  await page.goto('/website/destination/new');
+  await label(page, 'المعرّف في الرابط').fill('turkey');
+  await fillLoc(page, 'اسم الوجهة', 'تركيا', 'Turkey');
+  await label(page, 'التسمية على الخريطة').fill('إسطنبول');
+  await label(page, 'الإحداثيات').fill('41.0° N · 28.9° E');
+  await fillLoc(page, 'شعار قصير', 'بين قارتين', 'Between two continents');
+  await fillLoc(page, 'الوصف', 'وصف تركيا', 'About Turkey');
+  await fillLoc(page, 'أفضل موسم', 'الربيع', 'Spring');
+  await label(page, 'مصدر الصورة').fill('https://images.unsplash.com/photo-1524231757912-21f4fe3a7200');
+  await fillLoc(page, 'وصف الصورة (لقارئات الشاشة ومحركات البحث)', 'إسطنبول', 'Istanbul');
+  await page.getByRole('button', { name: 'حفظ ونشر' }).click();
+  await expect(page).toHaveURL(/\/website\/destination\/turkey$/);
+
+  // A visa page: a missing field is pointed out, then saved.
+  await page.goto('/website/visa/new');
+  await label(page, 'معرّف الوجهة').fill('turkey');
+  await page.getByRole('button', { name: 'حفظ ونشر' }).click();
+  await expect(page.locator('p[role="alert"]')).toContainText('راجع الحقول');
+  await fillLoc(page, 'الملخص', 'تأشيرة إلكترونية', 'E-visa');
+  await fillLoc(page, 'طريقة التقديم', 'عبر الإنترنت', 'Online');
+  await fillLoc(page, 'بند', 'جواز سفر', 'Passport');
+  await page.getByRole('button', { name: 'حفظ ونشر' }).click();
+  await expect(page).toHaveURL(/\/website\/visa\/turkey$/);
+
+  // The trip program of the package created earlier, with a library image.
+  await page.goto('/website?tab=package');
+  await page.getByRole('link', { name: 'إسطنبول الساحرة' }).click();
+  await expect(page).toHaveURL(/\/website\/package\/enchanting-istanbul$/);
+  await fillLoc(page, 'اسم الباقة', 'إسطنبول الساحرة', 'Enchanting Istanbul');
+  await label(page, 'الوجهة').selectOption('turkey');
+  await page.getByLabel('عائلية').check();
+  await fillLoc(page, 'أساس السعر (مثل: للشخص في غرفة مزدوجة)', 'للشخص', 'per person');
+  await fillLoc(page, 'جملة تعريفية قصيرة', 'مدينة على قارتين', 'A city on two continents');
+  await fillLoc(page, 'نبذة عن الرحلة', 'سبع ليالٍ', 'Seven nights');
+  await fillLoc(page, 'ميزة', 'فنادق 5 نجوم', '5-star hotels');
+  for (const [name, ar, en] of [
+    ['المسار', 'إسطنبول', 'Istanbul'],
+    ['الإقامة', 'فنادق', 'Hotels'],
+    ['الطيران', 'من بغداد', 'From Baghdad'],
+    ['الموسم', 'طوال السنة', 'All year'],
+    ['حجم المجموعة', '16', '16'],
+  ] as const)
+    await fillLoc(page, name, ar, en);
+  await fillLoc(page, 'عنوان اليوم', 'الوصول', 'Arrival');
+  await fillLoc(page, 'تفاصيل اليوم', 'استقبال في المطار', 'Airport pick-up');
+  await page.getByRole('button', { name: 'إضافة اليوم' }).click();
+  await fillLoc(page, 'عنوان اليوم', 'جولة البسفور', 'Bosphorus cruise', 1);
+  await fillLoc(page, 'تفاصيل اليوم', 'رحلة بحرية', 'A boat trip', 1);
+  await fillLoc(page, 'بند', 'الإقامة', 'Hotel stay');
+
+  await page.getByRole('button', { name: 'اختر من المكتبة أو ارفع' }).click();
+  const dialog = page.getByRole('dialog', { name: 'مكتبة الصور' });
+  await dialog
+    .getByLabel('رفع صورة')
+    .setInputFiles({ name: 'istanbul.png', mimeType: 'image/png', buffer: PNG });
+  await expect(dialog).toBeHidden();
+  await expect(label(page, 'مصدر الصورة')).toHaveValue(/^media:[a-f0-9]{24}$/);
+  await fillLoc(page, 'وصف الصورة (لقارئات الشاشة ومحركات البحث)', 'مسجد', 'A mosque');
+  await page.getByRole('button', { name: 'حفظ ونشر' }).click();
+  await expect(page.locator('p[role="status"]')).toContainText('تم الحفظ');
+
+  // The website's build receives pages shaped like its own content files.
+  const res = await request.get(`/api/public/v1/content?key=${state.apiKey}`);
+  expect(res.ok()).toBe(true);
+  const data = await res.json();
+  const pkg = data.packages.find((p: { slug: string }) => p.slug === 'enchanting-istanbul');
+  expect(pkg).toMatchObject({
+    destination: 'turkey',
+    price: 875000,
+    styles: ['family'],
+    departures: [{ date: '2030-07-15', status: 'limited' }],
+  });
+  expect(pkg.itinerary.map((d: { title: { en: string } }) => d.title.en)).toEqual([
+    'Arrival',
+    'Bosphorus cruise',
+  ]);
+  expect(pkg.image.src).toMatch(/\/api\/public\/media\/[a-f0-9]{24}$/);
+  expect(pkg.seo).toBeUndefined();
+  expect(data.visas[0]).toMatchObject({ destination: 'turkey', status: 'e-visa' });
+  expect(data.destinations[0]).toMatchObject({ slug: 'turkey', homeLayout: 'mid' });
+
+  // The image is public, with a long cache.
+  const img = await request.get(new URL(pkg.image.src).pathname);
+  expect(img.headers()['content-type']).toBe('image/png');
+  expect(img.headers()['cache-control']).toContain('immutable');
+
+  // Everything passes the website's own content schemas (images are downloaded
+  // into /uploads/erp by its build before this check runs there).
+  const asSite = JSON.parse(
+    JSON.stringify(data).replace(
+      /https?:\/\/[^"]+\/api\/public\/media\/([a-f0-9]{24})/g,
+      '/uploads/erp/$1.png',
+    ),
+  );
+  expect(packageSchema.safeParse(asSite.packages[0]).success).toBe(true);
+  expect(visaSchema.safeParse(asSite.visas[0]).success).toBe(true);
+  expect(destinationSchema.safeParse(asSite.destinations[0]).success).toBe(true);
+
+  // Without a key nothing is served.
+  expect((await request.get('/api/public/v1/content?key=pk_wrongwrongwrong')).status()).toBe(401);
 });
 
 test('a quote is priced, sent, accepted into a booking, then invoiced', async ({ page }) => {

@@ -38,6 +38,10 @@ test('roles grant only their permissions', () => {
   expect(can('sales', 'data.export')).toBe(false);
   expect(can('viewer', 'data.export')).toBe(false);
   expect(can('accountant', 'data.export')).toBe(true);
+  expect(can('operations', 'website.write')).toBe(true);
+  expect(can('manager', 'website.write')).toBe(true);
+  expect(can('sales', 'website.write')).toBe(false);
+  expect(can('viewer', 'website.write')).toBe(false);
 });
 
 test('business dates reject impossible days', () => {

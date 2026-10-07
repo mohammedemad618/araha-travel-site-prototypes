@@ -38,6 +38,8 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection('packages').createIndex({ tenantId: 1, slug: 1 }, { unique: true }),
     db.collection('departures').createIndex({ tenantId: 1, packageId: 1, date: 1 }),
     db.collection('departures').createIndex({ tenantId: 1, date: 1 }),
+    db.collection('siteContent').createIndex({ tenantId: 1, kind: 1, key: 1 }, { unique: true }),
+    db.collection('media.files').createIndex({ 'metadata.tenantId': 1, uploadDate: -1 }),
 
     db.collection('bookings').createIndex({ tenantId: 1, number: 1 }, { unique: true }),
     db.collection('bookings').createIndex({ tenantId: 1, customerId: 1 }),
