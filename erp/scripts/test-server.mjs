@@ -8,7 +8,13 @@ const mongo = await MongoMemoryServer.create({ instance: { port: 27099 } });
 console.log(`[test] MongoDB at ${mongo.getUri()}`);
 const app = spawn('npx', ['next', 'start', '-p', port], {
   stdio: 'inherit',
-  env: { ...process.env, MONGODB_URI: mongo.getUri(), MONGODB_DB: 'niura_test', INSECURE_COOKIES: '1' },
+  env: {
+    ...process.env,
+    MONGODB_URI: mongo.getUri(),
+    MONGODB_DB: 'niura_test',
+    INSECURE_COOKIES: '1',
+    ADMIN_RESET_TOKEN: 'e2e-recovery-token-0123456789abcdef',
+  },
 });
 const stop = async (code = 0) => {
   app.kill('SIGTERM');

@@ -11,6 +11,8 @@ const OWNER_B = { email: 'owner@beta.test', password: '' };
 const SALES = { email: 'sales@alpha.test', password: '' };
 const BRANCH_SALES = { email: 'baghdad@alpha.test', password: '' };
 const NEW_PASS = 'Owner-Strong-Pass-1';
+/** Matches ADMIN_RESET_TOKEN in scripts/test-server.mjs. */
+const RESET_TOKEN = 'e2e-recovery-token-0123456789abcdef';
 const state: { apiKey?: string; leadId?: string; bookingUrl?: string; customerId?: string } = {};
 
 /** Label match that ignores the required "*" marker. */
@@ -89,6 +91,28 @@ test('a new owner must replace the temporary password', async ({ page }) => {
 test('wrong passwords are refused', async ({ page }) => {
   await login(page, OWNER_A.email, 'not-the-password', false);
   await expect(page.locator('p[role="alert"]')).toContainText('غير صحيحة');
+});
+
+test('the platform admin is recovered with the server recovery token', async ({ page }) => {
+  await page.goto('/reset-admin');
+  await label(page, 'رمز الاستعادة').fill('not-the-token');
+  await label(page, 'البريد الإلكتروني').fill('root@niura.test');
+  await label(page, 'كلمة المرور الجديدة').fill('Recovered-Pass-2026');
+  await label(page, 'تأكيد كلمة المرور').fill('Recovered-Pass-2026');
+  await page.getByRole('button', { name: 'حفظ' }).click();
+  await expect(page.locator('p[role="alert"]')).toContainText('رمز الاستعادة غير صحيح');
+
+  await label(page, 'رمز الاستعادة').fill(RESET_TOKEN);
+  await page.getByRole('button', { name: 'حفظ' }).click();
+  await page.waitForURL('**/platform');
+
+  await page.context().clearCookies();
+  await login(page, ADMIN.email, ADMIN.password, false);
+  await expect(page.locator('p[role="alert"]')).toContainText('غير صحيحة');
+  ADMIN.email = 'root@niura.test';
+  ADMIN.password = 'Recovered-Pass-2026';
+  await login(page, ADMIN.email, ADMIN.password);
+  await expect(page).toHaveURL(/\/platform/);
 });
 
 test('owner sets up the company: staff, website key, package and dates', async ({ page }) => {

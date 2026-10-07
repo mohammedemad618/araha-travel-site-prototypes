@@ -4,7 +4,8 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getDb } from '../db';
-import { hashPassword, verifyPassword } from '../crypto';
+import { timingSafeEqual } from 'node:crypto';
+import { hashPassword, sha256, verifyPassword } from '../crypto';
 import { createSession, destroySession, getCtx } from '../session';
 import { rateLimit } from '../rate-limit';
 import { audit } from '../audit';
@@ -97,6 +98,53 @@ export async function setupPlatform(_: ActionResult | null, fd: FormData): Promi
     action: 'platform.setup',
     summary: parsed.data.email,
   });
+  redirect('/platform');
+}
+
+/** Recovery is switched on only while the server holds a long recovery token. */
+function adminResetEnabled(): boolean {
+  return (process.env.ADMIN_RESET_TOKEN ?? '').length >= 32;
+}
+
+const resetSchema = z
+  .object({
+    token: z.string().min(1, 'required'),
+    email: z.string().trim().toLowerCase().email('invalidEmail'),
+    password: z.string().min(10, 'weakPassword').max(200, 'tooLong'),
+    confirm: z.string(),
+  })
+  .refine((v) => v.password === v.confirm, { message: 'passwordMismatch', path: ['confirm'] });
+
+/**
+ * Sets a new email and password for the first platform administrator. Works only
+ * while ADMIN_RESET_TOKEN (32+ characters) is set on the server, and only with
+ * that token; remove the variable once the account is recovered.
+ */
+export async function resetPlatformAdmin(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
+  if (!adminResetEnabled()) return { ok: false, error: 'forbidden' };
+  if (!(await rateLimit(`admin-reset:${await clientIp()}`, 5, 900)))
+    return { ok: false, error: 'rateLimited' };
+  const parsed = resetSchema.safeParse(Object.fromEntries(fd));
+  if (!parsed.success) return { ok: false, error: 'required', fields: fieldErrors(parsed.error) };
+  const given = Buffer.from(sha256(parsed.data.token.trim()));
+  const expected = Buffer.from(sha256(process.env.ADMIN_RESET_TOKEN!));
+  if (!timingSafeEqual(given, expected))
+    return { ok: false, error: 'wrongResetToken', fields: { token: 'wrongResetToken' } };
+
+  const db = await getDb();
+  const users = db.collection<User>('users');
+  const admin = await users.findOne({ platformAdmin: true }, { sort: { createdAt: 1 } });
+  if (!admin) return { ok: false, error: 'notFound' };
+  const { email, password } = parsed.data;
+  if (await users.findOne({ email, _id: { $ne: admin._id } }))
+    return { ok: false, error: 'duplicateEmail', fields: { email: 'duplicateEmail' } };
+  await users.updateOne(
+    { _id: admin._id },
+    { $set: { email, passwordHash: await hashPassword(password), mustChangePassword: false, active: true } },
+  );
+  await db.collection('sessions').deleteMany({ userId: admin._id });
+  await createSession(admin._id);
+  await audit({ tenantId: null, userId: admin._id, action: 'platform.reset', summary: email });
   redirect('/platform');
 }
 

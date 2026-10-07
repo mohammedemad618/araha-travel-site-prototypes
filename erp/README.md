@@ -170,6 +170,14 @@ npm run build && npm run test:e2e             # اختبارات كاملة عل
   - `catalog` يعرض الأسعار والمقاعد فقط، بلا أي بيانات عملاء.
 - **سجل العمليات** لكل إجراء مهم: الدخول، والحذف، والدفعات، والتصدير، والصلاحيات.
 
+## استعادة حساب مدير المنصة
+
+إذا ضاع بريد مدير المنصة أو كلمة مروره:
+
+1. أضف في إعدادات موقع النظام على Netlify المتغير `ADMIN_RESET_TOKEN`، بقيمة عشوائية من 32 حرفاً على الأقل، ثم أعد النشر.
+2. افتح `‎/reset-admin`، وأدخل الرمز مع البريد وكلمة المرور الجديدين. تُغلق كل جلسات الحساب القديمة.
+3. احذف المتغير وأعد النشر. الصفحة لا تظهر أصلاً دون المتغير.
+
 ## النسخ الاحتياطي
 
 Atlas يأخذ نسخاً احتياطية تلقائية في الخطط المدفوعة. على الخطة المجانية صدّر البيانات دورياً عبر `mongodump`، أو من أزرار **تصدير CSV** في النظام.
@@ -197,6 +205,7 @@ Multi-tenant back office for travel agencies, linked to their websites:
 - Operations: packages with departure dates and seat control, bookings with sale items, supplier costs and profit, visa tracking.
 - Finance: IQD/USD payments and refunds, printable invoices and receipts, supplier balances.
 - Reports, roles and permissions, an audit log, CSV export, and Arabic/English (RTL/LTR).
+- Lost platform-admin access: set `ADMIN_RESET_TOKEN` (32+ chars), redeploy, use `/reset-admin`, then remove it.
 
 **Deploy:**
 

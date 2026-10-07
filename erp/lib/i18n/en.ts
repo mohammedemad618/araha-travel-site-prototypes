@@ -103,6 +103,7 @@ export const en: Dict = {
     duplicateSlug: 'This identifier is already used',
     invalidSlug: 'Lowercase letters, digits and hyphens only',
     wrongCredentials: 'Wrong email or password',
+    wrongResetToken: 'Wrong recovery token',
     wrongPassword: 'Current password is incorrect',
     rateLimited: 'Too many attempts, wait a moment and try again',
     weakPassword: 'Password must be at least 10 characters',
@@ -175,6 +176,10 @@ export const en: Dict = {
     setupTitle: 'Platform setup',
     setupIntro: 'Create the platform administrator. This page works once, before any account exists.',
     setupDone: 'Account created',
+    resetTitle: 'Recover the platform administrator',
+    resetIntro:
+      'Enter the recovery token stored in the server settings, then the new email and password for the platform administrator. Every open session of the account is signed out.',
+    resetToken: 'Recovery token',
     changePassword: 'Change password',
     mustChange: 'For your security, choose a new password before continuing.',
     currentPassword: 'Current password',

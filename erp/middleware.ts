@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC = ['/login', '/setup', '/api/public', '/api/health', '/icon.svg', '/suspended'];
+const PUBLIC = ['/login', '/setup', '/reset-admin', '/api/public', '/api/health', '/icon.svg', '/suspended'];
 
 // Cheap gate: requests without a session cookie go to the sign-in page. The
 // session itself is validated on the server for every page and action.
