@@ -5,6 +5,8 @@ import { requireTenant } from '@/lib/session';
 import { getI18n } from '@/lib/i18n/server';
 import { repo } from '@/lib/repo';
 import { listMedia } from '@/lib/media';
+import { fromMinor } from '@/lib/money';
+import { formatDate, todayISO } from '@/lib/dates';
 import { saveContent } from '@/lib/actions/site-content';
 import { isSingle, validKey } from '@/lib/site-content';
 import {
@@ -23,6 +25,7 @@ import {
 import { siteContentKinds, type SiteContentKind } from '@/lib/types';
 import { Card, PageHeader } from '@/components/ui';
 import { ContentEditor } from '@/components/content/ContentEditor';
+import type { PreviewExtras } from '@/components/content/SitePreview';
 import { DeleteGuideButton } from '../../WebsiteActions';
 
 export const metadata: Metadata = { title: 'Edit website page' };
@@ -77,6 +80,27 @@ export default async function EditWebsitePage({
   if (!isNew && CREATABLE.includes(kind) && !page) notFound();
 
   const initial = page?.data ?? blankContent(kind);
+
+  // What the live preview shows beside the page's own text.
+  const nextDates = pkg
+    ? await r.departures
+        .find({ packageId: pkg._id, date: { $gte: todayISO() }, closed: false })
+        .sort({ date: 1 })
+        .limit(3)
+        .toArray()
+    : [];
+  const names = (rows: { key: string; data: Record<string, unknown> }[], field: string) =>
+    Object.fromEntries(rows.map((d) => [d.key, d.data[field] as { ar?: string; en?: string }]));
+  const previewExtras: PreviewExtras = {
+    destinations: names(destinations, 'name'),
+    packages: names(packagePages, 'title'),
+    ...(pkg && {
+      price: fromMinor(pkg.price, pkg.currency).toLocaleString('en-US'),
+      days: pkg.days,
+      nights: pkg.nights,
+      departures: nextDates.map((d) => formatDate(d.date, lang)),
+    }),
+  };
   const nameOf = (v: unknown) => {
     const o = (v ?? {}) as { ar?: string; en?: string };
     return (lang === 'en' ? o.en || o.ar : o.ar || o.en) || '';
@@ -161,6 +185,7 @@ export default async function EditWebsitePage({
           initial={initial}
           media={media.map((m) => ({ id: String(m._id), name: m.filename }))}
           siteUrl={site}
+          previewExtras={previewExtras}
         />
       </Card>
     </>

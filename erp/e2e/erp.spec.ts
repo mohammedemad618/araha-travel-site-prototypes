@@ -319,6 +319,15 @@ test('website content: destination, visa and trip program are edited and served 
   await page.getByRole('link', { name: 'إسطنبول الساحرة' }).click();
   await expect(page).toHaveURL(/\/website\/package\/enchanting-istanbul$/);
   await fillLoc(page, 'اسم الباقة', 'إسطنبول الساحرة', 'Enchanting Istanbul');
+  // The live preview follows the form, with the price from inventory, in either language.
+  const preview = page.getByTestId('site-preview');
+  await expect(preview.getByRole('heading', { level: 1 })).toHaveText('إسطنبول الساحرة');
+  await expect(preview).toContainText('875,000');
+  const previewLang = page.getByRole('group', { name: 'لغة المعاينة' });
+  await previewLang.getByRole('button', { name: 'English' }).click();
+  await expect(preview.getByRole('heading', { level: 1 })).toHaveText('Enchanting Istanbul');
+  await expect(preview).toHaveAttribute('dir', 'ltr');
+  await previewLang.getByRole('button', { name: 'العربية' }).click();
   await label(page, 'الوجهة').selectOption('turkey');
   await page.getByLabel('عائلية').check();
   await fillLoc(page, 'أساس السعر (مثل: للشخص في غرفة مزدوجة)', 'للشخص', 'per person');
@@ -338,6 +347,7 @@ test('website content: destination, visa and trip program are edited and served 
   await page.getByRole('button', { name: 'إضافة اليوم' }).click();
   await fillLoc(page, 'عنوان اليوم', 'جولة البسفور', 'Bosphorus cruise', 1);
   await fillLoc(page, 'تفاصيل اليوم', 'رحلة بحرية', 'A boat trip', 1);
+  await expect(preview.getByRole('listitem').filter({ hasText: 'جولة البسفور' })).toBeVisible();
   await fillLoc(page, 'بند', 'الإقامة', 'Hotel stay');
 
   await page.getByRole('button', { name: 'اختر من المكتبة أو ارفع' }).click();

@@ -1,13 +1,14 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { ArrowDown, ArrowUp, ImagePlus, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Eye, ImagePlus, Plus, Trash2, X } from 'lucide-react';
 import { ActionForm, Field, SubmitButton, useFieldError } from '@/components/form';
 import { buttonClass } from '@/components/ui';
 import { useI18n } from '@/lib/i18n/client';
 import type { ActionResult } from '@/lib/forms';
 import type { FieldSpec } from '@/lib/site-content-forms';
 import { MediaPicker, imagePreviewUrl, type MediaItem } from './MediaPicker';
+import { SitePreview, type PreviewExtras } from './SitePreview';
 
 type Action = (prev: ActionResult | null, fd: FormData) => Promise<ActionResult>;
 type Json = Record<string, unknown>;
@@ -79,6 +80,7 @@ export function ContentEditor({
   initial,
   media,
   siteUrl,
+  previewExtras = {},
 }: {
   action: Action;
   kind: string;
@@ -90,9 +92,12 @@ export function ContentEditor({
   initial: Json;
   media: MediaItem[];
   siteUrl?: string;
+  /** Prices, durations and names the live preview shows next to the page's own text. */
+  previewExtras?: PreviewExtras;
 }) {
   const { t } = useI18n();
   const [value, setValue] = useState<Json>(initial);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const set = useCallback((path: Path, v: unknown) => setValue((cur) => setAt(cur, path, v) as Json), []);
   const ctx: Ctx = { value, set, media, siteUrl };
   return (
@@ -100,27 +105,77 @@ export function ContentEditor({
       <input type="hidden" name="kind" value={kind} />
       <input type="hidden" name="data" value={JSON.stringify(value)} />
       <input type="hidden" name="isNew" value={isNew ? '1' : ''} />
-      {isNew ? (
-        <Field label={keyLabel ?? 'key'} name="key" hint={keyHint} required>
-          {(p) => (
-            <input
-              {...p}
-              className="field-input max-w-sm"
-              dir="ltr"
-              defaultValue={contentKey ?? ''}
-              required
-            />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.85fr)]">
+        <div className="flex min-w-0 flex-col gap-6">
+          {isNew ? (
+            <Field label={keyLabel ?? 'key'} name="key" hint={keyHint} required>
+              {(p) => (
+                <input
+                  {...p}
+                  className="field-input max-w-sm"
+                  dir="ltr"
+                  defaultValue={contentKey ?? ''}
+                  required
+                />
+              )}
+            </Field>
+          ) : (
+            <input type="hidden" name="key" value={contentKey} />
           )}
-        </Field>
-      ) : (
-        <input type="hidden" name="key" value={contentKey} />
+          {fields.map((f, i) => (
+            <FieldView key={i} spec={f} path={f.name ? [f.name] : []} ctx={ctx} />
+          ))}
+        </div>
+        {/* Beside the form on wide screens, following the scroll. */}
+        <aside className="hidden xl:block">
+          <div className="sticky top-20 max-h-[calc(100svh-7rem)] overflow-y-auto pb-2">
+            <SitePreview
+              kind={kind}
+              contentKey={contentKey ?? ''}
+              value={value}
+              extras={previewExtras}
+              siteUrl={siteUrl}
+            />
+          </div>
+        </aside>
+      </div>
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-surface p-4 xl:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('preview.title')}
+        >
+          <div className="mb-3 flex justify-end">
+            <button
+              type="button"
+              className={buttonClass('secondary', 'sm')}
+              onClick={() => setPreviewOpen(false)}
+            >
+              <X size={15} aria-hidden="true" />
+              {t('common.close')}
+            </button>
+          </div>
+          <SitePreview
+            kind={kind}
+            contentKey={contentKey ?? ''}
+            value={value}
+            extras={previewExtras}
+            siteUrl={siteUrl}
+          />
+        </div>
       )}
-      {fields.map((f, i) => (
-        <FieldView key={i} spec={f} path={f.name ? [f.name] : []} ctx={ctx} />
-      ))}
       <div className="sticky bottom-0 -mx-5 flex items-center gap-3 border-t border-line bg-surface px-5 py-3">
         <SubmitButton>{t('website.saveAndPublish')}</SubmitButton>
-        <span className="text-[12.5px] text-faint">{t('website.saveHint')}</span>
+        <button
+          type="button"
+          className={`${buttonClass('secondary')} xl:hidden`}
+          onClick={() => setPreviewOpen(true)}
+        >
+          <Eye size={16} aria-hidden="true" />
+          {t('preview.show')}
+        </button>
+        <span className="hidden text-[12.5px] text-faint sm:inline">{t('website.saveHint')}</span>
       </div>
     </ActionForm>
   );
